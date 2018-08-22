@@ -1,0 +1,12 @@
+// ui
+event startup
+begin
+
+  SetLangMode(LangEnglish,"ENG",0);
+  
+  Setting("Burti Script Button setup",BurtiButtonsTClass,modDBMain);
+  Register("Burti Script Buttons","Burti Script Buttons",BurtiControlPanelWClass,modDBMain);
+//  Setting("Burti Console",BurtiConsoleWClass,modTC);
+
+  return;
+end;

@@ -1,0 +1,67 @@
+// ui
+external inner procedure NoDupObjs(string,var string);
+external inner procedure AutoObj(var string);
+
+// EVS: JPD-66
+procedure ExpandObjectHierarchy(integer wn,boolean changed)
+begin
+  record IVVc IVr;
+  
+  if (changed) then begin
+    DeselectWindow(wn,false);
+    GetWindowRecord(wn,IVr);
+    AutoObj(IVr.Objects);
+    NoDupObjs(IVr.Objects,IVr.Objects);
+    PutWindowRecord(wn,IVr);
+  end;
+  
+return;
+end;
+// :EVS
+
+
+global
+function Boolean IVDClassAfterEditField(Integer wn,string pfieldname,Integer fn, Integer rownr,Integer changed)
+BEGIN
+  Boolean res;
+  
+  res = inner.IVDClassAfterEditField(wn,pfieldname,fn,rownr,changed);
+  
+  ExpandObjectHierarchy(wn,changed != 0); // EVS: JPD-66
+  
+  IVDClassAfterEditField = res;
+  RETURN;
+END;
+
+global
+updating procedure BPIIVExpToFileDsm()// Edit ************************** BPI Ukraine - KramarAlexandr - Tuesday, 21 August 2018 10:01:48
+begin
+  record IVVc IVr;
+  record RcVc RepSpec;
+  integer wn;
+  
+  wn = CurWindow;
+  GetWindowRecord(wn,IVr);
+	recordnew(RepSpec);
+	ReportDefaults(RepSpec,"BPIIVExpToFileEClass");
+  RepSpec.repname = "BPIIVExpToFileEn";
+  RepSpec.long1 = IVr.SerNr;
+  RepSpec.Media = mtFile;
+  if(WindowState(wn)==0)then begin
+  	RunExport(RepSpec,true);
+	end else begin
+		beep;
+	end;
+  return;
+end;
+
+global
+function string 60 BPIIVExpToFileEClassDefaultFileName(record RcVc RepSpec)// Edit ************************** BPI Ukraine - KramarAlexandr - Tuesday, 21 August 2018 10:33:41
+begin
+  string 60 filename;
+  record CYBlock CYb;
+  row YearBlock Ybrw;
+
+  BPIIVExpToFileEClassDefaultFileName = "Untitled.csv";  
+  return;
+end;

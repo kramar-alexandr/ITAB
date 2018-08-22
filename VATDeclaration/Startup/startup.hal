@@ -1,0 +1,16 @@
+// ui
+event Startup
+begin
+  SetLangMode(LangLatvian,"LAT",0);
+	
+  Report("PVN deklar‚cija, PVN1, PVN2 (Burti SIA)",VATDeclaration2010RClass,VATDeclaration2010Rn,0,modPL);
+  Export("PVN deklar‚cija, PVN1, PVN2 (Burti SIA)",VATDeclaration2010EClass,VATDeclaration2010En,modPL);
+  
+  Setting("PVN - I. daºa (Burti SIA)",VATDecl2010ATClass,modPL);
+  Setting("PVN - II. daºa (Burti SIA)",VATDecl2010BTClass,modPL);
+  Setting("PVN - III. daºa (Burti SIA)",VATDecl2010CTClass,modPL);
+  
+  Setting("PVN - Uzst‚d´jumi (Burti SIA)",VATDECL_SettsTClass,modPL);//VITO: EDS-12
+  
+  return;
+end;

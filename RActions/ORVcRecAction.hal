@@ -1,0 +1,267 @@
+//c80150615
+external inner function Boolean SetInSet2(string,string);//VITO: JPD-39
+
+//VITO: EBST-6
+external inner function Boolean PasteActTypeInAct(string,var record ActVc);
+external inner function Boolean PasteCuInAct(var record ActVc,var string);
+external procedure GenerateMessage2(integer,integer,integer,integer,boolean);
+//:VITO
+
+global
+updating function LongInt ORVcRecordCheck(record ORVc ORr,record ORVc OR2r,LongInt stat,LongInt check)
+begin
+  LongInt res;
+  Integer insertmode,updatemode;
+  //VITO: JPD-39
+  record JPD_SettingsBlock JPD_Settingsb; 
+  integer curcomp;
+  //:VITO
+
+  res = 0;
+  insertmode = 1;//Rs_insert
+  updatemode = 2;//Rs_update
+  
+  //VITO: JPD-39
+  res = inner.ORVcRecordCheck(ORr,OR2r,stat,check);
+  
+  curcomp = CurrentCompany;
+  BlockLoad(JPD_Settingsb);
+  if (res == 0 and stat == updatemode and SetInSet2(curcomp,JPD_Settingsb.CompCodeTo)) then begin
+    if (NonBlank(ORr.PartnerCompORNr)) then begin
+      if (Right(ORr.PartnerCompORNr,1) != "-") then begin
+        ORr.PartnerCompORNr = ORr.PartnerCompORNr & "-";
+      end;
+    end;
+    //VITO: JPD-53
+    if (NonBlank(ORr.PartnerCompQTNr)) then begin
+      if (Right(ORr.PartnerCompQTNr,1) != "-") then begin
+        ORr.PartnerCompQTNr = ORr.PartnerCompQTNr & "-";
+      end;
+    end;
+    //:VITO
+  end; 
+  //:VITO
+  
+  ORVcRecordCheck = res;
+  return;
+end;
+
+global
+function LongInt ORVcRecordDuplicate(var record ORVc ORr,record ORVc OR2r,LongInt long3,LongInt long4)
+begin
+  LongInt res;
+  
+  //VITO: JPD-53
+  res = inner.ORVcRecordDuplicate(ORr,OR2r,long3,long4);
+  ORr.PartnerCompORNr = "";
+  ORr.PartnerCompQTNr = "";
+  //:VITO
+  
+  ORVcRecordDuplicate = res;  
+  return;
+end;
+
+//VITO: SIAJPD-19
+function string 255 GetObjWithType(string objectlist,string objecttype,boolean alltypedf)
+begin
+  record ObjVc Objr;
+  string 255 res,ostr;
+  longint pos;
+  
+  res = "";
+  pos = 0;
+  
+  while (GetNextSubstring(objectlist,pos,",",ostr)) begin
+    Objr.Code = ostr;
+    if (ReadFirstMain(Objr,1,true)) then begin
+      if (OBjr.OTCode == objecttype) then begin
+        if (res != "") then begin
+          res = res & ",";
+        end;
+        res = res & ostr;
+        if (!alltypedf) then begin
+          goto LGetObjWithType;          
+        end;
+      end;
+    end;
+  end;
+  LGetObjWithType:;
+
+  GetObjWithType = res;
+
+  return;
+end;
+
+function string 255 FindProjectObjectFromOR(string orobjects,string objecttype)
+begin
+  record ObjVc Objr;
+  string 255 obj,res;
+  
+  res = "";
+  
+  obj = GetObjWithType(orobjects,objecttype,false);
+  Objr.Code = obj;
+  if (ReadFirstMain(Objr,1,true)) then begin
+      res = Objr.Comment;
+  end;
+
+  FindProjectObjectFromOR = res;
+
+  return;
+end;
+//:VITO
+
+//VITO: EBST-6
+updating function boolean CreateActivityFromSetting(var record ORVc ORr,
+                                                              row JPD_AutoTaskBlock JPD_AutoTaskbrw)
+begin
+  record ActVc Actr,Act2r;
+  integer nwn;
+  string 255 warning;
+  boolean res;
+  //VITO: EBST-9
+  record JPD_SettingsBlock JPD_Settingsb;
+  integer curcomp,newcomp;
+
+  curcomp = CurrentCompany;
+  BlockLoad(JPD_Settingsb);
+  newcomp = StringToInt(JPD_Settingsb.CompForAutoAct);
+  if (curcomp != newcomp) then begin
+    SetServerCompany(newcomp);
+  end;
+  //:VITO
+
+  RecordNew(Actr);
+  Actr.TransDate = CurrentDate;
+  Actr.SerNr = NextSerNr("ActVc",Actr.TransDate,-1,false,"");
+  Actr.StartTime = CurrentTime;
+  Actr.ActType = JPD_AutoTaskbrw.ActType;
+  if (PasteActTypeInAct("",Actr)) then begin end;
+
+  if (JPD_AutoTaskbrw.PersonType == 0) then begin//Person //VITO: EBST-11; added check
+    if (nonblank(JPD_AutoTaskbrw.Person)) then begin
+      Actr.MainPersons = JPD_AutoTaskbrw.Person;
+    end else begin
+      Actr.MainPersons = CurrentUser;
+    end;
+  end;
+
+  //VITO: EBST-11
+  if (JPD_AutoTaskbrw.PersonType == 1) then begin//Coordinator
+    Actr.MainPersons = ORr.Coordinator;
+  end;
+  //:VITO
+  
+  //VITO: EBST-16
+  if (JPD_AutoTaskbrw.PersonType == 2) then begin//Salesman
+    Actr.MainPersons = ORr.SalesMan;
+  end;
+  //:VITO
+
+  Actr.CUCode = ORr.CustCode;
+  if (PasteCuInAct(Actr,warning)) then begin end;
+  Actr.Comment = FindProjectObjectFromOR(ORr.Objects,JPD_Settingsb.ProjObjType) & "-" & JPD_AutoTaskbrw.Comment;//VITO: SIAJPD-19
+  Actr.TodoFlag = kTodoFlagTodo;
+  Actr.CalTimeFlag = kCalTimeFlagTime;
+
+  if (RecordInsert(Actr,true)) then begin
+    CreateRecordLink(Actr,newcomp,ORr,curcomp);//VITO: EBST-9
+    CreateRecordLink(ORr,curcomp,Actr,newcomp);//VITO: EBST-9
+    res = true;
+  end else begin
+    res = false;
+  end;
+
+  //VITO: EBST-9
+  if (curcomp != newcomp) then begin
+    ResetCompany(curcomp);
+  end;
+  //:VITO
+
+  CreateActivityFromSetting = res;
+
+  return;
+end;
+
+global//VITO: EBST-14
+updating procedure CreateActivitiesAccordingToSetting(var record ORVc ORr,var integer totcnt,
+         var integer okcnt,var integer acttypeerrcnt,var integer actsaveerrcnt,var boolean orclassf)
+begin
+  record OrderClassVc OrderClasr;
+  record JPD_AutoTaskBlock JPD_AutoTaskb;
+  row JPD_AutoTaskBlock JPD_AutoTaskbrw;
+  record ActTypeVc ActTyper;
+  integer i,rwcnt;
+
+  totcnt = 0;
+  okcnt = 0;
+  acttypeerrcnt = 0;
+  actsaveerrcnt = 0;
+  orclassf = false;
+  OrderClasr.Code = ORr.OrderClass;
+  if (ReadFirstMain(OrderClasr,1,true)) then begin
+    BlockLoad(JPD_AutoTaskb);
+    rwcnt = MatRowCnt(JPD_AutoTaskb);
+    for (i=0;i<rwcnt;i=i+1) begin
+      MatRowGet(JPD_AutoTaskb,i,JPD_AutoTaskbrw);
+      if (JPD_AutoTaskbrw.OrderClass == ORr.OrderClass) then begin
+        totcnt = totcnt + 1;
+        ActTyper.Code = JPD_AutoTaskbrw.ActType;
+        if (ReadFirstMain(ActTyper,1,true)) then begin
+          if (CreateActivityFromSetting(ORr,JPD_AutoTaskbrw) == false) then begin
+            actsaveerrcnt = actsaveerrcnt + 1;
+          end else begin
+            okcnt = okcnt + 1;
+          end;
+        end else begin
+          acttypeerrcnt = acttypeerrcnt + 1;
+        end;
+      end;
+    end;//for
+  end else begin
+    orclassf = true;
+  end;
+
+  return;
+end;
+//:VITO
+
+global
+updating function LongInt ORVcRecordSaveAfter(var record ORVc ORr,record ORVc OR2r,LongInt long3,LongInt long4)
+begin
+  LongInt res;
+  integer totcnt,okcnt,acttypeerrcnt,actsaveerrcnt;//VITO: EBST-6
+  boolean orclassf;//VITO: EBST-6
+
+  //VITO: EBST-6
+  res = inner.ORVcRecordSaveAfter(ORr,OR2r,long3,long4);
+  
+	if (nonblank(ORr.OrderClass)) then begin
+		CreateActivitiesAccordingToSetting(ORr,totcnt,okcnt,acttypeerrcnt,actsaveerrcnt,orclassf);
+		GenerateMessage2(totcnt,okcnt,acttypeerrcnt,actsaveerrcnt,orclassf); 
+	end;
+  //:VITO
+
+  ORVcRecordSaveAfter = res; 
+  return;
+end;
+
+global
+updating function LongInt ORVcRecordUpdateAfter(var record ORVc ORr,record ORVc OR2r,LongInt long3,LongInt long4)
+begin
+  LongInt res;
+  integer totcnt,okcnt,acttypeerrcnt,actsaveerrcnt;//VITO: EBST-6
+  boolean orclassf;//VITO: EBST-6
+
+  //VITO: EBST-6
+  res = inner.ORVcRecordSaveAfter(ORr,OR2r,long3,long4);
+
+  if (nonblank(ORr.OrderClass) and OR2r.OrderClass != ORr.OrderClass) then begin
+    CreateActivitiesAccordingToSetting(ORr,totcnt,okcnt,acttypeerrcnt,actsaveerrcnt,orclassf);
+    GenerateMessage2(totcnt,okcnt,acttypeerrcnt,actsaveerrcnt,orclassf); 
+  end;
+  //:VITO
+
+  ORVcRecordUpdateAfter = res; 
+  return;
+end;

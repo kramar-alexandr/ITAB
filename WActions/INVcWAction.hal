@@ -1,0 +1,53 @@
+//VITO: JPD-51
+external function boolean MustCopyItemToPartnerCompany(string,var string);
+remote updating procedure CopyItemToPartnerCompany(record INVc,string,var string,var string);
+
+global
+procedure GenerateMessage(string okcomp,string notokcomp)
+begin
+  string 255 oktstr,notoktstr,tstr;
+  
+  oktstr = "";
+  if (okcomp != "") then begin
+    oktstr = USetStr(-100005);//Artikuls tika veiksm´gi kop•ts uz komp‚niju(‚m) 
+    oktstr = oktstr & okcomp & ". ";
+  end;
+  notoktstr = "";
+  if (notokcomp != "") then begin
+    notoktstr = USetStr(-100006);//Artikuls netika kop•ts uz komp‚niju(‚m) 
+    notoktstr = notoktstr & okcomp & ". ";
+  end;
+  tstr = oktstr & notoktstr;
+  if (tstr != "") then begin
+    MessageBox(0,tstr);
+  end;
+
+  return;
+end;
+
+global
+updating procedure CopyItemToPartnerCompanyDsm()
+begin
+  record INVc INr;
+  integer wn;
+  string 255 companiestocopy,okcomp,notokcomp;
+  longint error;
+  
+  wn = CurWindow;
+  GetWindowRecord(wn,INr);
+  if (WindowState(wn)==Rs_normal) then begin
+    if (MustCopyItemToPartnerCompany(INr.Code,companiestocopy)) then begin
+      if (companiestocopy != "") then begin
+        CopyItemToPartnerCompany(INr,companiestocopy,okcomp,notokcomp);
+        GenerateMessage(okcomp,notokcomp);
+      end else begin
+        MessageBox(-100008,"");//Artikuls netika kop•ts, jo nav defin•tas m•rúa komp‚nijas iestat´jum‚ JPD - Artikulu numuru aizliegtie interv‚li!
+      end;
+    end else begin
+      MessageBox(-100007,"");//Artikuls netika kop•ts, jo tas nav interv‚l‚, defin•t‚ iestat´jum‚ JPD - Artikulu numuru aizliegtie interv‚li!
+    end;
+  end;
+
+  return;
+end;
+//:VITO

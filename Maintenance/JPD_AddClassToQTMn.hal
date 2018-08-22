@@ -1,0 +1,54 @@
+//author VITO: EBST-10
+function boolean QuoteClassExists(string qtclass)
+begin
+  record QuoteClassBlock QuoteClassb;
+  row QuoteClassBlock QuoteClassbrw;
+  integer rwcnt,i;
+  boolean res;
+  
+  res = false;
+  BlockLoad(QuoteClassb);
+  rwcnt = MatRowCnt(QuoteClassb);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(QuoteClassb,i,QuoteClassbrw);
+    if (QuoteClassbrw.Code == qtclass) then begin
+      res = true;
+      i = rwcnt;
+    end;
+  end;
+
+  QuoteClassExists = res;
+
+  return;
+end;
+
+global
+updating procedure JPD_AddClassToQTMn(record RcVc RepSpec)
+begin
+  record QTVc QTr,QT2r;
+  boolean testf;
+
+  if (nonblank(RepSpec.f1)) then begin
+    if (QuoteClassExists(RepSpec.f1)) then begin
+      while (LoopMain(QTr,1,true)) begin
+        testf = true;
+        if (QTr.QuoteClass != "") then begin
+          testf = false;
+        end;
+
+        if (testf) then begin
+          RecordCopy(QT2r,QTr);
+          QTr.QuoteClass = RepSpec.f1;
+          RecordUpdate(QT2r,QTr,false);
+        end;
+      end;
+    end else begin
+      Beep;
+    end;
+  end else begin
+    Beep;
+  end;
+
+  return;
+end;
+//:VITO

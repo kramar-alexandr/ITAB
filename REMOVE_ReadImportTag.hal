@@ -1,0 +1,25 @@
+global
+updating procedure ReadImportTagjpd801506015POBlock(string thetag)
+begin
+  record PipelinOverviewBlock PipelinOverviewr;
+  row PipelinOverviewBlock PipelinOverviewrw;
+  Integer i,rwcnt
+  
+  rwcnt = 0;
+  
+  while (NextImportLine(false)) begin
+    ClearRow(PipelinOverviewr,PipelinOverviewrw,1);
+    PipelinOverviewrw.ViewName = ImportField;
+    PipelinOverviewrw.ColumnName = ImportField;
+    PipelinOverviewrw.Register = ImportField;
+    PipelinOverviewrw.RegisterFilter = ImportField;
+    PipelinOverviewrw.Amounts = StringToInt(ImportField);
+    PipelinOverviewrw.Company = ImportField;
+    MatRowPut(PipelinOverviewr,rwcnt,PipelinOverviewrw);
+    rwcnt = rwcnt + 1;
+  end;
+  
+  BlockStore(PipelinOverviewr);
+  
+  return;
+end;

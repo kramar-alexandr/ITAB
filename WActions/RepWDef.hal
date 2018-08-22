@@ -1,0 +1,22 @@
+external inner procedure FindRepDefHeader(string,string,var string);
+
+// EVS: JPD-67
+global
+procedure KeyRClassReportDefaults(Integer wn)
+begin
+  record RcVc RepSpec;
+  string 255 tstr;
+    
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  ReportDefaults(RepSpec,"KeyRClass");  
+  FindRepDefHeader(RepSpec.repname,RepSpec.shortname,tstr);
+  RepSpec.f1 = tstr;
+  RepSpec.AccSpec = 2;
+  RepSpec.flags[20] = 1;
+  PutWindowRecord(wn,RepSpec);
+  SelectWindow(wn);
+  
+  return;
+end;
+// :EVS

@@ -1,0 +1,311 @@
+// ui
+//c81160120
+//VITO: JPD-53
+external inner procedure ORSumup(var record ORVc);
+external inner function Boolean SetInSet2(string,string);
+external inner function Boolean PasteCustInOR(var record ORVc);
+external inner function Boolean ORVc_PasteArtCode(var record ORVc,Integer,var string,var string,Boolean);
+external inner procedure ORVc_PasteQuant(var record ORVc,Integer,Boolean,var Boolean);
+external inner function string 60 AddObjectToObjectList(string,string);
+external procedure GetORSerNrFromString(string,var longint);
+
+//VITO: EBST-14
+external updating procedure CreateActivitiesAccordingToSetting(var record ORVc,var integer,
+                                                    var integer,var integer,var integer,var boolean);
+external procedure GenerateMessage2(integer,integer,integer,integer,boolean);
+//:VITO
+
+procedure GetObjectsAndNamesWithType(string objstr, string objtype, var string objlist, var vector string vecObjects)
+begin
+  record ObjVc Objr;
+  string 255 oneobj;
+  longint pos;
+
+  while (GetNextSubstring(objstr,pos,",",oneobj)) begin
+    Objr.Code = oneobj;
+    if ReadFirstMain(Objr,1,true) then begin
+      if Objr.OTCode == objtype then begin
+        // add to list of objects that need to be transfered to other comp
+        if !SetInSet(Objr.Code, objlist) then begin
+          if nonblank(objlist) then begin
+            objlist = objlist & ",";
+          end;
+          objlist = objlist & Objr.Code;
+          vecObjects[Objr.Code & "NAME"] = Objr.Comment;
+        end;
+      end;
+    end;
+  end;
+
+  return;
+end;
+
+procedure AddQTObjectsToList(record QTVc QTr, string objtype, var string objlist, var vector string vecObjects)
+begin
+  row QTVc QTrw;
+  integer i,rwc;
+
+  GetObjectsAndNamesWithType(QTr.Objects, objtype, objlist, vecObjects);
+  rwc = MatRowCnt(QTr);
+  for(i=0;i<rwc;i=i+1)begin
+    MatRowGet(QTr,i,QTrw);
+    GetObjectsAndNamesWithType(QTrw.Objects, objtype, objlist, vecObjects);
+  end;
+
+  return;
+end;
+
+updating
+procedure CreateObjectsFromList(string objlist, vector string vecObjects)
+begin
+  record ObjVc Objr;
+  string 255 oneobj;
+  longint pos;
+
+  while (GetNextSubstring(objlist,pos,",",oneobj)) begin
+    Objr.Code = oneobj;
+    if !ReadFirstMain(Objr,1,true) then begin
+      Objr.Code = oneobj;
+      Objr.Comment = vecObjects[Objr.Code & "NAME"];
+      RecordStore(Objr,false);
+    end;
+  end;
+
+  return;
+end;
+
+function string 60 ObjectListFromList(string fulllist, string sublist)
+begin
+  string 60 res;
+  string 255 oneobj;
+  longint pos;
+
+  while (GetNextSubstring(fulllist,pos,",",oneobj)) begin
+    if SetInSet(oneobj, sublist) then begin
+      if nonblank(res) then begin
+        res = res & ",";
+      end;
+      res = res & oneobj;
+    end;
+  end;
+
+  ObjectListFromList = res;
+  return;
+end;
+
+updating function longint CopyQT_Create(record QTVc QTr,record JPD_SettingsBlock JPD_Settingsb,integer curcomp,integer newcomp,string objlist)
+begin
+  longint res;
+  row QTVc QTrw;
+  record ORVc newORr;
+  row ORVc ORrw,newORrw;
+  integer rwcnt,i,j;
+  string 255 tstr;
+  boolean testf,chsum;
+
+  res = -1;
+
+  RecordNew(newORr);
+  newORr.SerNr = NextSerNr("ORVc",CurrentDate,-1,false,"");
+  newORr.CustCode = JPD_Settingsb.DefaultCU;
+  PasteCustInOR(newORr);
+  newORr.OrdDate = QTr.QTDate;
+  newORr.PlanShip = QTr.PlanShip;
+  newORr.Comment = QTr.Comment;
+  //jpd-55; edz:
+  newORr.Comment2 = QTr.Comment2;
+  newORr.Comment3 = QTr.Comment3;
+  newORr.Comment4 = QTr.Comment4;
+  //:edz
+  newORr.OrderClass = QTR.QuoteClass;//VITO: EBST-8
+  //EBS --> coordinator to salesman and vice versa
+  // newORr.Coordinator = QTR.Coordinator;//VITO: EBST-11
+  // newORr.SalesMan = QTR.SalesMan;//VITO: EBST-13
+  newORr.Coordinator = QTR.SalesMan;
+  newORr.SalesMan = QTR.Coordinator;
+  newORr.Objects = ObjectListFromList(QTr.Objects, objlist);
+  //EBS <--
+  newORr.PartnerCompQTNr = QTr.SerNr & "|" & curcomp;
+  rwcnt = MatRowCnt(QTr);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(QTr,i,QTrw);
+    if (QTrw.SendingFlag == 1) then begin
+      ClearRow(newORr,newORrw,1);
+      j = MatRowCnt(newORr);
+      newORrw.ArtCode = QTrw.ArtCode;
+      MatRowPut(newORr,j,newORrw);
+      ORVc_PasteArtCode(newORr,j,tstr,tstr,false);
+      MatRowGet(newORr,j,newORrw);
+      newORrw.Spec = QTrw.Spec;
+      newORrw.Quant = QTrw.Quant;
+      newORrw.Objects = ObjectListFromList(QTrw.Objects, objlist);
+      MatRowPut(newORr,j,newORrw);
+      ORVc_PasteQuant(newORr,j,false,chsum);
+    end;
+  end;
+  ORSumup(newORr);
+  if (RecordInsert(newORr,false)) then begin
+    res = newORr.SerNr;
+    CreateRecordLink(QTr,curcomp,newORr,newcomp);
+    CreateRecordLink(newORr,newcomp,QTr,curcomp);
+  end;
+
+  CopyQT_Create = res;
+
+  return;
+end;
+
+updating function longint CopyQT_Update(record QTVc QTr,record JPD_SettingsBlock JPD_Settingsb,integer curcomp,integer newcomp,string objlist)
+begin
+  longint res;
+  record ORVc newORr,oldORr;
+  row ORVc ORrw,newORrw;
+  row QTVc QTrw;
+  integer newrwcnt,rwcnt,i,j;
+  longint neworsernr;
+  boolean testf,chsum;
+  string 255 tstr;
+  //VITO: EBST-14
+  integer totcnt,okcnt,acttypeerrcnt,actsaveerrcnt;
+  boolean orclassf;
+  //:VITO
+
+  res = -1;
+
+  GetORSerNrFromString(QTr.PartnerCompORNr,neworsernr);
+  newORr.SerNr = neworsernr;
+  if (ReadFirstMain(newORr,1,true)) then begin
+    if (Right(newORr.PartnerCompQTNr,1) == "-") then begin
+      res = -100003;
+    end else begin
+      RecordCopy(oldORr,newORr);
+      if (newORr.OrdDate != QTr.QTDate) then begin
+        newORr.OrdDate = QTr.QTDate;
+      end;
+      if (newORr.Comment != QTr.Comment) then begin
+        newORr.Comment = QTr.Comment;
+      end;
+      //jpd-55; edz:
+      if (newORr.Comment2 != QTr.Comment2) then begin
+        newORr.Comment2 = QTr.Comment2;
+      end;
+      if (newORr.Comment3 != QTr.Comment3) then begin
+        newORr.Comment3 = QTr.Comment3;
+      end;
+      if (newORr.Comment4 != QTr.Comment4) then begin
+        newORr.Comment4 = QTr.Comment4;
+      end;
+      //:edz
+      //VITO: EBST-8
+      if (newORr.OrderClass != QTr.QuoteClass) then begin
+        newORr.OrderClass = QTR.QuoteClass;
+      end;
+      //:VITO
+      //VITO: EBST-11
+      //EBS --> coordinator to salesman and vice versa
+      // if (newORr.Coordinator != QTR.Coordinator) then begin
+      //   newORr.Coordinator = QTR.Coordinator;
+      // end;
+      // //:VITO
+      // //VITO: EBST-13
+      // if (newORr.SalesMan != QTR.SalesMan) then begin
+      //   newORr.SalesMan = QTR.SalesMan;
+      // end;
+      if (newORr.Coordinator != QTR.SalesMan) then begin
+        newORr.Coordinator = QTR.SalesMan;
+      end;
+      if (newORr.SalesMan != QTR.Coordinator) then begin
+        newORr.SalesMan = QTR.Coordinator;
+      end;
+
+      tstr = ObjectListFromList(QTr.Objects, objlist);
+      newORr.Objects = AddObjectToObjectList(newORr.Objects, tstr);
+      //EBS <--
+      //:VITO
+      newrwcnt = MatRowCnt(newORr);
+      for (i=0;i<newrwcnt;i=i+1) begin
+        MatRowDelete(newORr,0);
+      end;
+      rwcnt = MatRowCnt(QTr);
+      for (i=0;i<rwcnt;i=i+1) begin
+        MatRowGet(QTr,i,QTrw);
+        if (QTrw.SendingFlag == 1) then begin
+          ClearRow(newORr,newORrw,1);
+          j = MatRowCnt(newORr);
+          newORrw.ArtCode = QTrw.ArtCode;
+          MatRowPut(newORr,j,newORrw);
+          ORVc_PasteArtCode(newORr,j,tstr,tstr,false);
+          MatRowGet(newORr,j,newORrw);
+          newORrw.Spec = QTrw.Spec;
+          newORrw.Quant = QTrw.Quant;
+          newORrw.Objects = ObjectListFromList(QTrw.Objects, objlist);
+          MatRowPut(newORr,j,newORrw);
+          ORVc_PasteQuant(newORr,j,false,chsum);
+        end;
+      end;
+      ORSumup(newORr);
+      if (RecordUpdate(oldORr,newORr,false) == 0) then begin
+        //VITO: EBST-14
+        if (oldORr.OrderClass != newORr.OrderClass) then begin
+          CreateActivitiesAccordingToSetting(newORr,totcnt,okcnt,acttypeerrcnt,actsaveerrcnt,orclassf);
+          GenerateMessage2(totcnt,okcnt,acttypeerrcnt,actsaveerrcnt,orclassf);
+        end;
+        //:VITO
+        res = 1;
+      end;
+    end;
+  end;
+
+  CopyQT_Update = res;
+
+  return;
+end;
+
+global
+updating function longint RecordAction_raCreateORInOtherCompanies2(var record QTVc QTr)
+begin
+  record QTVc oldQTr,newQTr;
+  record JPD_SettingsBlock JPD_Settingsb;
+  integer curcomp,newcomp;
+  integer i,rwcnt,nwn;
+  longint res;
+  boolean createf,updatef;
+  string 255 objlist;
+  vector string 255 vecObjects;
+
+  res = -1;
+  createf = false;
+  updatef = false;
+  curcomp = CurrentCompany;
+  BlockLoad(JPD_Settingsb);
+  newcomp = StringToInt(JPD_Settingsb.CompCodeTo);
+  if (curcomp != newcomp and SetInSet2(curcomp,JPD_Settingsb.CompCodeFrom)) then begin
+    AddQTObjectsToList(QTr,JPD_Settingsb.ProjObjType,objlist,vecObjects);
+    SetServerCompany(newcomp);
+    // create missing objects in newcomp
+    CreateObjectsFromList(objlist,vecObjects);
+    if (Blank(QTr.PartnerCompORNr)) then begin
+      //create newOR
+      createf = true;
+      res = CopyQT_Create(QTr,JPD_Settingsb,curcomp,newcomp,objlist);
+    end else begin
+      //update newOR
+      updatef = true;
+      res = CopyQT_Update(QTr,JPD_Settingsb,curcomp,newcomp,objlist);
+    end;
+    ResetCompany(curcomp);
+
+    if (res > -1 and createf) then begin
+      RecordCopy(oldQTr,QTr);
+      QTr.PartnerCompORNr = res & "|" & newcomp;
+      if (RecordUpdate(oldQTr,QTr,false) == 0) then begin end;
+    end;
+  end else begin
+    res = -100002;//No �is komp�nijas Kl. pas�t�jumu kop��ana nav at�auta.
+  end;
+
+  RecordAction_raCreateORInOtherCompanies2 = res;
+
+  return;
+end;
+//:VITO

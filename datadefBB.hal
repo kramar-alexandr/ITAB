@@ -1,0 +1,22 @@
+// ui
+//SourceFile("halcust/BurtiButtons/WActions",3);
+SourceFile("halcust/BurtiButtons/Tools",3);
+//SourceFile("halcust/BurtiButtons/Windows/eng",3);
+//SourceFile("halcust/BurtiButtons/Windows/lat",3);
+//SourceFile("halcust/BurtiButtons/Windows/rus",3);
+//SourceFile("halcust/BurtiButtons/Startup",3);
+
+begin
+
+  BlockBegin(BurtiButtonsBlock,-,"");
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(ButtonLabel,M4Str,255,0);
+  ArrayField(ButtonColor,M4Set,46,0);
+  ArrayField(ScriptPath,M4Str,255,0);
+  ArrayField(Arguments,M4Str,255,0);
+  EndArray;
+  EndBlock
+
+  return;
+end;

@@ -1,0 +1,139 @@
+// ui
+//c84180104
+SourceFile("halcust/Tools",3);
+SourceFile("halcust/latvian",3);
+SourceFile("halcust/english",3);
+SourceFile("halcust/WActions",3);
+SourceFile("halcust/RActions",3);
+SourceFile("halcust/Reports",3);
+SourceFile("halcust/Imports",3);
+SourceFile("halcust/Maintenance",3);//VITO: EBST-10
+
+SourceFile("halcust/level0/Documents",0);
+SourceFile("halcust/level0/Reports",0);
+SourceFile("halcust/level0/WActions",0);
+SourceFile("halcust/level0/RActions",0);
+SourceFile("halcust/level0/Tools",0);
+SourceFile("halcust/level0/Maint",0);
+
+Exec_File("halcust/datadefBB.hal");//Burti Buttons
+SourceFile("halcust/BurtiButtons/WActions",3);
+SourceFile("halcust/BurtiButtons/Windows/eng",3);
+SourceFile("halcust/BurtiButtons/Windows/lat",3);
+SourceFile("halcust/BurtiButtons/Windows/rus",3);
+SourceFile("halcust/BurtiButtons/Startup",3);
+
+Exec_File("halcust/datadefBP.hal");//Bankas paligs
+Exec_File("halcust/datadefVAT.hal");//PVN
+Exec_File("halcust/datadefEN.hal");
+
+SourceFile("halcust/LatPayRoll/latvian",0);//VITO: EBST-3
+SourceFile("halcust/LatPayRoll/hal/Reports",0);//VITO: EBST-3
+
+//CONTENT:
+//Standart procedures
+//New procedures
+//Standart records/blocks
+//New records/blocks
+
+//===STANDART PROCEDURES============================================================================
+
+//===NEW PROCEDURES=================================================================================
+
+begin
+//===STANDART RECORDS/BLOCKS========================================================================
+
+  RecordAddBegin(IVVc,"jpd801506015IVVc");
+  //jpd-55; edz:
+  RecordField(Comment2,M4Str,255,0);
+  RecordField(Comment3,M4Str,255,0);
+  RecordField(Comment4,M4Str,255,0);
+  //:edz
+  EndRecordAdd;
+
+  RecordAddBegin(ORVc,"jpd801506015ORVc");
+  RecordField(TotGPCurncy,M4Val,0,0); // kso jpd-12
+  RecordField(PartnerCompORNr,M4Str,100,0);//VITO: JPD-39
+  RecordField(PartnerCompQTNr,M4Str,100,0);//VITO: JPD-53
+  //jpd-55; edz:
+  //RecordField(Comment2,M4Str,255,0);
+  //RecordField(Comment3,M4Str,255,0);
+  //RecordField(Comment4,M4Str,255,0);
+  //:edz
+  RecordField(Coordinator,M4UStr,60,UserVc);//VITO: EBST-11
+  ArrayField(BasePriceCurncy,M423Val,0,0); // kso jpd-12
+  ArrayField(rowGPCurncy,M4Val,0,0);       // kso jpd-12
+  ArrayField(rowGPprc,M4UVal,0,0);         // kso jpd-12
+  ArrayField(SendingFlag,M4Set,900,0);//VITO: JPD-39
+  ArrayField(RowBasePriceCurncy,M423Val,0,0);//VITO: JPD-41
+  EndRecordAdd;
+
+  RecordAddBegin(QTVc,"jpd801506015QTVc");
+  RecordField(TotGPCurncy,M4Val,0,0);//VITO: JPD-42
+  RecordField(PartnerCompORNr,M4Str,100,0);//VITO: JPD-53
+  RecordField(Coordinator,M4UStr,60,UserVc);//VITO: EBST-11
+  //VITO: JPD-42
+  ArrayField(BasePriceCurncy,M423Val,0,0);
+  ArrayField(rowGPCurncy,M4Val,0,0);
+  ArrayField(rowGPprc,M4UVal,0,0);
+  ArrayField(RowBasePriceCurncy,M423Val,0,0);
+  //:VITO
+  ArrayField(SendingFlag,M4Set,900,0);//VITO: JPD-53
+  EndRecordAdd;
+  
+  BlockBegin(PipelinOverviewBlock,-,"jpd801506015POBlock");
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(ViewName,M4Str,40,0);
+  ArrayField(ColumnName,M4Str,40,0);
+  ArrayField(Register,M4StrSet,584,0);
+  ArrayField(RegisterFilter,M4List,200,0);
+  ArrayField(Amounts,M4Set,594,0);
+  ArrayField(RegisterFilter2,M4List,200,0);
+  ArrayField(colnr,M4Set,46,0);
+  ArrayField(Company,M4Code,10,0);//VITO: EBST-4
+  EndArray;
+  EndBlock;
+
+//===NEW RECORDS/BLOCKS=============================================================================
+
+  BlockBegin(JPD_SettingsBlock,-,"");
+  RecordField(DefaultCU,M4Code,20,CUVc);
+  RecordField(CompCodeFrom,M4UStr,100,0);
+  RecordField(CompCodeTo,M4UStr,100,0);
+  RecordField(CompForAutoAct,M4UStr,100,0);//VITO: EBST-9
+  RecordField(ProjObjType,M4Code,5,OTVc);//VITO: SIAJPD-19
+  EndBlock;
+  
+  //VITO: JPD-50
+  BlockBegin(JPD_INNrLimitsBlock,-,"");
+  BlockInServer;
+  BlockForAllCompanies;
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(ArtNrFrom,M4Code,20,0);
+  ArrayField(ArtNrTo,M4Code,20,0);
+  ArrayField(DeniedInComp,M4Code,10,0);
+  ArrayField(CreateComp,M4Code,10,0);
+  ArrayField(CopyToComp,M4Code,10,0);
+  EndArray;
+  EndBlock;
+  //:VITO
+  
+  //VITO: EBST-6
+  BlockBegin(JPD_AutoTaskBlock,-,"");
+  BlockInServer;
+  BlockForAllCompanies;
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(OrderClass,M4Code,5,OrderClassVc);
+  ArrayField(ActType,M4Code,5,ActTypeVc);
+  ArrayField(Person,M4Code,10,UserVc);
+  ArrayField(Comment,M4Str,255,0);
+  ArrayField(PersonType,M4Set,901,0);//VITO: EBST-11
+  EndArray;
+  EndBlock;
+  //:VITO
+  
+  return;
+end;

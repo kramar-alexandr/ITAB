@@ -1,0 +1,247 @@
+// ui
+//c81160120
+external inner function val FindCostPrice(string,string,string,val,val,Boolean);
+external inner function roundmode SetRoundModeD(Integer);
+external inner function Boolean ORDchrsum(var record ORVc,Integer);
+external inner procedure ORDchsum(var record ORVc,Integer);
+external inner procedure ORSumup(var record ORVc);
+
+//VITO: JPD-39
+external inner function Boolean SetInSet2(string,string);
+external inner function Boolean PasteCustInOR(var record ORVc);
+external inner function Boolean ORVc_PasteArtCode(var record ORVc,Integer,var string,var string,Boolean);
+external inner procedure ORVc_PasteQuant(var record ORVc,Integer,Boolean,var Boolean);
+//:VITO
+
+//jpd-29; edz:
+global
+procedure UpdateORBasePrice(record ORVc ORr,integer rownr)
+begin
+  row ORVc ORrw;
+  record MainStockBlock MSb;
+  string 10 location;  
+  val adjstockv;
+
+  location = ORr.Location;
+  if (blank(location)) then begin
+    BlockLoad(MSb);
+    location = MSb.MainStock;
+  end;
+  MatRowGet(ORr,rownr,ORrw);
+  if (nonblank(ORrw.Location)) then begin
+    location = ORrw.Location;
+  end;
+  if (nonblank(ORrw.ArtCode)) then begin
+    ORrw.BasePrice = FindCostPrice(ORrw.ArtCode,location,ORrw.SerialNr,ORrw.Quant,adjstockv,false);
+    ORrw.BasePrice = ORrw.BasePrice/ORrw.Quant;
+    ORrw.BasePrice = Round(ORrw.BasePrice,SetRoundModeD(5));
+  end;
+  MatRowPut(ORr,rownr,ORrw);
+  if (ORDchrsum(ORr,rownr)) then begin
+    ORDchsum(ORr,rownr);
+  end;
+  ORSumup(ORr);
+  
+  return;
+end;
+//:edz
+
+//VITO: JPD-39
+updating function longint CopyOR_Create(record ORVc ORr,record JPD_SettingsBlock JPD_Settingsb,
+                                                                    integer curcomp,integer newcomp)
+begin
+  longint res;
+  record ORVc newORr;
+  row ORVc ORrw,newORrw;
+  integer rwcnt,i,j;
+  string 255 tstr;
+  boolean testf,chsum;
+  
+  res = -1;
+  
+  RecordNew(newORr);
+  newORr.SerNr = NextSerNr("ORVc",CurrentDate,-1,false,"");
+  newORr.CustCode = JPD_Settingsb.DefaultCU;
+  PasteCustInOR(newORr);
+  newORr.OrdDate = ORr.OrdDate;
+  //newORr.Location = ORr.Location;
+  newORr.PlanShip = ORr.PlanShip;
+  newORr.Comment = ORr.Comment;
+  //jpd-55; edz:
+  newORr.Comment2 = ORr.Comment2;
+  newORr.Comment3 = ORr.Comment3;
+  newORr.Comment4 = ORr.Comment4;
+  //:edz
+  newORr.PartnerCompORNr = ORr.SerNr & "|" & curcomp;
+  rwcnt = MatRowCnt(ORr);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(ORr,i,ORrw);
+    if (ORrw.SendingFlag == 1) then begin
+      ClearRow(newORr,newORrw,1);
+      j = MatRowCnt(newORr);
+      newORrw.ArtCode = ORrw.ArtCode;
+      MatRowPut(newORr,j,newORrw);
+      ORVc_PasteArtCode(newORr,j,tstr,tstr,false);
+      MatRowGet(newORr,j,newORrw);
+      newORrw.Spec = ORrw.Spec;
+      newORrw.Quant = ORrw.Quant;
+      MatRowPut(newORr,j,newORrw);
+      ORVc_PasteQuant(newORr,j,false,chsum);
+    end;
+  end;
+  ORSumup(newORr);
+  if (RecordInsert(newORr,false)) then begin
+    res = newORr.SerNr;
+    CreateRecordLink(ORr,curcomp,newORr,newcomp);
+    CreateRecordLink(newORr,newcomp,ORr,curcomp);
+  end; 
+  
+  CopyOR_Create = res;
+
+  return;
+end;
+
+function Integer FindStrPosition(string tstr,string decsep)
+begin
+  Integer res;
+  Integer i,slen;
+  
+  slen = len(tstr);
+  for (i=slen;i>=0;i=i-1) begin
+    if (Mid(tstr,i,1)==decsep) then begin
+       res = i;
+       goto LFindStrPosition;
+    end;
+  end;
+LFindStrPosition:;  
+  FindStrPosition = res;
+  return;  
+end;
+
+global
+procedure GetORSerNrFromString(string instr,var longint neworsernr)
+begin
+  integer pos;
+  
+  neworsernr = -1;
+  pos = FindStrPosition(instr,"|") + 1;
+  neworsernr = StringToLongInt(Left(instr,pos-1));
+
+  return;
+end;
+
+updating function longint CopyOR_Update(record ORVc ORr,record JPD_SettingsBlock JPD_Settingsb,
+                                                                    integer curcomp,integer newcomp)
+begin
+  longint res;
+  record ORVc newORr,oldORr;
+  row ORVc ORrw,newORrw;
+  integer newrwcnt,rwcnt,i,j;
+  longint neworsernr;
+  boolean testf,chsum;
+  string 255 tstr;
+  
+  res = -1;
+  
+  GetORSerNrFromString(ORr.PartnerCompORNr,neworsernr);
+  newORr.SerNr = neworsernr;
+  if (ReadFirstMain(newORr,1,true)) then begin
+    if (Right(newORr.PartnerCompORNr,1) == "-") then begin
+      res = -100003;
+    end else begin
+      RecordCopy(oldORr,newORr);
+      if (newORr.OrdDate != ORr.OrdDate) then begin
+        newORr.OrdDate = ORr.OrdDate;
+      end;
+      if (newORr.PlanShip != ORr.PlanShip) then begin
+        newORr.PlanShip = ORr.PlanShip;
+      end;
+      if (newORr.Comment != ORr.Comment) then begin
+        newORr.Comment = ORr.Comment;  
+      end;
+      //jpd-55; edz:
+      if (newORr.Comment2 != ORr.Comment2) then begin
+        newORr.Comment2 = ORr.Comment2;  
+      end;
+      if (newORr.Comment3 != ORr.Comment3) then begin
+        newORr.Comment3 = ORr.Comment3;  
+      end;
+      if (newORr.Comment4 != ORr.Comment4) then begin
+        newORr.Comment4 = ORr.Comment4;  
+      end;
+      //:edz
+      newrwcnt = MatRowCnt(newORr);
+      for (i=0;i<newrwcnt;i=i+1) begin
+        MatRowDelete(newORr,0);
+      end;
+      rwcnt = MatRowCnt(ORr);
+      for (i=0;i<rwcnt;i=i+1) begin
+        MatRowGet(ORr,i,ORrw);
+        if (ORrw.SendingFlag == 1) then begin
+          ClearRow(newORr,newORrw,1);
+          j = MatRowCnt(newORr);
+          newORrw.ArtCode = ORrw.ArtCode;
+          MatRowPut(newORr,j,newORrw);
+          ORVc_PasteArtCode(newORr,j,tstr,tstr,false);
+          MatRowGet(newORr,j,newORrw);
+          newORrw.Spec = ORrw.Spec;          
+          newORrw.Quant = ORrw.Quant;
+          MatRowPut(newORr,j,newORrw);
+          ORVc_PasteQuant(newORr,j,false,chsum);
+        end;
+      end;  
+      ORSumup(newORr);
+      if (RecordUpdate(oldORr,newORr,false) == 0) then begin
+        res = 1;
+      end;
+    end;
+  end;
+  
+  CopyOR_Update = res;
+
+  return;
+end;
+
+global
+updating function longint RecordAction_raCreateORInOtherCompanies(var record ORVc ORr)
+begin
+  record ORVc oldORr,newORr;
+  record JPD_SettingsBlock JPD_Settingsb; 
+  integer curcomp,newcomp;
+  integer i,rwcnt,nwn;
+  longint res;
+  boolean createf,updatef;
+  
+  res = -1;
+  createf = false;
+  updatef = false;
+  curcomp = CurrentCompany;
+  BlockLoad(JPD_Settingsb);
+  newcomp = StringToInt(JPD_Settingsb.CompCodeTo);
+  if (curcomp != newcomp and SetInSet2(curcomp,JPD_Settingsb.CompCodeFrom)) then begin
+    SetServerCompany(newcomp);
+    if (Blank(ORr.PartnerCompORNr)) then begin
+      //create newOR
+      createf = true;
+      res = CopyOR_Create(ORr,JPD_Settingsb,curcomp,newcomp);
+    end else begin
+      //update newOR
+      updatef = true;
+      res = CopyOR_Update(ORr,JPD_Settingsb,curcomp,newcomp);
+    end;
+    ResetCompany(curcomp);
+    
+    if (res > -1 and createf) then begin
+      RecordCopy(oldORr,ORr);
+      ORr.PartnerCompORNr = res & "|" & newcomp;
+      if (RecordUpdate(oldORr,ORr,false) == 0) then begin end;  
+    end;
+  end else begin
+    res = -100002;//No äis komp‚nijas Kl. pasðt´jumu kop•äana nav atºauta.
+  end;
+  
+  RecordAction_raCreateORInOtherCompanies = res;
+
+  return;
+end;
+//:VITO

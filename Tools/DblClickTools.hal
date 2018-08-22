@@ -1,0 +1,25 @@
+// ui
+//jpd-72; edz:
+global
+procedure DblRetVc(string dblstr,string l,Integer currepwn)
+begin
+  Integer wn;
+  record RetVc Retr;
+
+  if (nonblank(dblstr)) then begin
+    Retr.SerNr = dblstr;
+    if (ReadFirstMain(Retr,1,true)) then begin  
+      wn = OpenWindow("RetDClass",1,0,"","",Retr);
+    end;
+  end;
+    
+  if (nonblank(l)) then begin
+    Retr.SerNr = l;
+    if (ReadFirstMain(Retr,1,true)) then begin  
+      wn = OpenWindow("RetDClass",1,0,"","",Retr);
+    end;
+  end;
+  
+  return;
+end;
+//:edz

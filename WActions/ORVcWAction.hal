@@ -1,0 +1,196 @@
+// ui
+//c81160120
+external inner function val MulRateToBase1(var string,val,val,val,val,val,val,roundmode);
+external function integer JPD_GetItemType(string);
+//vito//external inner function Boolean ORDClassQuantEFAfter(Integer,Integer,Integer,Integer);
+remote procedure UpdateORBasePrice(record ORVc,integer);
+
+remote updating function longint RecordAction_raCreateORInOtherCompanies(var record ORVc);//VITO: JPD-39
+
+//jpd-29; edz:
+procedure ORDClassArtCode2EFAfter(integer wn,integer rownr,integer changedf)
+begin
+  record ORVc ORr;
+
+  if (changedf!=0) then begin//VITO: JPD-47
+    GetWindowRecord(wn,ORr);
+    UpdateORBasePrice(ORr,rownr);
+    PutWindowRecord(wn,ORr);
+  end;  
+  
+  return;
+end;
+//:edz
+
+global
+function Boolean ORDClassAfterEditField(integer wn,string pfieldname,integer fn,integer rownr,integer changed)
+begin
+  record ORVc ORr;
+  row ORVc ORrw;
+  string 50 fieldname;
+  boolean res;
+
+  fieldname = pfieldname; // used for possible overrides when calling inner
+
+  switch (fieldname) begin
+    // kso: jpd-12
+    case "BasePriceCurncy":
+      if (changed != 0) then begin//VITO: JPD-47
+        DeselectWindow(wn,false);
+        GetWindowRecord(wn,ORr);
+        MatRowGet(ORr,rownr,ORrw);
+        ORrw.BasePrice = MulRateToBase1(ORr.CurncyCode,ORrw.BasePriceCurncy,ORr.FrRate,ORr.ToRateB1,ORr.ToRateB2,ORr.BaseRate1,ORr.BaseRate2,DefaultCurRoundOff);
+        ORrw.RowBasePriceCurncy = ORrw.BasePriceCurncy*ORrw.Quant;//VITO: JPD-41
+        MatRowPut(ORr,rownr,ORrw);
+        PutWindowRecord(wn,ORr);
+        fieldname = "BasePrice"; // major pretend time - override to fake BasePrice input and trigger appropriate master code
+      end;
+    // :kso jpd-12
+  end;    
+  
+  //vito//if (pfieldname!="Quant" or rownr<0) then begin//EVS: JPD-20
+    res = inner.ORDClassAfterEditField(wn,fieldname,fn,rownr,changed);
+  //vito//end;
+ 
+  switch (fieldname) begin
+    //jpd-29; edz:
+    case "ArtCode": ORDClassArtCode2EFAfter(wn,rownr,changed);
+    case "Quant": ORDClassArtCode2EFAfter(wn,rownr,changed);
+    //:edz
+  end;
+
+  ORDClassAfterEditField = res;
+  return;
+end;
+
+global
+function Boolean ORDClassActiveEditField(integer wn,string fieldname,integer fn,integer wnst,integer rownr,integer changed)
+begin
+  boolean res;
+  record ORVc ORr;
+  row ORVc ORrw;
+  integer itemtype;
+
+  res = inner.ORDClassActiveEditField(wn,fieldname,fn,wnst,rownr,changed);
+
+  if (res) then begin // master allower it, but we do additional checks
+
+    // kso: jpd-12
+    if (fieldname == "Sum" and rownr > -1) then begin
+      res = false;
+    end;
+    // :kso jpd-12
+
+    // kso: jpd-12
+    if (fieldname == "rowGPprc") then begin
+      res = false;
+    end;
+    // :kso jpd-12
+    
+    //VITO: JPD-41
+    if (fieldname == "RowBasePriceCurncy") then begin
+      res = false;
+    end;
+    //:VITO
+  
+    // kso: jpd-12
+    if ((fieldname == "BasePrice" or fieldname == "BasePriceCurncy") and rownr > -1) then begin
+      // only allow for plain and service items
+      GetWindowRecord(wn,ORr);
+      MatRowGet(ORr,rownr,ORrw);
+      itemtype = JPD_GetItemType(ORrw.ArtCode);
+      if (itemtype == kItemTypeStructured or itemtype == kItemTypeStocked) then begin
+        res = false;
+      end;
+    end;
+    // :kso jpd-12
+  
+  end;
+  
+  ORDClassActiveEditField = res;
+  return;
+end;
+
+
+//vito//global
+//vito//function Boolean ORDClassOnEnterKey(Integer wn,string fieldname,Integer fn,Integer rownr)
+//vito//begin
+//vito//  record ORVc ORr;
+//vito//  
+//vito//  //EVS: JPD-20
+//vito//  if (rownr>-1 and fieldname=="Quant") then begin
+//vito//    ORDClassQuantEFAfter(wn,fn,rownr,1);
+//vito//  end;
+//vito//  //:EVS
+//vito//  
+//vito//  ORDClassOnEnterKey = true;
+//vito//  return;
+//vito//end;
+
+//VITO: JPD-39
+global
+updating procedure CopyORToOtherCompORDsm()
+begin
+  record ORVc ORr;
+  integer normalmode,wn,nwn;
+  longint res;
+  string 255 tstr;
+  
+  normalmode = 0;
+  wn = CurWindow;
+  GetWindowRecord(wn,ORr);  
+  if (WindowState(wn) == normalmode) then begin
+    res = RecordAction_raCreateORInOtherCompanies(ORr);
+    if (res > -1) then begin
+      CloseWindow(CurWindow);
+      nwn = OpenWindow("ORDClass",1,0,"","",ORr);
+      MessageBox(-100000,"");//Veiksm´gi izveidots Kl. pasðt´jums partnerkomp‚nij‚.
+    end else begin
+      tstr = USetStr(-100001);//Kl. pasðt´jums partnerkomp‚nij‚ netika izveidots.
+      if (res != 0) then begin
+        tstr = USetStr(res) & " " & tstr;
+      end;
+      MessageBox(0,tstr);
+    end;
+  end else begin
+    Beep;
+  end;
+
+  return;
+end;
+//:VITO
+
+//VITO: EBST-6
+global
+procedure GenerateMessage2(integer totcnt,integer okcnt,integer acttypeerrcnt,integer actsaveerrcnt,
+                                                                                   boolean orclassf)
+begin
+  string 255 tstr;
+
+  tstr = "";
+  if (orclassf) then begin
+    tstr = USetStr(-100040) & USetStr(-100041);//Aktivit‚tes netika izveidotas: T‚da Klientu pasðt´jumu klase neeksiste!
+  end else begin
+    if (totcnt > 0) then begin
+      tstr = USetStr(-100042);//Aktivit‚tes
+      tstr = tstr & chr(10) & USetStr(-100043) & totcnt;//J‚izveido: 
+      tstr = tstr & chr(10) & USetStr(-100044) & okcnt;//Izveidots: 
+      if (totcnt != okcnt) then begin
+        tstr = tstr & chr(10) & USetStr(-100045);//Kºðdas
+        if (acttypeerrcnt > 0) then begin
+          tstr = tstr & chr(10) & USetStr(-100046) & acttypeerrcnt;//T‚ds Aktivit‚tes tips neeksiste: 
+        end;
+        if (actsaveerrcnt > 0) then begin
+          tstr = tstr & chr(10) & USetStr(-100047) & actsaveerrcnt;//Neizdev‚s saglab‚t Aktivit‚tes: 
+        end;
+      end;
+    end;
+  end;
+  if (tstr != "") then begin
+    //MessageBox(0,tstr);
+    LogText(0,tstr);
+  end;
+
+  return;
+end;
+//:VITO

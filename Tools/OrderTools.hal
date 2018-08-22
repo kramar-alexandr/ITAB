@@ -1,0 +1,44 @@
+// kso jpd-21
+global
+function val JPD_GetItemCostPriceFromOR(longint ordernr,integer rownr,string artcode)
+begin
+  record ORVc ORr;
+  row ORVc ORrw;
+  val res;
+  
+  ORr.SerNr = ordernr;
+  if (ReadFirstMain(ORr,1,true)) then begin
+    MatRowGet(ORr,rownr,ORrw);
+    if (ORrw.ArtCode == artcode) then begin
+      res = ORrw.BasePrice;
+    end;
+  end;
+  
+  JPD_GetItemCostPriceFromOR = res;
+  return;
+end;
+// kso jpd-21
+
+// kso jpd-21
+global
+function boolean JPD_UpdateGPWhenDel(row SHVc SHrw)
+begin
+  record CostAccBlock CAbl;
+  record INVc INr;
+  boolean res;
+  
+  res = true;
+  
+  BlockLoad(CAbl);
+  
+  INr.Code = SHrw.ArtCode;
+  ReadFirstMain(INr,1,true);
+  
+  if ((INr.ItemType == kItemTypeService or INr.ItemType == kItemTypePlain) and CAbl.CostAccForNonStocked == 1 and INr.UpdateCost != 0) then begin
+    res = false;
+  end;
+
+  JPD_UpdateGPWhenDel = res;
+  return;
+end;
+// kso jpd-21

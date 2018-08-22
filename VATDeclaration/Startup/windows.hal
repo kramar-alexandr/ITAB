@@ -1,0 +1,139 @@
+// ui
+external inner function string 255 VATZoneEditFieldLabelLAT(Integer);
+
+procedure VATDeclWindow(integer Type)
+begin
+  real h,h2,h3,vs,v,vm;
+  
+  SetLangMode(LangLatvian,"LAT",0);
+  
+  IF (Type==1 or Type==0) THEN BEGIN
+    SetWRect(20,80,450,510);
+    vs = 20; h=170; h2=250; h3=50;
+    PeriodField(h,v=20,"Periods");
+    EditFieldTL(h,v+=vs,50,"Neiekºaut PVN kodu",M4Code,Normal,2,f1,false,VATCodeSClass);
+    EditFieldTL(h,v+=vs,50,"Min. summa",M4Val,Normal,0,vals0,false,0);
+    EditFieldTL(h+135,v,50,"Maks. summa",M4Val,Normal,0,vals1,false,0);
+    EditFieldTL(h,v+=vs,70,"Sagatavoäanas datums",M4Date,Normal,0,d1,false,PasteCurDate);
+    EditFieldTL(h,v+=vs,150,"E-Pasts",M4Str,Normal,255,f2,false,0);
+    EditFieldTL(h,v+=vs,150,"Iban Numurs",M4Str,Normal,255,f3,false,0);
+    EditFieldTL(h,v+=vs,150,"T‚lrunis",M4Str,Normal,255,f4,false,0);
+    //eds-15; edz:
+    ButtonFrame(h3,v+40,80,2,"R‚d´t valðt‚");
+    RadioButton(h3,v+41,0,0,"B‚zes 1",flags[7]);
+    RadioButton(h3,v+59,1,0,"B‚zes 2",flags[7]);
+    //:edz
+    CheckBox(h3-20,v+82,0,"Atäifr•t X rindu",flags[8]);//alk-141; edz
+    CheckBox(h3-20,v+98,0,"Izv•rst r•úinus",flags[9]);//eds-19; edz
+    CheckBox(h3-20,v+114,0,"Summ•t pa kontaktu",flags[10]); // EVS: HAL-676
+    ButtonFrame(h,v+=40,150,4,"Deklar‚cijas form‚ts");
+    RadioButton(h,v+=1,3,0,"Form‚ts p•c 01.01.2018",flags[5]);
+    RadioButton(h,v+=18,2,0,"Form‚ts l´dz 31.12.2017",flags[5]);
+    RadioButton(h,v+=18,1,0,"Form‚ts l´dz 01.01.2013",flags[5]);
+    RadioButton(h,v+=18,0,0,"Form‚ts l´dz 01.03.2012",flags[5]);
+    EndFrame;
+    if (Type==0) then begin
+      ButtonFrame(h,v+=40,123,5,"R‚d´t");
+      Checkbox(h,v+=1,0,"I. daºu",flags[1]);
+      Checkbox(h,v+=20,0,"II. daºu",flags[2]);
+      Checkbox(h,v+=20,0,"III. daºu",flags[3]);
+      Checkbox(h,v+=20,0,"PVN 2",flags[6]);//eds-8; edz
+      /* All checked for report by default
+      ButtonFrame(h,v+=40,80,3,"Artikulu tips");// MDS: HERBE-1285
+      CheckBox(h,v,0,"Vienk‚räs",flags[18]);
+      CheckBox(h,v+=16,0,"Noliktavas",flags[19]); 
+      CheckBox(h,v+=16,0,"Servisa",flags[20]); //:MDS */
+      EditFieldTL(h,v+=30,150,"Nodokºu atskaite",M4Str,Normal,60,f12,false,TaxRepSClass);//eds-36; edz
+    end else begin
+      Tile(0,290,false,"",f1);
+      TileButton(1,"PVN 1");
+      TileButton(2,"PVN 2");
+      Tile(1,290,false,"1",f12);
+      EditFieldTL(h,v=10,150,"Nodokºu atskaite",M4Str,Normal,60,f12,false,TaxRepSClass);
+      h = h - 50;
+      ButtonFrame(h3,v+=40,140,3,"Eksport•t(l´dz 01.01.2013)");
+      RadioButton(h3,v+=1,0,0,"I. daºu",flags[4]);
+      RadioButton(h3,v+=18,1,0,"II. daºu",flags[4]);
+      RadioButton(h3,v+=18,2,0,"III. daºu",flags[4]);
+      EditFieldTL(h+160,v,70,"T rindas nr.",M4Str,Normal,3,f6,false,0);
+      Tile(2,270,false,"2",vals0);
+      h = 120; h2 = 200;
+      EditFieldTL(h,v=6,50,"Neiekºaut kl. klasi",M4UStr,Normal,20,f7,false,CClassSClass);
+      EditFieldTL(h,v+=20,50,"Neiekºaut art. klasi",M4UStr,Normal,20,f8,false,DISClass);
+      EditFieldTL(h,v+=20,50,"Pak. artikulu klase",M4UStr,Normal,20,AccStr,false,DISClass);
+      EditFieldTL(h,v+=20,50,"Pre‹u artikulu klase",M4UStr,Normal,20,TransStr,false,DISClass);
+      ButtonFrame(h2,v=16,80,3,"Artikulu tips");// MDS: HERBE-1285
+      CheckBox(h2,v=16,0,"Vienk‚räs",flags[18]);
+      CheckBox(h2,v+=16,0,"Noliktavas",flags[19]); 
+      CheckBox(h2,v+=16,0,"Servisa",flags[20]); //:MDS
+    end;
+    EndWindow;
+  END;
+
+  IF (Type==2 or Type==3 or Type==4) THEN BEGIN
+    SetWRect(20,80,550,298);
+    switch (Type) begin
+      case 2: SetBlid(VATDecl2010ABlock);
+      case 3: SetBlid(VATDecl2010BBlock);
+      case 4: SetBlid(VATDecl2010CBlock);
+    end;
+    Sizeable(-1,-1,0,0);
+    MatrixBegin(4,v=20,-21,-20,-,99);
+    if (Type!=3) then begin
+      MatCol(1,24,"PVN kods",0,VATCode,false,VATCodeSClass);
+      MatCol(1,80,"Puse",0,Type,false,SetSClass);
+      if (type!=4) then begin
+        MatCol(1,140,"Dar´juma v.",0,DealType,false,0);
+      end else begin
+        MatCol(1,140,"PVN dekl. rinda",0,DealType,false,SetSClass);
+      end;
+      MatCol(1,200,"Min. dar.v.",0,InclMinType,false,0);
+      MatCol(1,260,"Koment‚rs",0,Comment0,false,0);
+      MatCol(1,-60,"Min. summa",0,MinSumOpt,false,SetSClass);
+    end else begin
+      MatCol(1,24,"PVN kods",0,VATCode,false,VATCodeSClass);
+      MatCol(1,100,"Puse",0,Type,false,SetSClass);
+      MatCol(1,170,"Dar´juma v.",0,DealType,false,0);
+      MatCol(1,240,"Koment‚rs",0,Comment0,false,0);
+    end;
+    EndMatrix;
+    EndWindow;
+  END;
+  
+return;
+end;
+
+event DefineWindows
+begin
+  real h,h2,h3,v,vs,vm;//VITO: EDS-12
+  
+  SetLangMode(LangLatvian,"LAT",0);
+
+  WindowBegin("PVN deklar‚cija, PVN1, PVN2 (Burti SIA)",VATDeclaration2010RClass,CGRcW,RcType);
+  VATDeclWindow(0);
+
+  WindowBegin("PVN deklar‚cija, PVN1, PVN2 (Burti SIA)",VATDeclaration2010EClass,CGEcW,RcType);
+  VATDeclWindow(1);
+
+  WindowBegin("PVN - I. daºa (Burti SIA)",VATDecl2010ATClass,CGHbl,HBlRecType);
+  VATDeclWindow(2);
+  
+  WindowBegin("PVN - II. daºa (Burti SIA)",VATDecl2010BTClass,CGHbl,HBlRecType);
+  VATDeclWindow(3);
+    
+  WindowBegin("PVN - III. daºa (Burti SIA)",VATDecl2010CTClass,CGHbl,HBlRecType);
+  VATDeclWindow(4);
+  
+  //VITO: EDS-12
+  WindowBegin("PVN1 - Uzst‚d´jumi",VATDECL_SettsTClass,CGSbl,-);
+  SetBlid(VATDECL_SettsBlock);
+  SetWRect(64,80,509,250);
+  h = 130; v = 20; vs = 20;
+  EditField(h,v,-20,"Eksporta faila vieta",Normal,ExportFilesPath,false,0);
+  CheckBox(h,v+=vs,0,"Kases ieÀ•mumu ordera dati no gr‚matojuma",CLInFromTR);//eds-27; edz
+  CheckBox(h,v+=16,0,"Gr‚m. rind‚s",TRRows);//eds-27; edz
+  StaticText(h,v+=vs,"",false);
+  EndWindow;
+  
+return;
+end;

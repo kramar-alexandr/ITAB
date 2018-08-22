@@ -1,0 +1,36 @@
+// ui
+//c84180104
+
+event DefineWindows
+begin
+  Real i,h,h1,h2,h3,h4,h5,v,vs,vm,hl,l,t,v2,w,offset,offset2,offset3;
+  record EPPayRollSetBlock EPSetBl;
+  
+  BlockLoad(EPSetBl);
+  Setlangmode(LangLatvian,"LAT",0);
+
+  WindowBegin("Veidot uzkr‚to atvaºin‚jumu anal´zi",EPEmpAccVacRClass,CGRcW,RcType); 
+  SetWRect(20,80,390,220);
+  v= 6; vs = 20;
+  h = 120;//VITO: EBST-3
+  EditFieldTL(h,v=20,150,"Uz datumu",M4Date,Normal,10,d1,false,PasteCurDate);
+  EditFieldTL(h,v+=vs,150,"L´gums",M4UStr,Normal,20,f1,false,EPContractSClass); 
+  EditFieldTL(h,v+=vs,150,"Darbinieku grupa",M4UStr,Normal,10,f2,false,EPEmpGroupSClass);//VITO: EBST-3
+  ButtonFrame(h,v+=40,150,3,"R‚d´t");
+  RadioButton(h,v,0,0,"P‚rskats",ArtMode);
+  RadioButton(h,v+=15,1,0,"Detaliz•ti",ArtMode);
+  RadioButton(h,v+=15,2,0,"Detaliz•ti ar ierakstiem",ArtMode);
+
+  CheckBox(h,v+=30,0,"Iekºaut neakt´vos l´gumus",flags[2]);
+  CheckBox(h,v+=16,0,"R‚d´t papildu atvaºin‚jumu",flags[1]);
+  
+  v2 = v;//VITO: EBST-3
+  ButtonFrame(h,v2=v2+40,165,3,"R‚d´t");
+  RadioButton(h,v2,0,0,"Tikai kav•jumus",flags[15]);
+  RadioButton(h,v2+=15,1,0,"Iekºaut pl‚notos kav•jumus",flags[15]);
+  RadioButton(h,v2+=15,2,0,"Tikai pl‚notos kav•jumus",flags[15]);
+
+  EndWindow;
+  
+return;  
+end;

@@ -1,0 +1,35 @@
+// ui
+event definewindows
+begin
+  record BurtiButtonsBlock BBbl;
+  row BurtiButtonsBlock BBrw;
+  integer i,rwcnt;
+  
+  SetLangMode(LangEnglish,"ENG",0);
+  
+  WindowBegin("Burti Buttons",BurtiButtonsTClass,CGHbl,-);
+  SetWRect(20,80,750,291);
+  SetBlid(BurtiButtonsBlock);
+  Sizeable(-1,-1,0,0);
+  MatrixBegin(20,27,-50,-20,-,20);
+  MatCol(1,25,"Button label",0,ButtonLabel,false,0);
+  MatCol(1,200,"Color",0,ButtonColor,false,SetSClass);
+  MatCol(1,280,"Script path",0,ScriptPath,false,0);
+  MatCol(1,430,"Arguments",0,Arguments,false,0);
+  EndMatrix;
+  EndWindow;
+
+  WindowBegin("Burti Control Panel",BurtiControlPanelWClass,CGother,RcType);
+  DynamicWindow;
+  UseView(RcVc);
+  SetWRect(20,80,450,450);
+  BlockLoad(BBbl);
+  rwcnt = MatRowCnt(BBbl);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(BBbl,i,BBrw);
+    ColourPushButton(50,20+(i*30),380,40+(i*30),"BurtiButton" & i,BBrw.ButtonLabel,BBrw.ButtonColor);
+  end;
+  EndWindow;
+  
+  return;
+end;

@@ -1,0 +1,25 @@
+// ui
+event startup
+begin
+
+  SetLangMode(LangLatvian,"ENG",0);
+  
+  //modSY
+  Setting("JPD - System settings",JPD_SettingsTClass,modSY);
+  //modSL
+  Setting("JPD - Items numbers limitation ranges",JPD_INNrLimitsTClass,modSL);//VITO: JPD-50
+  //mosNL
+  Setting("JPD - Items numbers limitation ranges",JPD_INNrLimitsTClass,modIN);//VITO: JPD-50
+  //modQT
+  Register("Sales Forecast","Sales Forecast",SalesForecastVc,modQT);//jpd-52; edz
+  Maintenance("JPD - Insert class in Quotations",JPD_AddClassToQTVClass,JPD_AddClassToQTMn,modQT);//VITO: EBST-10
+  //modIN
+  Report("JPD - Deficiency List",JPD_PurRClass,JPD_PurRn,0,modIN);//jpd-52; edz
+  //modSL
+  Report("JPD - Specify Item Sales Statistics",JPD_ItemSalesRClass,JPD_ItemSalesRn,0,modSL);//RRA JPD-57
+  Report("JPD - Specify Customer Sales Statistics",JPD_CustSalesRClass,JPD_CustSalesRn,0,modSL);//RRA JPD-57
+  //modSO
+  Setting("JPD - Automatically Created Tasks",JPD_AutoTaskTClass,modSO);//VITO: EBST-6
+  
+  return;
+end;

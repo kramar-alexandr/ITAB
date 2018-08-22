@@ -1,0 +1,15 @@
+//c80150615
+
+global
+function LongInt QTVcRecordDuplicate(var record QTVc QTr,record QTVc QT2r,LongInt long3,LongInt long4)
+begin
+  LongInt res;
+  
+  //VITO: JPD-53
+  res = inner.QTVcRecordDuplicate(QTr,QT2r,long3,long4);
+  QTr.PartnerCompORNr = "";
+  //:VITO
+  
+  QTVcRecordDuplicate = res;  
+  RETURN;
+END;

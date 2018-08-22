@@ -1,0 +1,142 @@
+// ui
+remote procedure BurtiButton(integer);
+
+global
+procedure BurtiButton0()
+begin
+  BurtiButton(0);
+  return;
+end;
+
+global
+procedure BurtiButton1()
+begin
+  BurtiButton(1);
+  return;
+end;
+
+global
+procedure BurtiButton2()
+begin
+  BurtiButton(2);
+  return;
+end;
+
+global
+procedure BurtiButton3()
+begin
+  BurtiButton(3);
+  return;
+end;
+
+global
+procedure BurtiButton4()
+begin
+  BurtiButton(4);
+  return;
+end;
+
+global
+procedure BurtiButton5()
+begin
+  BurtiButton(5);
+  return;
+end;
+
+global
+procedure BurtiButton6()
+begin
+  BurtiButton(6);
+  return;
+end;
+
+global
+procedure BurtiButton7()
+begin
+  BurtiButton(7);
+  return;
+end;
+
+global
+procedure BurtiButton8()
+begin
+  BurtiButton(8);
+  return;
+end;
+
+global
+procedure BurtiButton9()
+begin
+  BurtiButton(9);
+  return;
+end;
+
+global
+procedure BurtiButton10()
+begin
+  BurtiButton(10);
+  return;
+end;
+
+global
+procedure BurtiButton11()
+begin
+  BurtiButton(11);
+  return;
+end;
+
+global
+procedure BurtiButton12()
+begin
+  BurtiButton(12);
+  return;
+end;
+
+global
+procedure BurtiButton13()
+begin
+  BurtiButton(13);
+  return;
+end;
+
+global
+procedure BurtiButton14()
+begin
+  BurtiButton(14);
+  return;
+end;
+
+global
+procedure BurtiButton15()
+begin
+  BurtiButton(15);
+  return;
+end;
+
+global
+procedure BurtiButton16()
+begin
+  BurtiButton(16);
+  return;
+end;
+
+global
+procedure BurtiButton17()
+begin
+  BurtiButton(17);
+  return;
+end;
+
+global
+procedure BurtiButton18()
+begin
+  BurtiButton(18);
+  return;
+end;
+
+global
+procedure BurtiButton19()
+begin
+  BurtiButton(19);
+  return;
+end;

@@ -1,0 +1,77 @@
+// ui
+event Startup
+begin
+  SetLangMode(LangLatvian,"LAT",0);
+  
+  SString(32300,"PVN deklar‚cija, PVN1, PVN2 (Burti SIA)");
+  SString(32301,"I. Priekänodoklis par iekäzem• ieg‚d‚taj‚m prec•m un saÀemtajiem pakalpojumiem");
+  SString(32302,"Apliekam‚s personas PVN re®. numurs");
+  SString(32303,"Periods - par ");
+  SString(32304,". gada ");
+  SString(32305,"Dar. partn.");
+  SString(32306,"Dar´juma");
+  SString(32307,"Pre‹u vai");
+  SString(32308,"PVN, ");
+  SString(32309,"Attaisnojuma dokuments");
+  SString(32310,"nosaukums");
+  SString(32311,"PVN re®. nr.");
+  SString(32312,"veids");
+  SString(32313,"pakalp.");
+  SString(32314,"Dok. veids");
+  SString(32315,"numurs");
+  SString(32316,"Datums");
+  SString(32317,"v. b. PVN");
+  SString(32318,"II. Priekänodoklis par prec•m un pakalpojumiem, kas saÀemti no Eiropas Savien´bas dal´bvalst´m");
+  SString(32319,"K");
+  SString(32320,"V•rt´ba valðt‚");
+  SString(32321,"No dar.p. saÀ. r•ú.");
+  SString(32322,"Summa Val. kods");
+  SString(32323,"III. Priekänodoklis par pieg‚d‚taj‚m prec•m un sniegtajiem pakalpojumiem");
+  SString(32324,"PVN dekl.");
+  SString(32325,"rindas nr.");
+  SString(32326,"Diena M•nesis Gads");
+  SString(32327,"Atbild´g‚s personas paraksts un t‚ atäifr•jums");
+  SString(32328,"2. pielikums");
+  SString(32329,"Ministru kabineta");
+  SString(32330,"2009.gada 22.decembra noteikumiem Nr.1640");
+  SString(32331,"PVN 1");
+  SString(32332,"P‚rskats par priekänodokºa un nodokºa summ‚m, kas iekºautas PVN deklar‚cij‚");
+  SString(32333,"ceturksni");
+  SString(32334,"nenosak‚ms");
+  SString(32335,"pusgadu");
+  SString(32336,"m•nesi");
+  SString(32337,"Neatpaz´tu periodu");
+  SString(32338,"Atjaunojiet licenci");
+  SString(32339,"Valsts kods");
+  SString(32340,"Kods");
+  SString(32341,"PVN2. P‚rskats par pre‹u pieg‚d•m un sniegtajiem pakalpojumiem Eiropas Savien´bas teritorij‚");
+  SString(32342,"Summa, ");
+  SString(32343,"Eksport•t atskaiti");
+  
+  SetBegin(10666);//CITR-258 GLS
+  SetText(0,"-");
+  SetText(1,"Debets");
+  SetText(2,"Kred´ts");
+  EndSet;
+
+  SetBegin(10667);//CITR-258 GLS
+  SetText(0,"-");
+  SetText(1,"41");
+  SetText(10,"41.1");
+  SetText(2,"42");
+  SetText(3,"43");
+  SetText(4,"44");
+  SetText(5,"45");
+  SetText(6,"46");
+  SetText(7,"47");
+  SetText(8,"48");
+  SetText(9,"48.2");
+  EndSet;
+  
+  SetBegin(10668);//MDS HERBE- 1262//CITR-258 GLS
+  SetText(0,"Ietekm•t");
+  SetText(1,"Neietekm•t");
+  EndSet;
+   
+  return;
+end;

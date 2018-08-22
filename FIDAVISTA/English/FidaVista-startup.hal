@@ -1,0 +1,138 @@
+// ui
+event startup
+begin
+
+  SetLangMode(LangEnglish,"ENG",0);
+
+  Module("Banking assistant","",730,modFV);
+  
+  //Import("Create payments from purchase ledger",APListIn,APListIn,modFV);//fv-94; edz  
+  Import("FiDAViSta (Latvija)",0,FidaVistaIn,modFV);
+  Import("LITAS-ESIS (Lithuania)",0,BankLitIn,modFV);
+  Import("Telehansa (Estonia)",BankEstIn,BankEstIn,modFV);//fv-96; edz
+  Import("SEPA (ISO20022)",SEPAIn,SEPAIn,modFV);//fv-164; edz
+  Import("First Data",FirstDataIClass,FirstDataIn,modFV);//alk-290; edz
+  
+  Register("Imported files","Imported files",FidaVistaVc,modFV);
+  Register("Contacts","Contacts",CUVc,modFV);
+  Register("Invoices","Invoices",IVVc,modFV);
+  Register("Receipts","Receipts",IPVc,modFV);
+  Register("Purchase invoices","Purchase invoices",VIVc,modFV);
+  Register("Payments","Payments",OPVc,modFV);
+  Register("Personnel payments","Personnel payments",PPVc,modFV);
+  
+  Export("Payment export",FidaVista_OPEClass,FidaVista_OPEn,modPL);
+  Export("Payment export",FidaVista_OPEClass,FidaVista_OPEn,modFV);
+  Export("Personnel payment export",FidaVista_PPEClass,FidaVista_PPEn,modFV);//fv-47; edz
+  Export("Personnel payment export",FidaVista_PPEClass,FidaVista_PPEn,modExp);//fv-47; edz
+  //Export("Darba algu saraksts uz FidaVista",BPPayrollEClass,PayrollToFidaVistaEn,modPY);//herbe-244; edz
+  //Export("Darba algu saraksts uz FidaVista",BPPayrollEClass,PayrollToFidaVistaEn,modFV);//herbe-244; edz
+  //Export("Purchase ledger",APListEClass,APListEn,modFV);//fv-94; edz
+  
+  Setting("Banking assistant - Pattern settings",FidaVistaPatTClass,modFV);
+  Setting("Banking assistant - Settings",FidaVistaParamsTClass,modFV);
+  Setting("Banking assistant - Bank account link to accounts",FidaVistaAccTClass,modFV);
+  Setting("Banking assistant - POS commissions",FidaVistaCommTClass,modFV);//fv-157; edz
+  Setting("Payment Modes",PMTClass,modFV);//fv-127; edz
+  Setting("Banking assistant - Bank customers",FidaVistaTRTClass,modFV);//fv-167; edz
+  
+  Maintenance("Delete Imported files records",FidaVistaRemoveVClass,FidaVistaRemoveMn,modFV);//fv-103; edz
+  
+  Report("Imported file statistics",FidaVistaRClass,FidaVistaRn,0,modFV);
+
+  SetBegin(790);
+  SetText(0,"-");
+  SetText(1,"Invoice");
+  SetText(2,"Official No.");
+  SetText(3,"Customer order");
+  SetText(4,"Our Reference");//fv-93; edz
+  EndSet;
+  
+  //fv-53; edz:
+  SetBegin(791);
+  SetText(0,"-");
+  SetText(1,"Transaction");
+  SetText(2,"Personnel payment");
+  EndSet; 
+  //:edz
+
+  StrSetBegin(10000);
+  StrSetText(31946,"Export Payment export (FiDAViSta) started");
+  StrSetText(31947,"Export Payment export (FiDAViSta) ended");
+  StrSetText(31948,"Import FiDAViSta started");
+  StrSetText(31949,"Import FiDAViSta ended");
+  StrSetText(31950,"File imported - ");
+  StrSetText(31951,"Customer hasn't been recognised by bank account or registration no");
+  StrSetText(31952,"Customer found - ");
+  StrSetText(31953,"Customer hasn't been specified");
+  StrSetText(31954,"FiDAViSta import statistics");
+  StrSetText(31955,"File imported");
+  StrSetText(31956,"Document hasn't been created");//fv-28; edz
+  StrSetText(31957,"Receipt created");
+  StrSetText(31958,"Mismatching registration no, but matching invoice no and amount");
+  StrSetText(31959,"Mismatching currencies");
+  StrSetText(31960,"Invoice already paid");
+  StrSetText(31961,"Invoice with specified number hasn't been found");
+  StrSetText(31962,"Found invoice with matching amount");
+  StrSetText(31963,"Payment sum matches full debt sum");
+  StrSetText(31964,"Invoice hasn't been found. importing as prepayment");
+  StrSetText(31965,"Added to receipt");
+  StrSetText(31966,"Receipt import isn't enabled");
+  StrSetText(31967,"Payment export isn't enabled");
+  StrSetText(31968,"Payment intelligentrecognition hasn't been enabled");
+  StrSetText(31969,"Transaction created");
+  StrSetText(31970,"Invoice paid");//FV-14; edz
+  StrSetText(31971,"Remaining sum added to invoice");//FV-14; edz
+  StrSetText(31972,"Payment created");//FV-4; edz
+  StrSetText(31973,"Linked with payment");//FV-4; edz
+  StrSetText(31974,"Payment sum is equal with debt sum");//FV-4; edz
+  StrSetText(31975,"New contact created");//FV-16; edz
+  StrSetText(31976,"Contact with the same Legal ID or bank account already registered");//FV-16; edz
+  StrSetText(31977,"Bank account or legal ID number not found");//FV-29; edz
+  StrSetText(31978,"Contact already linked with this record");//FV-29; edz
+  StrSetText(31979,"Found ");//FV-35; edz
+  StrSetText(31980," records.");//FV-35; edz
+  StrSetText(31981," Imported ");//FV-35; edz
+  StrSetText(31982,"Personnel payment");
+  StrSetText(31983,"Not all personnel payment rows were exported");
+  StrSetText(31984,"Personnel payment created");//fv-53; edz
+  StrSetText(31985,"Payroll_payment");//herbe-244; edz
+  StrSetText(31986,"Nepiecieäams ievad´t izmaksu tipu sagatavoäan‚ 'Algu parametri'");//herbe-244; edz
+  StrSetText(31987,"BurtiEnabler expired");
+  StrSetText(31988,"Transaction hasn't been created because account hasn't been found");//fv-86; edz
+  StrSetText(31989,"Record with the same operation number already registered");//fkc-15; edz
+  StrSetText(31990,"Currency must be specified");
+  StrSetText(31991,"Date older than allowed");//fv-58; edz
+  StrSetText(31992,"Number series not defined");//fv-99; edz
+  StrSetText(31993,"Hasn't been imported: ");//fv-116; edz
+  StrSetText(31994,"Prepayment hasn't been created because paid invoice was found: ");//fv-122; edz
+  StrSetText(31995,"Payment already registered");//fv-124; edz
+  //alk-115; edz: lv only
+  //StrSetText(31996,"N.p.k");
+  //StrSetText(31997,"Uzv‚rds, V‚rds");
+  //StrSetText(31998,"Pers.kods");
+  //StrSetText(31999,"Konta Nr.");
+  //StrSetText(32000,"Summa");
+  //:edz
+  StrSetText(31001,"Invoice's");//fv-138; edz
+  StrSetText(31002,"date greater than payment's date");//fv-138; edz
+  StrSetText(31003,"Import file's reg.no differs from current company's reg.no");//fv-140; edz
+  //fv-144; edz:
+  StrSetText(31004,"Op. number");
+  StrSetText(31005,"Op. type");
+  StrSetText(31006,"Sum");
+  StrSetText(31007,"Status");
+  StrSetText(31008,"FV contact");
+  StrSetText(31009,"Linked record's contact");
+  //:edz
+  StrSetText(31010,"Import failed. No payment type for account: ");//kame-116; edz
+  StrSetText(31011,"Can't delete processed record");//kame-117; edz
+  StrSetText(31012,"Pagal avansin« apyskaitˆ Nr.");//coll-47; edz
+  //StrSetText(31013,"Nesakr´t samaksas veids izmaks‚tajam avansam un algu maks‚jumam");//opt-93; edz
+  StrSetText(31014,"Only one person allowed in personnel payment!");//fv-169; edz
+  StrSetText(31015,"Incorrect file format");//fv-174; edz
+  StrSetText(31016,"Payment found and OKed");//RGS: FV-207
+  EndStrSet;
+
+  return;
+end;

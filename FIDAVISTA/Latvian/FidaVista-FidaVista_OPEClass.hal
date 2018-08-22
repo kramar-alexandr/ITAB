@@ -1,0 +1,68 @@
+// ui
+event definewindows
+begin
+  real h,h2,h3,v,vs,vm,t;
+  
+  SetLangMode(LangLatvian,"LAT",0);
+
+  WindowBegin("MaksÇjumu uzdevumi",OPSClass,CGslist,-);
+  SetWRect(20,80,529,307);
+  Sizeable(-1,-1,0,0);
+  SpawnClass(OPDClass);
+  UseView(OPVc);
+  RecordList(4,17,-21,-39);
+  RlColKey(4,1,"N_r.",SerNr,false,SerNr);
+  RlColKey(84,79,"Izr.",OrderedFlag,false,OrderedFlag);
+  RlColKey(121,116,"Gr.",DoneFlag,false,DoneFlag);
+  RlColKey(151,151,"SamaksÇts",TransDate,false,TransDate);
+  RlColKey(231,231,"Atsauksme",PayNumber,false,PayNumber);
+  RlColKey(-131,-131,"Summa",CurPayVal,true,CurPayVal);
+  RlCol(-30,-30,"Valta",PayCurCode,true);
+  RlCol(-1,-1,"",Invalid,true);
+  SearchField("Meklït");
+  EndWindow;
+
+  WindowBegin("Veidot maksÇjumu uzdevumu eksportu",FidaVista_OPEClass,CGECW,RcType);
+  SetWRect(100,100,520,440);
+  h = 160;v = 8;vs = 20;h2 = 250;
+  EditField(h,v+=vs, 120, "MaksÇjumu uzdevumi",Normal,f1,false,OPSClass);
+  PeriodField(h,v+=vs,"Periods");
+  EditField(h,v+=vs,80, "PiegÇdÇtÇjs",Normal,AccStr,false,VESClass);
+  EditField(h,v+=vs,80, "Samaksas veids",Normal,ObjStr,false,PMSClass);//fv-81; edz
+  EditField(h,v+=vs,80, "Valta",Normal,f2,false,CurncyCodeSClass);
+  CheckBox(h=50,v+=22,0,"Tikai izrakst¥tos",flags[0]);
+  CheckBox(h,v+=18,0,"Tikai neeksportïtos",flags[1]);//FV-20; edz
+  CheckBox(h,v+=18,0,"Tikai negrÇmatotos",flags[2]);//fv-56; edz
+  ButtonFrame(h,v+=40,190,2,"LAT banku parametri");
+  CheckBox(h,v,0,"Pievienot BOM(Danske Bank)",flags[3]);//fv-98; edz
+  CheckBox(h,v+=18,0,"Sa¥sinÇt komentÇru(Nordea Solo)",flags[4]);//fv-104; edz
+  //fv-57; edz:
+  ButtonFrame(h=200,v=148,160,2,"Eksporta datums:");
+  RadioButton(h,v,0,0,"MU izrakst¥‰anas",ArtMode);
+  RadioButton(h,v+=18,1,0,"Izvïlïties",ArtMode);
+  EditField(h+75,v,65,"",Normal,d1,false,PasteCurDate);
+  //:edz
+  //fv-95; edz:
+  ButtonFrame(h=50,v+=5*vs,160,6,"Valsts"); //JP: VFV-156
+  RadioButton(h,v,0,0,"Latvija - FiDAViSta",OKmode);
+  RadioButton(h,v+=16,1,0,"Igaunija - Telehansa",OKmode);
+  RadioButton(h,v+=16,2,0,"Lietuva - LITAS-ESIS",OKmode);
+  //:edz
+   //JP: JCD-26
+  RadioButton(h,v+=16,3,0,"Igaunija - SEPA",OKmode);
+  RadioButton(h,v+=16,4,0,"Lietuva - SEPA",OKmode);
+  RadioButton(h,v+=16,5,0,"VÇcija - SEPA",OKmode); // EVS: TRZ-18
+  RadioButton(h,v+=16,6,0,"Latvija - SEPA",OKmode); // RGS: FV-208
+  EndFrame;
+  ButtonFrame(h,v+=40,190,2,"SEPA papildus parametri");
+  CheckBox(h,v,0,"Viens maksÇjums piegÇdÇtÇjam",flags[5]);
+  CheckBox(h,v+=18,0,"Årzemju maksÇjumi",flags[7]);
+  ButtonFrame(h,v+=vs*2,150,3,"Bankas pakalpoj.");
+  RadioButton(h,v,0,0,"MaksÇjam mïs",flags[8]);
+  RadioButton(h,v+=18,1,0,"MaksÇ piegÇdÇtÇjs",flags[8]);
+  RadioButton(h,v+=18,2,0,"Dal¥ts",flags[8]);
+  //:JP
+  EndWindow;
+
+  return;
+end;

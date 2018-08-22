@@ -1,0 +1,991 @@
+//c84180104
+external procedure ConvertDatePerShort(date,date,var string);
+external function val GetEPAvSalary(record EPCalcResVc,string,date,string,date,val,val,boolean,val,boolean);
+external function val amountofworkdays(date ,date,boolean ,string);
+external function longint datediff(date,date);
+external function roundmode SetRoundModeD(Integer);
+external function string 255 EPContractFieldOnDate2(record EPContractVc,date,string);
+external function Boolean IsEPHolliday(Date,record BHollVc,record TimeClassVc,Boolean,boolean);
+external function string 255 EPContractFieldOnDate(string,date,string);
+
+procedure CalculateMonthDays(record EPContractVc EPContractr,record EPPayrollSetBlock EPPaySetBl,date startdate,date EndDate,string timecl,var val days,val subdays)
+begin
+  date cd,ed,sd,lastd;
+  val daycount,daycount2,daycount3;
+  integer cnt,m1,m2;
+  val m,mt;
+  date td;
+  td = addmonth(startdate,1);
+  m1 = td.month;
+  m2 = EndDate.month;
+  m = m2 - m1 + 1 + 12 * (EndDate.year - td.year);
+  if (EndDate.day <> daysinmonth(startdate.year,startdate.month)) then begin
+    mt = 1.00 / daysinmonth(EndDate.year,EndDate.month)*EndDate.day;
+  m = m - 1 + mt;
+  end;
+  if (subdays <> 0) then begin
+    mt = 1.00 / daysinmonth(EndDate.year,EndDate.month)*subdays;
+  m = m - mt;
+  end;
+/*
+  if (startdate.day <> EndDate.day and daysinmonth(startdate.year,startdate.month)-startdate.day <> daysinmonth(EndDate.year,EndDate.month)-EndDate.day) then begin
+    
+  ed = AddDay(EndDate,-EndDate.day + daysinmonth(EndDate.year,EndDate.month));
+    sd = AddDay(EndDate,-EndDate.day+1);
+    daycount2 = amountofworkdays(sd,ed,false,timecl);//number of workdays in the first month of calculating period 
+    if (skipd>0) then begin
+      daycount3 = amountofworkdays(fd,ld,false,timecl);   
+      daycount2 = daycount2 - daycount3;
+    end;
+    if (m1<>m2 or startdate.year <> EndDate.year) then begin
+      daycount = amountofworkdays(addday(sd,EndDate.day),ed,false,timecl);
+      m = m - daycount/daycount2;
+      m = round(m,SetRoundModeD(2));
+    end else begin
+      daycount = amountofworkdays(startdate,EndDate,false,timecl);
+      m = m + daycount/daycount2;
+      m = round(m,SetRoundModeD(2));
+    end;
+  end;
+  */
+  days = m / 12 * EPPaySetBl.AccVacDays;
+ 
+return;
+end;
+
+function boolean PresentOffWork(array longint alist,integer size,longint sernr)
+begin
+  boolean res;
+  integer i;
+
+  res = false;
+  for (i = 0; i < size; i = i + 1) begin
+    if (alist[i] == sernr) then begin
+      res = true;
+      i = size;
+    end;
+  end;
+
+  PresentOffWork = res;
+  return;
+end;
+
+procedure AddNewItem(var Integer size,var array Longint vacser,var array Integer vactype,Integer pos)
+begin
+  Integer i;
+
+  for (i=size;i>pos;i=i-1) begin
+    vacser[i] = vacser[i-1];
+    vactype[i] = vactype[i-1];
+  end;
+  
+  vacser[pos] = -2;
+  vactype[pos] = 0;
+  size = size + 1;
+
+  return;
+end;
+
+procedure DescreaseUsedAmount(var val adddays,record EPPayrollSetBlock EPPaySetBl,record EPContractVc EPContractr,record TimeClassVc Timeclr,record BHollVc BHr,Date fromdate,Date todate)
+begin
+  Integer i;
+  Date fd,ed,td;
+  record EPOffWorkVc EPOffWorkr;
+  boolean foundf,holfoundf,testf;
+
+  if (EPPaySetBl.AddAmendedDays==1) then begin
+    td = fromdate;
+    while (td<=todate) begin
+      if (IsEPHolliday(td,BHr,Timeclr,false,true)) then begin
+        if (IsEPHolliday(td,BHr,Timeclr,true,false)) then begin
+          adddays = adddays - 1;
+        end;
+      end;
+      td = AddDay(td,1);
+    end;
+  end;
+  
+  return;
+end;
+
+
+procedure EPCalculateEmpAccVacation(record EPPayrollSetBlock EPPaySetBl,record EPContractVc EPContractr,array longint vacser,array longint vac1ser,array longint vacsub,array integer vactype,array integer vac1type,array integer vac2type,var integer size,var integer size1,var integer size2,
+var val subdays,var val adddays,var val adddays2,date fromdate,date todate,var val t2,integer addplan)
+begin
+  record EPOffWorkGroupVc EPOffWorkGroupr;
+  record EPOffWorkVc EPOffWorkr;
+  record EPOffWorkPlanVc EPOffWorkPlanr;
+  boolean Trhs2,testf;
+  string 20 timecl;
+  date fd,ed;
+  val wdays;
+  val t;
+  integer i;
+  array longint planlist;
+  integer plansize;
+  record EPExtraVacVc EVr;
+  record TimeClassVc Timeclr;
+  record CYBlock CYBl;
+  record BHollVc BHr;
+
+  BlockLoad(CYbl);
+  BHr.CountryCode = CYbl.CountryCode;
+  if (ReadFirstMain(BHr,1,true)==false) then begin
+    RecordNew(BHr);
+  end;
+
+  timecl = EPContractFieldOnDate(EPContractr.ContractNr,fromdate,"TimeClass");
+  Timeclr.Code = timecl;
+  ReadFirstMain(Timeclr,1,true); 
+
+  size = 0;
+  size1 = 0;
+  size2 = 0;
+  //EPContractr.LastVacChange = addday(fromdate,1);
+  EPContractr.LastVacChange = fromdate;
+  if (addplan == 0 or addplan == 1) then begin
+    EPOffWorkr.ContractNr = EPContractr.ContractNr;
+    EPOffWorkr.StartDate = EPContractr.LastVacChange;
+    ResetLoop(EPOffWorkr);
+    TrHs2 = true;
+    while (LoopKey("ContractNr",EPOffWorkr,2,TrHs2)) begin
+      testf = true;
+      if (EPOffWorkr.OKFlag == 0) Then Begin
+        Testf = false;
+      end;
+      if (EPContractr.ContractNr <> EPOffWorkr.ContractNr) then begin
+        TrHs2 = false; testf = false;
+      end;       
+      if (EPOffWorkr.StartDate > todate) then begin
+        TrHs2 = false; testf = false;
+      end;
+      if (EPOffWorkr.EndDate < EPContractr.LastVacChange) then begin
+        testf = false;
+      end;
+      if (testf) then begin
+        if (EPOffWorkr.OffWorkPlanNr > -1) then begin
+          planlist[plansize] = EPOffWorkr.OffWorkPlanNr;
+          plansize = plansize + 1;
+        end;
+      end;
+      if (testf) and (nonblank(EPOffWorkr.Group)) then begin
+        EPOffWorkGroupr.Code = EPOffWorkr.Group;
+        if (ReadFirstMain(EPOffWorkGroupr,1,true)) then begin
+          if (EPOffWorkGroupr.UpdateVac==1) then begin
+            vacser[size] = EPOffWorkr.SerNr;
+            size = size + 1;
+          end;
+          if (EPOffWorkGroupr.UpdateVac2 == 1) then begin
+            vac1ser[size1] = EPOffWorkr.SerNr;
+            size1 = size1 + 1;
+          end;
+          if (EPOffWorkGroupr.UpdateVac3 == 1) then begin
+            vacsub[size2] = EPOffWorkr.SerNr;
+            size2 = size2 + 1;
+          end;
+        end;
+      end;
+    end;
+  end;
+  
+  if (addplan == 1 or addplan == 2) then begin
+
+  //kzs added planned vacations
+    EPOffWorkPlanr.ContractNr = EPContractr.ContractNr;
+    EPOffWorkPlanr.StartDate = EPContractr.LastVacChange;
+    ResetLoop(EPOffWorkPlanr);
+    TrHs2 = true;
+    while (LoopKey("ContractNr",EPOffWorkPlanr,2,TrHs2)) begin
+      testf = true;
+      if (EPContractr.ContractNr <> EPOffWorkPlanr.ContractNr) then begin
+        TrHs2 = false; testf = false;
+      end;       
+      if (EPOffWorkPlanr.StartDate > todate) then begin
+        TrHs2 = false; testf = false;
+      end;
+      if (EPOffWorkPlanr.EndDate < EPContractr.LastVacChange) then begin
+        testf = false;
+      end;
+      if (testf) and (nonblank(EPOffWorkPlanr.OffWorkGr) and PresentOffWork(planlist,plansize,EPOffWorkPlanr.SerNr)==false) then begin
+        EPOffWorkGroupr.Code = EPOffWorkPlanr.OffWorkGr;
+        if (ReadFirstMain(EPOffWorkGroupr,1,true)) then begin
+          if (EPOffWorkGroupr.UpdateVac==1) then begin
+            vacser[size] = EPOffWorkPlanr.SerNr;
+            vactype[size] = 1;
+            size = size + 1;
+          end;
+          if (EPOffWorkGroupr.UpdateVac2 == 1) then begin
+            vac1ser[size1] = EPOffWorkPlanr.SerNr;
+            vac1type[size1] = 1;
+            size1 = size1 + 1;
+          end;
+          if (EPOffWorkGroupr.UpdateVac3 == 1) then begin
+            vacsub[size2] = EPOffWorkPlanr.SerNr;
+            vac2type[size2] = 1;
+            size2 = size2 + 1;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+  adddays = 0;
+  subdays = 0;
+  adddays2 = 0;
+  for (i = 0; i < size; i = i + 1) begin
+    EPOffWorkr.SerNr = vacser[i];
+    if (vactype[i] == 0) then begin
+      if (ReadFirstMain(EPOffWorkr,1,true)) then begin
+        if (EPContractr.LastVacChange > EPOffWorkr.StartDate) then begin
+          fd = EPContractr.LastVacChange;
+        end else begin
+          fd = EPOffWorkr.StartDate;
+        end;
+        if (EPOffWorkr.EndDate > todate) then begin
+          ed = todate;
+        end else begin
+          ed = EPOffWorkr.EndDate;
+        end;
+        wdays = amountofworkdays(fd,ed,false,timecl);
+        DescreaseUsedAmount(wdays,EPPaySetBl,EPContractr,TimeClr,BHr,fd,ed);
+        adddays = adddays + wdays;
+      end;
+    end else begin
+      EPOffWorkPlanr.SerNr = vacser[i];
+      if (ReadFirstMain(EPOffWorkPlanr,1,true)) then begin
+        if (EPContractr.LastVacChange > EPOffWorkPlanr.StartDate) then begin
+          fd = EPContractr.LastVacChange;
+        end else begin
+          fd = EPOffWorkPlanr.StartDate;
+        end;
+        if (EPOffWorkPlanr.EndDate > todate) then begin
+          ed = todate;
+        end else begin
+          ed = EPOffWorkPlanr.EndDate;
+        end;
+        wdays = amountofworkdays(fd,ed,false,timecl);
+        adddays = adddays + wdays;
+      end;
+    end;
+  end;
+
+  for (i = 0; i < size1; i = i + 1) begin
+
+    if (vac1type[i] == 0) then begin
+      EPOffWorkr.SerNr = vac1ser[i];
+      if (ReadFirstMain(EPOffWorkr,1,true)) then begin
+        if (EPContractr.AddAccVacChange > EPOffWorkr.StartDate) then begin
+          fd = EPContractr.AddAccVacChange;
+        end else begin
+          fd = EPOffWorkr.StartDate;
+        end;
+        if (EPOffWorkr.EndDate > todate) then begin
+          ed = todate;
+        end else begin
+          ed = EPOffWorkr.EndDate;
+        end;
+        wdays = amountofworkdays(fd,ed,false,timecl);
+        adddays2 = adddays2 + wdays;
+      end;
+    end else begin
+      EPOffWorkPlanr.SerNr = vac1ser[i];
+      if (ReadFirstMain(EPOffWorkPlanr,1,true)) then begin
+        if (EPContractr.LastVacChange > EPOffWorkPlanr.StartDate) then begin
+          fd = EPContractr.LastVacChange;
+        end else begin
+          fd = EPOffWorkPlanr.StartDate;
+        end;
+        if (EPOffWorkPlanr.EndDate > todate) then begin
+          ed = todate;
+        end else begin
+          ed = EPOffWorkPlanr.EndDate;
+        end;
+        wdays = amountofworkdays(fd,ed,false,timecl);
+        adddays2 = adddays2 + wdays;
+      end;
+    end;
+
+  end;
+
+  for (i = 0; i < size2; i = i + 1) begin
+    if (vac2type[i] == 0) then begin
+      EPOffWorkr.SerNr = vacsub[i];
+      if (ReadFirstMain(EPOffWorkr,1,true)) then begin
+        if (EPContractr.LastVacChange > EPOffWorkr.StartDate) then begin
+          fd = EPContractr.LastVacChange;
+        end else begin
+          fd = EPOffWorkr.StartDate;
+        end;
+        if (EPOffWorkr.EndDate > todate) then begin
+          ed = todate;
+        end else begin
+          ed = EPOffWorkr.EndDate;
+        end;
+        //trace(EPContractr.LastVacChange,todate);
+        wdays = datediff(ed,fd)+1;
+        subdays = subdays + wdays;//wrong way to do it
+      end;
+    end else begin
+      EPOffWorkPlanr.SerNr = vacsub[i];
+      if (ReadFirstMain(EPOffWorkPlanr,1,true)) then begin
+        if (EPContractr.LastVacChange > EPOffWorkPlanr.StartDate) then begin
+          fd = EPContractr.LastVacChange;
+        end else begin
+          fd = EPOffWorkPlanr.StartDate;
+        end;
+        if (EPOffWorkPlanr.EndDate > todate) then begin
+          ed = todate;
+        end else begin
+          ed = EPOffWorkPlanr.EndDate;
+        end;
+        wdays = datediff(ed,fd)+1;
+        subdays = subdays + wdays;//wrong way to do it
+      end;
+    end;
+
+  end;
+  t2 = 0;
+  if (nonblank(EPPaySetBl.AccVacBaseDays)) then begin
+    t = DateDiff(todate,fromdate)-subdays;
+    t2 = round(t / EPPaySetBl.AccVacBaseDays * EPPaySetBl.AccVacDays,SetRoundModeD(2));
+  end else begin
+    CalculateMonthDays(EPContractr,EPPaySetBl,fromdate,todate,timecl,t2,subdays);
+  end;
+  //ksz start 2013-09-23 13:42:02
+  EVr.ContractNr = EPContractr.ContractNr;
+  ResetLoop(EVr);
+  TrHs2 = true;
+  while (LoopKey("ContractNr",EVr,2,TrHs2)) begin
+    if (EVr.ContractNr!=EPContractr.ContractNr) then begin
+      TrHs2 = false;
+    end else begin
+      testf = true;
+      if (EPOffWorkr.TransDate > todate) then begin
+        testf = false;
+      end;
+      if (testf) then begin
+        t2 = t2 + EVr.Days;
+      end;
+    end;
+  end;
+  
+return;
+end;
+
+global 
+function val EPGetAccVacCalc(record EPContractVc EPContractr,date todate)
+begin
+  record EPPayrollSetBlock EPPaySetBl;
+  array longint vacser,vac1ser,vacsub;
+  array integer vactype,vac1type,vac2type;
+  integer size,size1,size2;
+  val subdays,adddays,adddays2;
+  date fromdate;
+  val t2;
+
+  BlockLoad(EPPaySetBl);
+  fromdate = EPContractr.LastVacChange;//AddDay(EPContractr.LastVacChange,1);
+  if (blank(fromdate)) then begin 
+    fromdate = EPContractr.StartDate;//AddDay(EPContractr.StartDate,-1); 
+  end;
+  EPCalculateEmpAccVacation(EPPaySetBl,EPContractr,vacser,vac1ser,vacsub,vactype,vac1type,vac2type,size,size1,size2,subdays,adddays,adddays2,fromdate,todate,t2,0);
+  
+  EPGetAccVacCalc = t2 - adddays + EPContractr.AccVac;
+  return;
+end;
+
+//new function for FANALYSE function
+global 
+function val EPGetAccVacCalc2(string contrnr,date todate)
+begin
+  record EPPayrollSetBlock EPPaySetBl;
+  array longint vacser,vac1ser,vacsub;
+  array integer vactype,vac1type,vac2type;
+  integer size,size1,size2;
+  val subdays,adddays,adddays2;
+  date fromdate;
+  val t2;
+  record EPContractVc EPContractr;
+  val res;
+  
+  res = 0;
+  EPContractr.ContractNr = contrnr;
+  if (ReadFirstMain(EPContractr,1,true)) then begin
+    BlockLoad(EPPaySetBl);
+    fromdate = EPContractr.LastVacChange;//AddDay(EPContractr.LastVacChange,1);
+    if (blank(fromdate)) then begin 
+      fromdate = EPContractr.StartDate;//AddDay(EPContractr.StartDate,-1); 
+    end;
+    EPCalculateEmpAccVacation(EPPaySetBl,EPContractr,vacser,vac1ser,vacsub,vactype,vac1type,vac2type,size,size1,size2,subdays,adddays,adddays2,fromdate,todate,t2,0);
+    res = t2 - adddays + EPContractr.AccVac;
+  end;
+  
+  EPGetAccVacCalc2 = res;
+  return;
+end;
+
+function val GetShortAvSal(record EPContractVc EPContractr,date fromdate,date todate)
+begin
+  record EPCalcResVc EPCalcResr;
+  boolean TestF;
+  val avsal;
+
+  EPCalcResr.ContractNr = EPContractr.ContractNr;
+  EPCalcResr.StartDate= todate;
+  testf = loopBackKey("ContractStartDate:" & EPContractr.ContractNr,EPCalcResr,1,True);
+  //if (testf) Then Begin//KSZ removed this because we still need to get average salary from initial amounts specified 2014-10-21
+    avsal = GetEPAvSalary(EPCalcresr,EPContractr.EmpCode,todate,EPContractr.ContractNr,todate,0,0,false,0,false);  
+  //end;
+  GetShortAvSal = avsal;
+Return;
+end;
+
+procedure FillOffWorkRec(record EPOffWorkPlanVc EPOffWorkPlanr,var record EPOffWorkVc EPOffWorkr)
+begin
+
+  recordNew(EPOffWorkr);
+  EPOffWorkr.TransDate = EPOffWorkPlanr.TransDate;
+  EPOffWorkr.StartDate = EPOffWorkPlanr.StartDate;
+  EPOffWorkr.EndDate = EPOffWorkPlanr.EndDate;
+  EPOffWorkr.ContractNr = EPOffWorkPlanr.ContractNr;
+  EPOffWorkr.EmpCode = EPOffWorkPlanr.EmpCode;
+  EPOffWorkr.EmpName = EPOffWorkPlanr.Name;
+  EPOffWorkr.Group = EPOffWorkPlanr.OffWorkGr;
+  EPOffWorkr.OffWorkPlanNr = EPOffWorkPlanr.SerNr;
+
+  return;
+end;
+
+procedure ShowDetEmpRep(record EPContractVc EPContractr,
+            record RcVc RepSpec,
+            date fromdate,date todate,
+            val adddays,val subdays,val t2,val avsal,val avsald,
+            date fromdate2,date todate2,
+            val adddays2,val avsal2,val avsald2,
+            array longint vacsub,integer size2,
+            array longint vacser,integer size,
+            array longint vac1ser,integer size1,
+            array integer vactype,array integer vac1type,array integer vac2type,
+            string timecl)
+Begin
+  Record EPOffWorkGroupVc EPOffWorkGroupr;
+  record EPOffWorkVc EPOffWorkr;
+  record EPOffWorkPlanVc EPOffWorkPlanr;
+  date fd,ed;
+  val wdays;
+  integer i;
+  boolean planf,foundf;
+  string 30 depcode;
+  record TimeClassVc Timeclr;
+  record CYBlock CYBl;
+  record BHollVc BHr;
+  record EPPayrollSetBlock EPPaySetBl;
+  
+  BlockLoad(EPPaySetBl);
+  BlockLoad(CYbl);
+  BHr.CountryCode = CYbl.CountryCode;
+  if (ReadFirstMain(BHr,1,true)==false) then begin
+    RecordNew(BHr);
+  end;
+
+  Timeclr.Code = EPContractFieldOnDate(EPContractr.ContractNr,fromdate,"TimeClass");
+  ReadFirstMain(Timeclr,1,true);
+
+  Black_divider(0,1);
+  StartFormat(15);
+  OutString(0,"DblContractVc",EPContractr.ContractNr,false);
+  OutString(50,"DblEmpVc",EPContractr.EmpCode,false);
+  OutString(100,0,EPContractr.EmpName,false);
+  OutString(270,0,EPContractr.StartDate,false);
+  depcode = EPContractFieldOnDate2(EPContractr,todate,"DepCode");
+  OutString(1,0,depcode,true);
+  endFormat;
+  
+  StartFormat(15);
+  endFormat;
+
+  StartFormat(15);
+  OutString(30,0,USetStr(24937),false);
+  OutString(95,0,USetStr(24938),false);
+  OutString(200,0,USetStr(24939),false);
+  OutString(270,0,USetStr(24940),false);
+  OutString(350,0,USetStr(24941),false);
+  OutString(1,0,USetStr(24942),true);
+  endFormat;
+
+  gray_divider(30,1);
+
+  StartFormat(15);
+  OutString(30,0,fromdate,false);
+  OutString(95,0,todate,false);
+  OutString(200,0,datediff(todate,fromdate),false);
+  OutVal(270,0,subdays,M4UVal,false);
+  OutVal(350,0,datediff(todate,fromdate)-subdays,M4UVal,false);
+  OutString(420,0,"+",false);
+  OutString(1,0,t2,true);
+  endFormat;
+  StartFormat(15);
+  OutString(300,0,USetStr(24943),true);
+  OutString(420,0,"+",false);
+  OutVal(1,0,EPContractr.AccVac,M4UVal,true);
+  endFormat;
+  StartFormat(15);
+  OutString(300,0,USetStr(24944),true);
+  OutString(420,0,"-",false);
+  OutVal(1,0,adddays,M4UVal,true);
+  endFormat;
+  black_divider(400,1);
+  StartFormat(15);
+  OutString(300,0,USetStr(24945) & todate & " :",true);
+  OutString(1,0,avsald,true);
+  endFormat;
+  StartFormat(15);
+  endFormat;
+  StartFormat(15);
+  OutString(300,0,USetStr(24946),false);
+  OutString(1,0,avsal,true);
+  endFormat;
+  StartFormat(15);
+  OutString(300,0,USetStr(24947),false);
+  OutString(1,0,round(avsal*avsald,SetRoundModeD(2)),true);
+  endFormat;
+
+  StartFormat(15);
+  endFormat;
+  if (size2 > 0 and RepSpec.ArtMode==2) then begin
+    Gray_divider(30,1);
+  StartFormat(5);
+  endFormat;
+  StartFormat(15);
+  OutString(30,0,USetStr(24948),false);
+  endFormat;
+  StartFormat(5);
+  endFormat;
+  StartFormat(15);
+  OutString(30,0,USetStr(24949),false);
+  OutString(80,0,USetStr(24950),false);
+  OutString(150,0,USetStr(24951),false);
+  OutString(220,0,USetStr(24952),false);
+  //OutString(280,0,"Nosaukums",false);
+  OutString(1,0,USetStr(24953),true);  
+  endFormat;
+  for (i = 0; i < size2; i = i + 1) begin
+    EPOffWorkr.SerNr = vacsub[i];
+    foundf = readfirstmain(EPOffWorkr,1,true);
+    planf = false;
+    if (vac2type[i] == 1) then begin
+      EPOffWorkPlanr.SerNr = vacsub[i];
+      if (readfirstmain(EPOffWorkPlanr,1,true)) then begin
+        FillOffWorkRec(EPOffWorkPlanr,EPOffWorkr);
+        planf = true;
+      end;
+    end;
+    if (planf or foundf ) then begin
+      if (fromdate > EPOffWorkr.StartDate) then begin
+        fd = fromdate;
+      end else begin
+        fd = EPOffWorkr.StartDate;
+      end;
+      if (EPOffWorkr.EndDate > todate) then begin
+        ed = todate;
+      end else begin
+        ed = EPOffWorkr.EndDate;
+      end;
+      wdays = datediff(ed,fd)+1;
+      StartFormat(15);
+      if (planf) then begin
+        OutString(30,"DblEPOffWorkPlanVc",EPOffWorkr.OffWorkPlanNr,false);
+      end else begin
+        OutString(30,"DblEPOffWorkVc",EPOffWorkr.SerNr,false);
+      end;
+      OutString(80,0,fd,false);
+      OutString(150,0,ed,false);
+      OutString(220,0,EPOffWorkr.Group,false);
+      EPOffWorkGroupr.Code = EPOffWorkr.Group;
+      if (ReadFirstMain(EPOffWorkGroupr,1,True)) then begin
+        OutString(300,0,EPOffWorkGroupr.Description,false);
+      end;
+      OutString(1,0,wdays,true);
+      endFormat;
+    end;
+  end;
+  StartFormat(15);
+  OutString(30,0,USetStr(24954),false);
+  OutString(1,0,subdays,true);
+  endFormat;
+  StartFormat(30);
+  endFormat;
+  end;
+  if (size > 0 and RepSpec.ArtMode==2) then begin
+    Gray_divider(30,1);
+    StartFormat(15);
+    OutString(30,0,USetStr(24955),false);
+    endFormat;
+    StartFormat(5);
+    endFormat;
+    StartFormat(15);
+    OutString(30,0,USetStr(24949),false);
+    OutString(80,0,USetStr(24950),false);
+    OutString(150,0,USetStr(24951),false);
+    OutString(220,0,USetStr(24956),false);
+    //OutString(280,0,"Nosaukums",false);
+    OutString(1,0,USetStr(24953),true);  
+    endFormat;
+    for (i = 0; i < size; i = i + 1) begin
+      EPOffWorkr.SerNr = vacser[i];
+      foundf = readfirstmain(EPOffWorkr,1,true);
+      planf = false;
+      if (vactype[i] == 1) then begin
+        EPOffWorkPlanr.SerNr = vacser[i];
+        if (readfirstmain(EPOffWorkPlanr,1,true)) then begin
+          FillOffWorkRec(EPOffWorkPlanr,EPOffWorkr);
+          planf = true;
+        end;
+      end;
+      if (planf or foundf) then begin
+        if (fromdate> EPOffWorkr.StartDate) then begin
+          fd = fromdate;
+        end else begin
+          fd = EPOffWorkr.StartDate;
+        end;
+        if (EPOffWorkr.EndDate > todate) then begin
+          ed = todate;
+        end else begin
+          ed = EPOffWorkr.EndDate;
+        end;
+        wdays = amountofworkdays(fd,ed,false,timecl);
+        DescreaseUsedAmount(wdays,EPPaySetBl,EPContractr,TimeClr,BHr,fd,ed);
+        StartFormat(15);
+        if (planf) then begin
+          OutString(30,"DblEPOffWorkPlanVc",EPOffWorkr.OffWorkPlanNr,false);
+        end else begin
+          OutString(30,"DblEPOffWorkVc",EPOffWorkr.SerNr,false);
+        end;
+        OutString(80,0,fd,false);
+        OutString(150,0,ed,false);
+        OutString(220,0,EPOffWorkr.Group,false);
+        EPOffWorkGroupr.Code = EPOffWorkr.Group;
+        if (ReadFirstMain(EPOffWorkGroupr,1,True)) then begin
+          OutString(300,0,EPOffWorkGroupr.Description,false);
+        end;
+        OutString(1,0,wdays,true);
+        endFormat;
+      end;
+    end;
+    StartFormat(15);
+    OutString(30,0,USetStr(24607),false);
+    OutString(1,0,adddays,true);
+    endFormat;
+    StartFormat(20);
+    endFormat;
+  end;  
+  If (RepSpec.flags[1]==1) Then begin
+    Black_Divider(30,1);
+  StartFormat(10);
+  endFormat;
+  StartFormat(15);
+    OutString(300,0,USetStr(24957),true);
+    OutString(420,0,"+",false);
+  if (blank(EPContractr.AddAccVac)) Then Begin
+    EPContractr.AddAccVac = 0;
+  end;
+    OutVal(1,0,EPContractr.AddAccVac,M4UVal,true);
+    endFormat;
+  StartFormat(15);
+  OutString(300,0,USetStr(24959),true);
+    OutString(420,0,"+",false);
+  OutVal(1,0,EPContractr.AddAccVacInPer,M4UVal,true);
+  endFormat;
+    StartFormat(15);
+    OutString(300,0,USetStr(24960),true);
+    OutString(420,0,"-",false);
+    OutVal(1,0,adddays2,M4UVal,true);
+    endFormat;
+    black_divider(400,1);
+    StartFormat(15);
+    OutString(300,0,USetStr(24961) & todate2 & " :",true);
+    OutString(1,0,avsald2,true);
+    endFormat;
+    StartFormat(15);
+    endFormat;
+    StartFormat(15);
+    OutString(300,0,USetStr(24962),false);
+    OutString(1,0,avsal,true);
+    endFormat;
+    StartFormat(15);
+    OutString(300,0,USetStr(24963),false);
+    OutString(1,0,round(avsal*avsald2,SetRoundModeD(2)),true);
+    endFormat;
+    StartFormat(15);
+    endFormat;
+
+    if (size1 > 0 and RepSpec.ArtMode==2) then begin
+      Gray_divider(30,1);
+      StartFormat(15);  
+      OutString(30,0,USetStr(24964),false);
+      endFormat;
+      StartFormat(5);
+      endFormat;
+      StartFormat(15);
+      OutString(30,0,USetStr(24949),false);
+      OutString(80,0,USetStr(24950),false);
+      OutString(150,0,USetStr(24951),false);
+      OutString(220,0,USetStr(24965),false);
+      //OutString(280,0,"Nosaukums",false);
+      OutString(1,0,USetStr(24966),true);  
+      endFormat;
+      for (i = 0; i < size1; i = i + 1) begin
+        EPOffWorkr.SerNr = vac1ser[i];
+        foundf = readfirstmain(EPOffWorkr,1,true);
+        planf = false;
+        if (vac1type[i] == 1) then begin
+          EPOffWorkPlanr.SerNr = vac1ser[i];
+          if (readfirstmain(EPOffWorkPlanr,1,true)) then begin
+            FillOffWorkRec(EPOffWorkPlanr,EPOffWorkr);
+            planf = true;
+          end;
+        end;
+        if (planf or foundf) then begin
+          if (fromdate> EPOffWorkr.StartDate) then begin
+            fd = fromdate;
+          end else begin
+            fd = EPOffWorkr.StartDate;
+          end;
+          if (EPOffWorkr.EndDate > todate) then begin
+            ed = todate;
+          end else begin
+            ed = EPOffWorkr.EndDate;
+          end;
+          wdays = amountofworkdays(fd,ed,false,timecl);
+          StartFormat(15);
+          if (planf) then begin
+            OutString(30,"DblEPOffWorkPlanVc",EPOffWorkr.OffWorkPlanNr,false);
+          end else begin
+            OutString(30,"DblEPOffWorkVc",EPOffWorkr.SerNr,false);
+          end;
+          OutString(80,0,fd,false);
+            OutString(150,0,ed,false);
+          OutString(220,0,EPOffWorkr.Group,false);
+          EPOffWorkGroupr.Code = EPOffWorkr.Group;
+          if (ReadFirstMain(EPOffWorkGroupr,1,True)) then begin
+            OutString(300,0,EPOffWorkGroupr.Description,false);
+          end;
+        OutString(1,0,wdays,true);
+        endFormat;
+        // adddays2 = adddays2 + wdays;
+        end;
+      end;
+      StartFormat(15);
+      OutString(30,0,USetStr(24954),false);
+      OutString(1,0,adddays2,true);
+      endFormat;
+    end;
+  end;
+  StartFormat(15);
+  endFormat;
+  return;
+end;
+
+//VITO: EBST-3
+function boolean EmpNotFromGroup(string empcode,string empgroup,var string group)
+begin
+  record EPEmpVc EPEmpr;
+  boolean res;
+  
+  res = true;
+  group = "";
+  EPEmpr.EmpCode = empcode;
+  if (ReadFirstMain(EPEmpr,1,true)) then begin
+    if (nonblank(EPEmpr.Group)) then begin
+      group = EPEmpr.Group;
+      if (EPEmpr.Group == empgroup) then begin
+        res = false;
+      end;
+    end;
+  end;
+  
+  EmpNotFromGroup = res;
+
+  return;
+end;
+//:VITO
+
+global 
+procedure EPEmpAccVacRn(record RcVc RepSpec)
+begin
+  array longint vacser,vac1ser,vacsub;
+  integer size,size1,size2;
+  record EPPayrollSetBlock EPPaySetBl;
+  record EPContractVc EPContractr;
+  record EPEmpVc EPEmpr;
+  record EPOffWorkVc EPOffWorkr;
+  record EPOffWorkGroupVc EPOffWorkGroupr;
+  string 255 tstr;
+  string 20 timecl;
+  integer rw,rwc,i;
+  val daycnt,skipd,wdays,avsal,totdays,totsum,adddays2;
+  date fd,ed,fromdate,todate;
+  date fromdate2,todate2;
+  val t2,t,adddays,subdays,avsald,avsald2,avsal2,totsum2,totdays2;
+  boolean testf,TrHs,TrHs2;
+  array integer vactype,vac1type,vac2type;
+  string 10 group;//VITO: EBST-3
+
+  StartReportJob(USetStr(24920));
+  //VITO: EBST-3
+  if (nonblank(RepSpec.f2)) then begin
+    rw = 1;
+    tstr = USetStr(24631) & RepSpec.f2;//Darbinieku grupa : 
+    Header(rw,tstr,1);
+    rw = rw + 1;
+  end;
+  //:VITO
+  endHeader;
+ 
+  if (RepSpec.ArtMode>0) then begin
+    SetRepCol(2,50);
+    SetRepCol(3,100);
+    SetRepCol(4,270);
+    SetRepCol(5,350);
+    StartFormat(15);
+    OutString(0,0,USetStr(24921),false);
+    OutString(2,0,USetStr(24922),false);
+    OutString(3,0,USetStr(24923),false);
+    OutString(4,0,USetStr(24924),false);
+    OutString(1,0,USetStr(24925),true);
+    endFormat;
+  end else begin
+    SetRepCol(2,40);
+    SetRepCol(3,80);
+    SetRepCol(4,180);
+    SetRepCol(5,230);
+//  SetRepCol(6,300);
+  SetRepCol(7,330);
+  SetRepCol(8,390);
+    StartFormat(15);
+    OutString(0,0,USetStr(24926),false);
+    OutString(3,0,USetStr(24927),false);
+    OutString(4,0,USetSTr(24928),false);
+    OutString(5,0,USetStr(24929),false);
+//    OutString(6,0,"B.Dat.",false);
+    OutString(7,0,USetStr(24930),false);
+    OutString(8,0,USetStr(24931),false);
+    OutString(1,0,UsetStr(24932),true);
+    endFormat;
+  Black_divider(0,1);
+  end;
+
+  BlockLoad(EPPaySetBl);
+  if (nonblank(RepSpec.d1)) then begin
+    Trhs = true;
+    while (LoopMain(EPContractr,1,TrHs)) begin
+      testf = true;
+      if (NonBlank(RepSpec.f1) and RepSpec.f1 <> EPContractr.ContractNr) then begin
+        testf = false;
+      end;
+      if (EPContractr.Closed==1) then begin
+        testf = false;
+      end;
+      if (nonblank(EPContractr.EndDate) and EPContractr.EndDate < RepSpec.d1) then begin
+      //  testf = false;
+      end;
+      if (nonblank(EPContractr.StartDate) and EPContractr.StartDate > RepSpec.d1) then begin
+        testf = false;
+      end;
+      if (EPContractr.ContractEmpType<>0) Then Begin
+        testf = False;
+      end;
+      if (EPContractr.SubContractf==1) Then Begin
+        testf = False;
+      end;
+      //VITO: EBST-3
+      if (testf and nonblank(RepSpec.f2)) then begin
+        if (EmpNotFromGroup(EPContractr.EmpCode,RepSpec.f2,group)) then begin
+          testf = false;
+        end;
+      end;
+      //:VITO
+      if (RepSpec.flags[2]==0 and (nonblank(EPContractr.EndDate) and EPContractr.EndDate<RepSpec.d1)) then begin
+        testf = false;
+      end;
+      if (testf) then begin
+        if (EPContractr.TimeClass != "") then begin
+          timecl = EPContractr.TimeClass; 
+        end else begin
+          timecl = EPPaySetbl.DefTimeClass; 
+        end;
+        adddays2 = 0;
+        fromdate = EPContractr.LastVacChange;
+        //fromdate = addDay(EPContractr.LastVacChange,1);
+        fromdate2 = EPContractr.AddAccVacChange;
+        if (blank(EPContractr.LastVacChange)) then begin 
+          fromdate = EPContractr.StartDate;//addday(EPContractr.StartDate,-1); 
+        end;
+        if (blank(EPContractr.AddAccVacChange)) then begin 
+          fromdate2 = EPContractr.StartDate;//addday(EPContractr.StartDate,-1); 
+        end;
+        todate = RepSpec.d1;
+        if (EPContractr.EndDate < RepSpec.d1 and nonblank(EPContractr.EndDate)) then begin todate = EPContractr.EndDate; end;
+        todate2 = todate;
+    
+        EPCalculateEmpAccVacation(EPPaySetBl,EPContractr,vacser,vac1ser,vacsub,vactype,vac1type,vac2type,size,size1,size2,subdays,adddays,adddays2,fromdate,todate,t2,RepSpec.flags[15]);
+        avsal = Round(GetShortAvSal(EPContractr,fromdate,todate),SetRoundModeD(2));
+        if (RepSpec.ArtMode>0) Then begin
+          avsald = round(t2 - adddays+EPContractr.AccVac,SetRoundModeD(2));
+          avsald2 = round(EPContractr.AddAccVacInPer+EPContractr.AddAccVac-adddays2,SetRoundModeD(2));
+          ShowDetEmpRep(EPContractr,RepSpec,fromdate,todate,adddays,subdays,t2,avsal,avsald,fromdate2,todate2,adddays2,avsal2,avsald2,vacsub,size2,vacser,size,vac1ser,size1,vactype,vac1type,vac2type,timecl);
+          totsum = totsum + round(avsal*avsald,SetRoundModeD(2));
+          totdays = totdays + avsald;
+          totsum2 = totsum2 + round(avsal * avsald2,SetRoundModeD(2));
+          totdays2 = totdays2 + avsald2;
+        end else begin
+          ConvertDatePerShort(fromdate,todate,tstr);
+          StartFormat(15);
+          OutString(0,"DblContractVc",EPContractr.ContractNr,false);
+          OutStringID(3,"DblEmpVc2",EPContractr.EmpName,false,EPContractr.EmpCode);
+          OutString(4,0,EPContractr.AccVac,false);
+          OutString(5,0,tstr,false);
+          //OutSTring(6,0,todate,false);
+          //OutSTring(6,0,EPContractr.EndDate,false);
+          avsald = round(t2 - adddays+EPContractr.AccVac,SetRoundModeD(2));
+          avsald2 = round(EPContractr.AddAccVacInPer+EPContractr.AddAccVac-adddays2,SetRoundModeD(2));
+          if (RepSpec.flags[1]==1) then begin
+            OutString(7,0,avsald+avsald2,false);
+            OutString(8,0,avsal,false);
+            OutString(1,0,(avsald+avsald2)*avsal,true);
+          end else begin
+            OutString(7,0,avsald,false);
+            OutString(8,0,avsal,false);
+            OutString(1,0,avsald*avsal,true);
+          end;
+          endFormat;
+          totsum = totsum + round(avsal*avsald,SetRoundModeD(2));
+          totdays = totdays + avsald;
+          totsum2 = totsum2 + round(avsal * avsald2,SetRoundModeD(2));
+          totdays2 = totdays2 + avsald2;
+        end;
+      end;
+    end;
+    Black_Divider(0,1);
+    StartFormat(15);
+    OutString(300,0,USetStr(24933),false);
+    OutString(1,0,totdays,true);
+    endFormat;
+    StartFormat(15);
+    OutString(300,0,USetStr(24934),false);
+    OutString(1,0,totsum,true);
+    endFormat;
+    if (RepSpec.flags[1]==1) Then Begin
+      StartFormat(15);
+      OutString(300,0,USetStr(24935),false);
+      OutString(1,0,totdays2,true);
+      endFormat;
+      StartFormat(15);
+      OutString(300,0,USetStr(24936),false);
+      OutString(1,0,totsum2,true);
+      endFormat;
+    end;
+  end;
+  endJob;
+  return;
+end;

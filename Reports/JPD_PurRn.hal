@@ -1,0 +1,1260 @@
+//c81160120
+//jpd-52; edz
+external inner function Boolean HasModPO();
+external inner function Boolean HasModSO();
+
+external inner function roundmode SetRoundModeD(Integer);
+external inner function Boolean CheckVARSubsets(record VARVc,string,string);
+external inner function Boolean TestArtCodeMatch(string,string);
+external inner procedure ExtractObj(string,var Integer,var string);
+external inner function Integer FindYVars(string,string,string);
+external inner function Boolean FindItemVAR(string,var string,var string,var string,var string);
+external inner function Boolean FindItemVAR2(string,var string,var string,var string);
+external inner function Boolean IsVarietyItem(string);
+external inner function Boolean ReadFirstItem(string,var record INVc,Boolean,Boolean);
+external inner procedure GetStockValue(string,string,var record ItemStatusVc);
+external inner procedure HTSort1(Integer, var string);
+external inner procedure HTDetailLevel(Integer, var string);
+external inner procedure HTArtSel(string,string, var string);
+external inner procedure HTLocations(string, string, var string);
+external inner procedure HTDepartments(string,string,var string);
+external inner function Boolean GetItemNameStr(Integer,var string,string,string,string);
+external inner procedure HTCustClass(string,var string);
+external inner procedure HTCustClassType(string,var string);
+external inner function Boolean SetInSet2(string,string);
+external inner procedure ItemClassTypef(string,string,var Boolean);
+external inner procedure HT2Per(Date, Date , var string);//jpd-52; edz
+
+global
+procedure FindMinLevel(var val mlevel, string location, string item,Boolean varf)
+begin
+  record MinPerLocVc MinPer;
+  Boolean TrHs,found;
+  Integer keys;
+
+  MinPer.ItemCode = item;
+  keys = 1;
+  if (nonblank(location)) then begin
+    MinPer.Location = location;
+    keys = 2;
+  end;
+  TrHs = true;
+  while LoopMain(MinPer,keys,TrHs) begin
+    if (varf) then begin
+      if (MinPer.ItemCode!=item) then begin
+        TrHs = false;
+      end;
+    end else begin
+      if (MinPer.ItemCode!=item) then begin
+        TrHs = false;
+      end;
+    end;
+    if (nonblank(location)) then begin
+      if (MinPer.Location!=location) then begin
+        TrHs = false;
+      end;
+    end;
+    if (TrHs) then begin
+      mlevel = mlevel + MinPer.MinLevel;   
+      found = true;
+    end;    
+  end;
+  if (found==false) then begin
+    TrHs = true;
+    ResetLoop(MinPer);
+    while LoopMain(MinPer,keys,TrHs) begin
+      if (varf) then begin
+        if (MinPer.ItemCode!=item) then begin
+          TrHs = false;
+        end;
+      end else begin
+        if (MinPer.ItemCode!=item) then begin
+          TrHs = false;
+        end;
+      end;
+      if (nonblank(location)) then begin
+        if (MinPer.Location!=location) then begin
+          TrHs = false;
+        end;
+      end;
+      if (TrHs) then begin
+        mlevel = mlevel + MinPer.MinLevel;
+        found = true;
+      end;
+    end;
+  end;
+  return;
+end;
+
+global
+Function Boolean FindPItem(string itemcode,string location,var record PIVc PIp,string veselect,Integer matchve)
+begin
+  Boolean res;
+  record POSettingBlock POSb;
+
+  PIp.DefaultChoice = 1;
+  PIp.ItemCode = itemcode;
+  PIp.Location = location;
+  res = ReadFirstKey("DefaultChoice",PIp,3,true);
+  if (res==false) then begin
+    if (nonblank(location)) then begin//Must be NONBLANK , if it was blank it was treated above
+      PIp.DefaultChoice = 1;
+      PIp.ItemCode = itemcode;
+      PIp.Location = "";
+      res = ReadFirstKey("DefaultChoice",PIp,3,true);
+    end;
+  end;
+  if (matchve!=0) then begin
+    if (nonblank(veselect)) then begin
+      if (veselect!=PIp.VECode) then begin
+        res = false;
+        goto LFindPItem;
+      end;
+    end;
+  end else begin
+    if (nonblank(veselect)) then begin
+      PIp.DefaultChoice = 1;
+      PIp.ItemCode = itemcode;
+      PIp.Location = location;
+      PIp.VECode = veselect;
+      res = ReadFirstKey("DefaultChoice",PIp,4,true);
+      if (res==false) then begin
+        PIp.ItemCode = itemcode;
+        PIp.VECode = veselect;
+        res = ReadFirstKey("MainKey",PIp,2,true);
+      end;
+      if (res==false) then begin
+        if (nonblank(location)) then begin
+          PIp.DefaultChoice = 1;
+          PIp.ItemCode = itemcode;
+          PIp.Location = "";
+          PIp.VECode = veselect;
+          res = ReadFirstKey("DefaultChoice",PIp,4,true);
+        end;
+      end;
+    end;
+  end;
+  if (res==false) then begin
+    BlockLoad(POSb);
+    if (nonblank(POSb.DefaultSupplier)) then begin
+      RecordNew(PIp);
+      PIp.ItemCode = itemcode;
+      PIp.VEItemCode = itemcode;
+      PIp.VECode = POSb.DefaultSupplier;
+      res = true;
+    end;
+  end;
+
+LFindPItem:;
+  FindPItem = res;
+  return;
+end;
+
+procedure FindSalesOrderQuantity(string artcode,LongInt ordernr,var val qty)
+BEGIN
+  record ORVc ORr;
+  row ORVc ORrw;
+  Integer i,rwcnt;
+  val t;
+  
+  qty = 0;
+  ORr.SerNr = ordernr;
+  if (ReadFirstMain(ORr,1,true)) then begin
+    rwcnt = MatRowCnt(ORr);
+    for (i=0;i<rwcnt;i=i+1) begin
+      MatRowGet(ORr,i,ORrw);
+      if (ORrw.ArtCode==artcode) then begin
+        t = ORrw.Shipd1 - ORrw.Quant;
+        qty = qty + t;
+      end;
+    end;
+  end;
+  RETURN;
+END;
+
+procedure FindPurchaseOrderQuantity(string artcode,LongInt ordernr,var val qty)
+BEGIN
+  record POVc POr;
+  row POVc POrw;
+  Integer i,rwcnt;
+  val t;
+  
+  qty = 0;
+  POr.SerNr = ordernr;
+  if (ReadFirstMain(POr,1,true)) then begin
+    rwcnt = MatRowCnt(POr);
+    for (i=0;i<rwcnt;i=i+1) begin
+      MatRowGet(POr,i,POrw);
+      if (POrw.ArtCode==artcode) then begin
+        t = POrw.Shipd1 - POrw.Quant;
+        qty = qty + t;
+      end;
+    end;
+  end;
+  RETURN;
+END;
+
+procedure FindFutureQuantity(record RcVc RepSpec,string artcode,var val totquant)
+BEGIN
+  record ItemHistVc IHr;
+  Boolean TrHs;
+  val quant;
+
+  totquant = 0;
+  IHr.ArtCode = artcode;
+  IHr.TransDate = RepSpec.d1;
+  TrHs = true;
+  while (LoopKey("ArtCode",IHr,2,TrHs)) begin
+    if (IHr.ArtCode!=artcode) then begin TrHs = false; end;
+    if ((TrHs) and (IHr.TransDate<>RepSpec.d1))  then begin
+      if (IHr.FileName=="Fut3ORVc") then begin
+        FindSalesOrderQuantity(artcode,IHr.TransNr,quant);
+        totquant = totquant + quant;
+      end;
+      if (IHr.FileName=="Fut1POVc") then begin
+        FindPurchaseOrderQuantity(artcode,IHr.TransNr,quant);
+        totquant = totquant + quant;
+      end;
+    end;
+  end;
+  RETURN;
+END;
+
+global
+Function Boolean FindPOQantity(record INVc INp,record ItemStatusVc ISp,Boolean varf,string location,record PIVc PIp,var val t1p,var val t2p,var val minlevel,val predsales,Boolean defic,Boolean checkpif,Boolean checkminpoqty)
+begin
+//try to make same as FindPOQty2
+  Boolean res;
+  val t;
+  record POSettingBlock POb;
+  Integer it;
+
+  BlockLoad(POb);
+  minlevel = blankval;  
+  FindMinLevel(minlevel,location,INp.Code,varf);
+  if (blank(minlevel)) then begin
+    minlevel = INp.MinLevel;
+  end;
+
+  GetStockValue(INp.Code,location,ISp);
+  t1p = ISp.Instock - ISp.OrddOut + ISp.POUnOKQty - ISp.ProdOrd;
+  t2p = 0;
+  t   = 0;
+  t1p = t1p - predsales;
+  if (t1p<minlevel) then begin
+    t2p = minlevel - t1p;
+  end;
+  
+  res = true;
+  if (PIp.ItemCode=="") then begin
+    res = false;
+  end;
+  if (res) and (checkpif) then begin
+    if (t2p>0) then begin
+      t = t2p;
+      if (PIp.NormPOQty!=0) and (defic==false) then begin
+        if (PIp.NormPOQty>t2p) then begin
+          t2p = PIp.NormPOQty;
+        end;
+        if (POb.UseNormOrdMult!=0) then begin
+          t = t2p/PIp.NormPOQty;
+          t = t + 49999.00/100000.00;
+          t = Round(t,SetRoundModeD(0));
+          t2p = t*PIp.NormPOQty;
+        end;
+      end;
+      if (checkminpoqty) then begin
+        if (PIp.MinPOQty!=0) then begin
+          if (PIp.MinPOQty>t2p) then begin
+            t2p = PIp.MinPOQty;
+          end;
+        end;
+      end;
+    end;
+  end;
+//  FindFutureQuantity(RepSpec,INp.Code,t);//??
+  //t1p = t1p + t;
+  FindPOQantity = res;
+  return;
+end;
+
+//jpd-52; edz:
+function string 255 GetItemOut(record RecVc Recr)
+begin
+  string 255 res;
+  row RecVc Recrw;
+  integer i,rwcnt;
+  
+  res = "";
+  
+  rwcnt = MatROwCnt(Recr);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(Recr,i,Recrw);
+    if (Recrw.OutQty>0) then begin
+      res = Recrw.Item;
+    end;
+  end;
+  
+  GetItemOut = res;
+  return;
+end;
+
+function boolean INIsInSFandRec(record RcVc RepSpec,string incode,var vector boolean v_itemf,var vector val v_itemq,var vector val v_itemrecq,date startdate,date enddate)
+begin
+  boolean res,TrHs,TrHs2,testf,foundf;
+  record RecVc Recr;
+  row RecVc Recrw;
+  record INVc INr;
+  record SalesForecastVc SFr;
+  row SalesForecastVc SFrw;
+  integer i,j,rwcnt,rwcnt2;
+  string 255 itemout,ymonth;
+  date sdate,edate;
+  vector boolean v_sf,v_rf;
+  vector string 255 v_reccode;
+  
+  res = false;
+
+  sdate = startdate;
+  edate = enddate;
+  ymonth = "|" & GetYear(sdate) & "|" & GetMonth(sdate);
+
+  ResetLoop(Recr);
+  while (LoopMain(Recr,1,true)) begin
+    itemout = GetItemOut(Recr);
+    if (nonblank(itemout)) then begin
+      v_reccode[itemout] = Recr.Code;
+    end;
+  end;
+  
+  while (sdate<=edate) begin
+    TrHs2 = true;
+    SFr.StartDate = sdate;
+    ResetLoop(SFr);
+    while (LoopKey("StartDate",SFr,1,TrHs2)) begin
+      testf = true;
+      if (!DateInRange(sdate,SFr.StartDate,SFr.EndDate)) then begin
+        testf = false;
+      end;
+      if (v_sf[SFr.Code]) then begin
+        testf = false;
+      end;
+      if (TrHs2 and testf) then begin
+        if (SFr.RowType==1) then begin
+          rwcnt2 = MatRowCnt(SFr);
+          for (j=0;j<rwcnt2;j=j+1) begin
+            MatRowGet(SFr,j,SFrw);
+            if (nonblank(SFrw.ItemCode) and nonblank(v_reccode[SFrw.ItemCode])) then begin
+              Recr.Code = v_reccode[SFrw.ItemCode];
+              if (ReadFirstMain(Recr,1,true)) then begin
+                rwcnt = MatRowCnt(Recr);
+                foundf = false;
+                for (i=0;i<rwcnt;i=i+1) begin
+                  MatRowGet(Recr,i,Recrw);
+                  if (Recrw.Item==incode and Recrw.InQty>0) then begin
+                    v_itemf[incode & ymonth] = true;
+                    if (!foundf) then begin//if more than once in specification
+                      v_itemq[incode & ymonth] = v_itemq[incode & ymonth] + SFrw.Qty;
+                      foundf = true;
+                    end;
+                    if (!v_rf[Recr.Code] or RepSpec.flags[9]==1) then begin//if used in more than one sales forecast(disable for month view - one SF for one month)
+                      v_itemrecq[incode & ymonth] = v_itemrecq[incode & ymonth] + Recrw.InQty;
+                    end;
+                    res = true;
+                    j = rwcnt2;
+                    v_sf[SFr.Code] = true;
+                  end;
+                end;
+                v_rf[Recr.Code] = true;
+              end;
+            end;
+          end;
+        end;
+      end;
+    end;
+    sdate = AddMonth(sdate,1);
+    if (RepSpec.flags[9]==1) then begin
+      ymonth = "|" & GetYear(sdate) & "|" & GetMonth(sdate);
+    end;
+  end;
+  
+  INIsInSFandRec = res;
+  return;
+end;
+//:edz
+
+//jpd-52; edz:
+function string 255 ConvertValToString(val amount)
+begin 
+  string 255 tstr;
+  record SysFormatBlock SysFormatRec;
+  
+  BlockLoad(SysFormatRec);
+  tstr = ValToString(amount,M4Val,SysFormatRec.thousSep,SysFormatRec.decimalPt,1);
+  ConvertValToString = tstr;
+  return;
+end;
+//:edz
+
+procedure PrintData(Integer namepos,record RcVc RepSpec,string itemcode,record INVc INr,Boolean varf)
+begin
+  record PIVc PIr;
+  record ItemStatusVc ISr;
+  Boolean printf,pifound;
+  val t,t1,t2,minlevel;
+  //jpd-52; edz
+  vector boolean v_itemf;
+  vector val v_itemq,v_itemrecq;
+  integer pos,i;
+  val tval,dval;
+  boolean hassfrec;
+  date sdate,edate,tdate;
+  string 255 ymonth,outstr;
+  transaction integer start,interval;
+  record SalesForecastVc SFr;
+  record TenderVc Tenderr;
+  val tquant;
+  //:edz
+
+  //jpd-52; edz:
+  sdate = RepSpec.sStartDate;
+  edate = RepSpec.sEndDate;
+  while (GetDay(sdate)!=1) begin
+    sdate = AddDay(sdate,-1);
+  end;
+  i = 0;
+  //:edz
+  
+  pifound = FindPItem(INr.Code,RepSpec.FirstAcc,PIr,RepSpec.f2,RepSpec.flags[1]);
+  if (pifound==false) then begin
+    PIr.ItemCode = "";
+  end;
+  printf = true;
+  if (nonblank(RepSpec.AccStr)) then begin
+    if (pifound==false) then begin 
+      printf = false;
+    end else begin
+      if (PIr.SalesMan<>RepSpec.AccStr) then begin
+        printf = false;
+      end;
+    end;
+  end;
+  if (nonblank(RepSpec.Stext)) then begin
+    if (pifound==false) then begin 
+      printf = false;
+    end else begin
+      if (PIr.SalesGroup<>RepSpec.Stext) then begin
+        printf = false;
+      end;
+    end;
+  end;
+  pifound = FindPOQantity(INr,ISr,varf,RepSpec.FirstAcc,PIr,t1,t2,minlevel,0,true,RepSpec.flags[5]!=0,false);
+  if ((RepSpec.flags[3]==0) or (t1<>0)) then begin
+    if (RepSpec.flags[4]==1) then  begin
+      if (t2==0) then begin 
+        printf = false; 
+      end;
+    end;
+    if (printf) then begin
+      //jpd-52; edz:
+      pos = namepos;
+      hassfrec = INIsInSFandRec(RepSpec,INr.Code,v_itemf,v_itemq,v_itemrecq,sdate,edate);
+      //:edz
+      //jpd-52; edz:
+      if (RepSpec.flags[7]==0 and hassfrec) then begin
+        printf = false;
+      end;
+      if (RepSpec.flags[8]==0 and !hassfrec) then begin
+        printf = false;
+      end;
+      //:edz
+      if (printf) then begin
+        StartFormat(15);
+        OutString(0,"DblINVc",Left(INr.Code,8),false);
+        if (RepSpec.Media!=mtFile) and (RepSpec.Media!=mtExcel) and (RepSpec.Media!=mtClipboard) then begin
+          OutString(pos-5,0,Left(INr.Name,23),false);
+        end else begin
+          OutString(pos-5,0,INr.Name,false);
+        end;
+        //jpd-52; edz:
+        ymonth = "|" & GetYear(sdate) & "|" & GetMonth(sdate);
+        if (RepSpec.flags[9]==0) then begin
+          pos = 480 - 10*35;
+          OutString(pos,0,ConvertValToString(v_itemrecq[INr.Code & ymonth]),true);//Average materials per shop
+          pos = 480 - 9*35;
+          OutString(pos,0,ConvertValToString(INr.MinLevel),true);//Minimal Level
+          pos = 480 - 8*35;
+          OutString(pos,0,ConvertValToString(ISr.Instock),true);//In Stock
+          pos = 480 - 7*35;
+          OutString(pos,0,ConvertValToString(ISr.Instock/v_itemrecq[INr.Code & ymonth]),true);//Shops in stock
+          pos = 480 - 6*35;
+          OutString(pos,0,ConvertValToString(v_itemq[INr.Code & ymonth]),true);//On Sales Forecast
+          pos = 480 - 5*35;
+          OutString(pos,0,ConvertValToString(v_itemq[INr.Code & ymonth]*v_itemrecq[INr.Code & ymonth]),true);//Qty including Sales Forecast
+          pos = 480 - 4*35;
+          OutString(pos,0,ConvertValToString(ISr.Instock-v_itemq[INr.Code & ymonth]*v_itemrecq[INr.Code & ymonth]),true);//Net
+          pos = 480 - 3*35;
+          OutString(pos,0,ConvertValToString(ISr.POUnOKQty),true);//In Purchase Orders
+          //pos = 480 - 3*35;
+          //OutString(pos,0,ISr.Instock/v_itemrecq[INr.Code & ymonth]+ISr.POUnOKQty/v_itemrecq[INr.Code & ymonth],M40Val,true);//Shops in Stock including PO
+          tval = (ISr.Instock-v_itemq[INr.Code & ymonth]*v_itemrecq[INr.Code & ymonth])+ISr.POUnOKQty;//Calculated Purchase Order size
+          if (tval>0) then begin
+            tval = 0;
+          end;
+          if (tval<0) then begin//convert to positive
+            tval = tval - 2*tval;
+          end;
+          dval = tval;
+          if (PIr.MinPOQty>tval and tval!=0) then begin
+            dval = PIr.MinPOQty;
+          end;
+          if (!hassfrec) then begin//master functionality for Defncy column
+            dval = t2;
+          end;
+          if (dval==blankval) then begin
+            dval = 0;
+          end;
+          pos = 480 - 2*35;
+          OutString(pos,0,ConvertValToString(PIr.MinPOQty),true);//Defncy
+          pos = 480 - 1*35;
+          OutString(pos,0,ConvertValToString(tval),true);//Min Order Level
+          OutString(480,0,ConvertValToString(dval),true);//Calculated Purchase Order size
+        end else begin
+          i = 0;
+          OutString(pos+85,0,ConvertValToString(ISr.Instock),true);//In Stock
+          while (sdate<=edate) begin
+            ymonth = "|" & GetYear(sdate) & "|" & GetMonth(sdate);
+            //tval = (ISr.Instock-v_itemq[INr.Code & ymonth]*v_itemrecq[INr.Code & ymonth])-ISr.POUnOKQty;
+            tval = v_itemq[INr.Code & ymonth]*v_itemrecq[INr.Code & ymonth];
+            //if (PIr.MinPOQty>tval) then begin
+            //  tval = PIr.MinPOQty;
+            //end;
+            if (!hassfrec) then begin
+              tval = t2;
+            end;
+            if (tval==blankval) then begin
+              tval = 0;
+            end;
+            //if (!v_itemf[INr.Code & ymonth]) then begin
+            //  Tenderr.Code = "GREEN";
+            //end else begin
+            tquant = tquant + v_itemq[INr.Code & ymonth]*v_itemrecq[INr.Code & ymonth];
+            if (ISr.Instock>=tquant) then begin
+              Tenderr.Code = "GREEN";
+              outstr = UChr(10004);
+            end else begin
+              Tenderr.Code = "RED";
+              outstr = UChr(10006);
+            end;
+            //end;
+            OutString(start+i*interval-1,0,ConvertValToString(tval),true);
+            //if (RepSpec.Media==mtScreen) then begin
+            //  OutImage(start+i*interval,10,10,Tenderr);
+            //end else begin
+              OutString(start+i*interval+5,0,outstr,M4Str);
+            //end;
+            i = i + 1;
+            sdate = AddMonth(sdate,1);
+          end;
+        end;
+        //:edz
+        EndFormat;
+      end;
+    end;
+  end;
+  return;
+end;
+
+procedure ShowOneVarietyGroupDeficiency(string group,string itsz,record RcVc RepSpec,record INVc INr,string subsets,string mask)
+begin
+  record VARVc VARr;
+  Boolean found,testf;
+  Integer insz;
+  string 255 artcode,itemcode,itemname;
+
+  itemcode = INr.Code;
+  itemname = INr.Name;
+  if (itsz!=".") then begin
+    insz = StringToInt(itsz);
+  end;
+  found = true;
+  VARr.VARGCode = group;
+  while (LoopKey("VARGCode",VARr,1,found)) begin
+    if (VARr.VARGCode!=group) then begin
+      found = false;
+    end;
+    if (found) then begin
+      if (itsz!=".") then begin
+        artcode = itemcode & VARr.Code;
+      end else begin
+        artcode = itemcode & itsz & VARr.Code;
+      end;      
+      INr.Code = artcode;
+      INr.Name = itemname & ", " & VARr.Comment;
+      testf = true;
+      if (nonblank(subsets)) then begin
+        if (CheckVARSubsets(VARr,subsets,mask)==false) then begin
+          testf = false;
+        end;
+      end;    
+      if (testf) then begin
+        PrintData(40,RepSpec,itemcode,INr,true);
+      end;
+    end;
+  end;
+  return;
+end;
+
+procedure ShowTwoVarietiesGroupDeficiency(string group1,string group2,record RcVc RepSpec,record INVc INr,string subsets,string mask)
+begin
+  record VARVc VARr1;
+  Boolean found1,testf;
+  record VARVc VARr2;
+  Boolean found2;
+  record VARGVc VARGr;
+  Integer insz1,insz2;
+  string 255 artcode,artcode1,itemcode,itemname,itsz1,itsz2,subsettotest;
+
+  itemcode = INr.Code;
+  itemname = INr.Name;
+  found1 = true;
+  VARr1.VARGCode = group1;
+  while (LoopKey("VARGCode",VARr1,1,found1)) begin
+    if (VARr1.VARGCode!=group1) then begin
+      found1 = false;
+    end;
+    if (found1) then begin
+      VARGr.Code = VARr1.VARGCode;
+      ReadFIrstMain(VARGr,1,true);
+      itsz1 = VARGr.VarSize;
+      if (itsz1!=".") then begin
+        insz1 = StringToInt(itsz1);
+      end;
+      if (itsz1!=".") then begin
+        artcode = itemcode & VARr1.Code;
+      end else begin
+        artcode = itemcode & itsz1 & VARr1.Code;
+      end;      
+      artcode1 = artcode;
+      testf = true;
+      if (nonblank(subsets)) then begin
+        if (CheckVARSubsets(VARr1,subsets,mask)==false) then begin
+          testf = false;
+        end;
+      end;
+      
+      if (testf) then begin
+        ResetLoop(VARr2);
+        found2 = true;
+        VARr2.VARGCode = group2;
+        while (LoopKey("VARGCode",VARr2,1,found2)) begin
+          if (VARr2.VARGCode!=group2) then begin
+            found2 = false;
+          end;
+          if (found2) then begin  
+            artcode = artcode1;
+            VARGr.Code = VARr2.VARGCode;
+            ReadFIrstMain(VARGr,1,true);
+            itsz2 = VARGr.VarSize;
+            if (itsz2!=".") then begin
+              insz2 = StringToInt(itsz2);
+            end;
+            if (itsz2!=".") then begin
+              artcode = artcode & VARr2.Code;
+            end else begin
+              artcode = artcode & itsz2 & VARr2.Code;
+            end;      
+            INr.Code = artcode;
+            INr.Name = itemname & ", "  & VARr1.Comment & ", " & VARr2.Comment;
+            testf = true;
+            if (nonblank(subsets)) then begin
+              if (CheckVARSubsets(VARr2,subsets,mask)==false) then begin
+                testf = false;
+              end;
+            end;
+            if (testf) then begin
+              PrintData(60,RepSpec,itemcode,INr,true);
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+  return;
+end;
+
+procedure ShowThreeVarietiesGroupDeficiency(string group1,string group2,string group3,record RcVc RepSpec,record INVc INr,string subsets,string mask)
+begin
+  record VARVc VARr1;
+  Boolean found1;
+  record VARVc VARr2;
+  Boolean found2;
+  record VARVc VARr3;
+  Boolean found3,testf;
+  record VARGVc VARGr;
+  Integer insz1,insz2,insz3;
+  string 255 artcode,artcode1,artcode2,itemcode,itemname,itsz1,itsz2,itsz3;
+  string 255 varname1,varname2,varname3;
+
+  itemcode = INr.Code;
+  itemname = INr.Name;
+  found1 = true;
+  VARr1.VARGCode = group1;
+  while (LoopKey("VARGCode",VARr1,1,found1)) begin
+    if (VARr1.VARGCode!=group1) then begin
+      found1 = false;
+    end;
+    if (found1) then begin
+      VARGr.Code = VARr1.VARGCode;
+      ReadFIrstMain(VARGr,1,true);
+      itsz1 = VARGr.VarSize;
+      if (itsz1!=".") then begin
+        insz1 = StringToInt(itsz1);
+      end;
+      if (itsz1!=".") then begin
+        artcode = itemcode & VARr1.Code;
+      end else begin
+        artcode = itemcode & itsz1 & VARr1.Code;
+      end;      
+      artcode1 = artcode;
+      testf = true;
+      if (nonblank(subsets)) then begin
+        if (CheckVARSubsets(VARr1,subsets,mask)==false) then begin
+          testf = false;
+        end;
+      end;
+      if (testf) then begin
+        ResetLoop(VARr2);
+        found2 = true;
+        VARr2.VARGCode = group2;
+        while (LoopKey("VARGCode",VARr2,1,found2)) begin
+          if (VARr2.VARGCode!=group2) then begin
+            found2 = false;
+          end;
+          if (found2) then begin  
+            artcode = artcode1;
+            VARGr.Code = VARr2.VARGCode;
+            ReadFIrstMain(VARGr,1,true);
+            itsz2 = VARGr.VarSize;
+            if (itsz2!=".") then begin
+              insz2 = StringToInt(itsz2);
+            end;
+            if (itsz2!=".") then begin
+              artcode = artcode & VARr2.Code;
+            end else begin
+              artcode = artcode & itsz2 & VARr2.Code;
+            end;      
+            artcode2 = artcode;
+
+            testf = true;
+            if (nonblank(subsets)) then begin
+              if (CheckVARSubsets(VARr2,subsets,mask)==false) then begin
+                testf = false;
+              end;
+            end;
+            if (testf) then begin
+              ResetLoop(VARr3);
+              found3 = true;
+              VARr3.VARGCode = group3;
+              while (LoopKey("VARGCode",VARr3,1,found3)) begin
+                if (VARr3.VARGCode!=group3) then begin
+                  found3 = false;
+                end;
+                if (found3) then begin
+                  artcode = artcode2;
+                  VARGr.Code = VARr3.VARGCode;
+                  ReadFIrstMain(VARGr,1,true);
+                  itsz2 = VARGr.VarSize;
+                  if (itsz2!=".") then begin
+                    insz2 = StringToInt(itsz2);
+                  end;
+                  if (itsz2!=".") then begin
+                    artcode = artcode & VARr3.Code;
+                  end else begin
+                    artcode = artcode & itsz2 & VARr3.Code;
+                  end;      
+                  INr.Code = artcode;
+                  INr.Name = itemname & ", "  & VARr1.Comment & ", " & VARr2.Comment & ", " & VARr3.Comment;
+                  testf = true;
+                  if (nonblank(subsets)) then begin
+                    if (CheckVARSubsets(VARr3,subsets,mask)==false) then begin
+                      testf = false;
+                    end;
+                  end;
+                  if (testf) then begin
+                    PrintData(100,RepSpec,itemcode,INr,true);
+                  end;
+                end;
+              end;
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+  return;
+end;
+
+procedure ShowVarietiesDeficiency(record RcVc RepSpec,record INVc INr)
+begin
+  string 255 itsz,mask,subsets,mskrep,xpos,ypos,zpos,tstr;
+  Integer nrofy,pos,i,cnt;
+  Array string 20 ac;
+
+  FindItemVAR(INr.Code,itsz,mask,mskrep,subsets);
+  cnt = 0;
+  pos = 0;
+  for (i=0;i<20;i=i+1) begin
+    ExtractObj(mask,pos,tstr);
+    if (nonblank(tstr)) then begin
+      ac[i] = tstr;
+      cnt = cnt + 1;
+    end else begin
+      i = 20;
+    end;
+  end;
+  if (cnt>0) then begin xpos = ac[0]; end;
+  if (cnt>1) then begin ypos = ac[1]; end;
+  if (cnt>2) then begin zpos = ac[2]; end;
+
+//Trace("mask " & mask," mskrep " & mskrep);
+
+  nrofy = FindYVars(ypos,subsets,mask);
+
+//Trace("xpos " & xpos," ypos " & ypos & " nrofy " & nrofy & " cnt " & cnt & " zpos " & zpos);
+  switch (cnt) begin
+    case 1: ShowOneVarietyGroupDeficiency(xpos,itsz,RepSpec,INr,subsets,mask);
+    case 2: ShowTwoVarietiesGroupDeficiency(xpos,ypos,RepSpec,INr,subsets,mask);
+    case 3: ShowThreeVarietiesGroupDeficiency(xpos,ypos,zpos,RepSpec,INr,subsets,mask);
+  end;
+
+  return;
+end;
+
+procedure PrintOneItemData(record RcVc RepSpec,record INVc INr,Boolean varf,var string lastgroup,var Boolean itemout)
+begin
+  record ITVc ITr;
+  string 255 namestr;
+    
+  if (GetItemNameStr(1,namestr,RepSpec.Stext,INr.Name,INr.Code)) then begin end;
+  if (RepSpec.flags[2]==1) then begin
+    if (lastgroup<>INr.Group) then begin
+      if (itemout==true) then begin
+        Gray_Divider(0,1);
+      end;
+      StartFormat(15);
+      OutString(20,0,INr.Group,false);
+      ITr.Code = INr.Group;
+      if (ReadFirstMain(ITr,1,true)) then begin
+        OutString(100,0,ITr.Comment,false);
+      end;
+      EndFormat;
+      Gray_Divider(0,1);
+      lastgroup = INr.Group;
+      itemout = true;
+    end;
+  end;
+  if (RepSpec.flags[6]!=0) and (varf) then begin
+    ShowVarietiesDeficiency(RepSpec,INr);
+  end else begin
+    PrintData(40,RepSpec,INr.Code,INr,varf);
+  end;
+  return;
+end;
+
+procedure TestItem(record RcVc RepSpec,record INVc INr,string fromart,string toart,string frcc,string tocc,string frdep,string todep,
+                   var Boolean testf,var Boolean TrHs)
+begin
+  testf = true;
+  if (nonblank(RepSpec.LastAcc)) then begin
+    if (INr.Department<frdep) then begin
+      testf = false;
+    end;
+    if (INr.Department>todep) then begin
+      testf = false;
+    end;
+  end;
+  if (INr.ItemType<>1) then begin testf = false; end;
+  if (RepSpec.flags[2]==0) then begin
+      if (TrHs) then begin
+        if (nonblank(tocc)) then begin
+          if (INr.Group>tocc) then begin
+            testf = false;
+          end;
+        end;
+      end;
+      if (TrHs) then begin
+        if (nonblank(frcc)) then begin
+          if (INr.Group<frcc) then begin
+            testf = false;
+          end;
+        end;
+      end;
+      if (TrHs) then begin
+        if (nonblank(toart)) then begin
+          if (INr.Code>toart) then begin
+            TrHs = false;
+          end;
+        end;
+      end;
+  end;
+  if (RepSpec.flags[2]==1) then begin
+      if (TrHs) then begin
+        if (nonblank(tocc)) then begin
+          if (INr.Group>tocc) then begin
+            TrHs = false;
+          end;
+        end;
+      end;
+      if (TrHs) then begin
+        if (nonblank(toart)) then begin
+          if (INr.Code>toart) then begin
+            testf = false;
+          end;
+        end;
+      end;
+      if (TrHs) then begin
+        if (nonblank(fromart)) then begin
+          if (INr.Code<fromart) then begin
+            testf = false;
+          end;
+        end;
+      end;
+  end;
+  if (RepSpec.flags[2]==2) then begin
+      if (TrHs) then begin
+        if (nonblank(tocc)) then begin
+          if (INr.Group>tocc) then begin
+            testf = false;
+          end;
+        end;
+      end;
+      if (TrHs) then begin
+        if (nonblank(frcc)) then begin
+          if (INr.Group<frcc) then begin
+            testf = false;
+          end;
+        end;
+      end;
+      if (TrHs) then begin
+        if (nonblank(toart)) then begin
+          if (INr.Code>toart) then begin
+            testf = false;
+          end;
+        end;
+      end;
+      if (TrHs) then begin
+        if (nonblank(fromart)) then begin
+          if (INr.Code<fromart) then begin
+            testf = false;
+          end;
+        end;
+      end;
+  end;
+  if (TrHs) then begin
+    if (INr.Terminated<>0) then begin
+      testf = false;
+    end;
+  end;
+  if (nonblank(RepSpec.f4)) then begin
+    if (SetInSet2(RepSpec.f4,INr.DispGroups)==false) then begin
+      testf = false;
+    end;
+  end;
+  if (nonblank(RepSpec.f5)) then begin
+    if (testf==true) then begin
+      testf = false;
+      ItemClassTypef(RepSpec.f5,INr.DispGroups,testf);
+    end;
+  end;
+  if (TrHs==false) then begin testf = false; end;
+  return;
+end;
+
+//jpd-52; edz:
+procedure CalcCols(integer monthc,var integer start,var integer interval)
+begin
+  integer mdiff;
+  
+  mdiff = 12-monthc;
+  if (mdiff>6) then begin
+    mdiff = 6;
+  end;
+  start = 150 + mdiff*20;
+  interval = 29 + mdiff;
+
+  return;
+end;
+
+global
+procedure SplitInMonths(date sdate,date edate,var array string a_sdate,var array date a_edate)
+begin
+  date tdate;
+  integer i;
+  boolean testf;
+
+  i = 0;
+  testf = true;
+  while (testf) begin
+    if (blankdate(tdate)) then begin
+      a_sdate[i] = sdate;
+    end else begin
+      a_sdate[i] = tdate;
+    end;
+    tdate = AddMonth(a_sdate[i],1);
+    a_sdate[i] = DateToString(a_sdate[i],"MM/YY");
+    if (tdate<edate) then begin
+      a_edate[i] = AddDay(tdate,-1);
+    end else begin
+      a_edate[i] = edate;
+      testf = false;
+    end;
+    i = i + 1;
+  end;
+
+  return;
+end;
+//:edz
+
+global
+procedure JPD_PurRn(record RcVc RepSpec)
+begin
+  record INVc INr;
+  record ITVc ITr;
+  record ItemStatusVc ISr;
+  String 255 tstr;
+  Integer rw;
+  Boolean pifound;
+  Boolean TrHs;
+  val t,t1,t2;
+  String 255 fromart,toart;
+  String 255 frcc,tocc;
+  String 255 lastgroup;
+  Boolean itemout;
+  Boolean testf,varf;
+  Boolean printf;
+  String 255 ckey;
+  Integer keys;
+  String 255 namestr;
+  String 20 frdep,todep;
+  val minlevel;
+  string 255 itsz,mask,subsets,mskrep;
+  //jpd-52; edz:
+  integer pos,i;
+  array date a_edate;
+  array string 255 a_sdate;
+  transaction integer start,interval;
+  //:edz
+
+  fromart = FirstInRange(RepSpec.f1,20);
+  toart =  LastInRange(RepSpec.f1,20);
+  frcc = FirstInRange(RepSpec.f3,5);
+  tocc = LastInRange(RepSpec.f3,5);
+
+  frdep = FirstInRange(RepSpec.LastAcc,10);
+  todep = LastInRange(RepSpec.LastAcc,10);
+
+  itemout = false;
+  lastgroup ="";
+  rw = 1;
+  StartReportJob("JPD - " & USetStr(2323));//Iztrðkstoäo pre‹u p‚rskats
+  HTArtSel(RepSpec.f1,RepSpec.f3,tstr);
+  Header(rw,tstr,1);
+  rw = rw + 1;
+  //jpd-52; edz:
+  HT2Per(RepSpec.sStartDate,RepSpec.sEndDate,tstr);
+  Header(rw,tstr,1);
+  rw = rw + 1;
+  //:edz
+  HTCustClass(RepSpec.f4,tstr);
+  if (nonblank(tstr)) then begin
+    Header(rw,tstr,1);
+    rw = rw + 1;
+  end; 
+  HTCustClassType(RepSpec.f5,tstr);
+  if (nonblank(tstr)) then begin
+    Header(rw,tstr,1);
+    rw = rw + 1;
+  end;  
+  HTDetailLevel(RepSpec.ArtMode,tstr);
+  Header(rw,tstr,0);
+  HTSort1(RepSpec.flags[2],tstr);
+  Header(rw,tstr,1);
+  rw = rw + 1;
+  if (nonblank(RepSpec.FirstAcc)) then begin
+    HTLocations(RepSpec.FirstAcc,RepSpec.FirstAcc,tstr);
+    Header(rw,tstr,0);
+  end;
+  if (nonblank(RepSpec.LastAcc)) then begin
+    HTDepartments(frdep,todep,tstr);
+    Header(rw,tstr,0);
+  end;
+  if (RepSpec.flags[3]==1) then begin
+    tstr=USetStr(6651);
+    Header(rw,tstr,1);
+  end;
+  EndHeader;
+  SetRepCol(2,35);
+  //if (Left(BuildProductCode,8)!="Standard") then begin//VITO: EBST-2; commented
+    SetRepCol(7,190);
+    SetRepCol(3,235);
+    SetRepCol(4,290);
+    SetRepCol(5,330);
+    SetRepCol(6,380);
+    SetRepCol(8,430);
+  //end else begin
+  //  SetRepCol(7,235);
+  //  SetRepCol(3,300);
+  //  SetRepCol(4,360);
+  //  SetRepCol(6,420);
+  //end;
+  //jpd-52; edz:
+  if (RepSpec.flags[7]==0 and RepSpec.flags[8]==0) then begin
+    StartFormat(15);
+    OutString(0,0,USetStr(-100023),false);//Nepiecieäams nor‚d´t artikulus, kurus r‚d´t
+    EndFormat;
+    goto L99;
+  end;
+  if (RepSpec.flags[9]!=0) then begin
+    SplitInMonths(RepSpec.sStartDate,RepSpec.sEndDate,a_sdate,a_edate);
+    if (GetDay(RepSpec.sStartDate)!=1 or GetDay(AddDay(RepSpec.sEndDate,1))!=1) then begin
+      StartFormat(15);
+      OutString(0,0,USetStr(-100021),false);//J‚nor‚da pilns m•nesis
+      EndFormat;
+      goto L99;
+    end else begin
+      if (a_sdate.length>12) then begin
+        StartFormat(15);
+        OutString(0,0,USetStr(-100022),false);//Periods nedr´kst p‚rsniegt 12 m•neäus
+        EndFormat;
+        goto L99;
+      end;
+    end;
+    CalcCols(a_sdate.length,start,interval);
+  end;
+  //:edz
+  
+  StartFormat(15);
+  OutString(0,0,USetStr(2325),false);//Artikuls
+  OutString(2,0,USetStr(-100024),false);//jpd-52; edz  //Description
+  //if (Left(BuildProductCode,8)=="Standard") then begin//VITO: EBST-2; commented
+    //jpd-52; edz:
+    if (RepSpec.flags[9]!=1) then begin
+      pos = 480 - 10*35;
+      OutString(pos,0,USetStr(-100009),true);//Average
+      pos = 480 - 9*35;
+      OutString(pos,0,USetStr(-100010),true);//Min. Q.
+      pos = 480 - 8*35;
+      OutString(pos,0,USetStr(-100011),true);//Stock
+      pos = 480 - 7*35;
+      OutString(pos,0,USetStr(-100012),true);//'=Shops
+      pos = 480 - 6*35;
+      OutString(pos,0,USetStr(-100013),true);//Forecast
+      pos = 480 - 5*35;
+      OutString(pos,0,USetStr(-100014),true);//Forecast
+      pos = 480 - 4*35;
+      OutString(pos,0,USetStr(-100015),true);//Net
+      pos = 480 - 3*35;
+      OutString(pos,0,USetStr(-100016),true);//Open
+      //pos = 480 - 3*35;
+      //OutString(pos,0,USetStr(-100017),true);//Shops incl. PO
+      pos = 480 - 2*35;
+      OutString(pos,0,USetStr(-100018),true);//PO
+      pos = 480 - 1*35;
+      OutString(pos,0,USetStr(-100020),true);//Deficiency
+      OutString(480,0,USetStr(-100019),true);//New
+      EndFormat;
+      
+      //VITO: EBST-5; some changes
+      StartFormat(15);
+      OutString(0,0,"",true);
+      OutString(2,0,"",true);
+      pos = 480 - 10*35;
+      OutString(pos,0,USetStr(-100025),true);///Shop
+      pos = 480 - 9*35;
+      OutString(pos,0,"",true);
+      pos = 480 - 8*35;
+      OutString(pos,0,"",true);
+      pos = 480 - 7*35;
+      OutString(pos,0,"",true);
+      pos = 480 - 6*35;
+      OutString(pos,0,USetStr(-100026),true);//(Shops)
+      pos = 480 - 5*35;
+      OutString(pos,0,USetStr(-100027),true);//(Matr.)
+      pos = 480 - 4*35;
+      OutString(pos,0,USetStr(-100027),true);//(Matr.)
+      pos = 480 - 3*35;
+      OutString(pos,0,USetStr(-100028),true);//PO
+      pos = 480 - 2*35;
+      OutString(pos,0,USetStr(-100029),true);//Min Q
+      pos = 480 - 1*35;
+      OutString(pos,0,USetStr(-100028),true);//PO
+      OutString(480,0,USetStr(-100028),true);//PO
+      EndFormat;
+      //:VITO
+    end else begin
+      OutString(125,0,USetStr(-100011),true);//Stock
+      for (i=0;i<a_sdate.length;i=i+1) begin
+        OutString(start+i*interval,0,a_sdate[i],true);
+        OutString(start+i*interval,0,"",true);
+      end;
+      EndFormat;
+    end;
+    //:edz
+  //end else begin
+  //  OutString(7,0,USetStr(5579),true);//Min atlikums
+  //  OutString(3,0,USetStr(2342),true);//Noliktav‚
+  //  if (HasModSO) then begin
+  //    OutString(4,0,USetStr(2343),true);//Kl.pasðt
+  //  end;
+  //  if (HasModPO) then begin
+  //    OutString(6,0,USetStr(2347),true);//Pasðt´ts
+  //  end;
+  //  OutString(1,0,USetStr(2341),true);//Iztrðkums
+  //  EndFormat;
+  //end;
+  Gray_Divider(0,1);
+  
+  if (RepSpec.flags[2]==0) then begin
+    INr.Code = fromart;
+    ckey = "Code";
+    keys = 1;
+  end;
+  if (RepSpec.flags[2]==1) then begin
+    INr.Group = frcc;
+    INr.Code = fromart;
+    ckey = "Group";
+    keys = 2;
+  end;
+  if (RepSpec.flags[2]==2) then begin
+    INr.Name = "";
+    ckey = "Name";
+    keys = 1;
+  end;
+  TrHs = true;
+  if (RepSpec.flags[6]==0) then begin
+    if (FindItemVAR2(fromart,itsz,mask,subsets)) then begin
+      if (ReadFirstItem(fromart,INr,true,false)) then begin
+        TrHs = true;
+        TestItem(RepSpec,INr,fromart,toart,frcc,tocc,frdep,todep,testf,TrHs);
+        if (testf) then begin
+          INr.Code = fromart;
+          PrintOneItemData(RepSpec,INr,true,lastgroup,itemout);
+          TrHs = false;
+        end;
+      end;
+    end;
+  end;
+  if (TrHs) then begin
+    while (LoopKey(ckey,INr,keys,TrHs)) begin
+      TestItem(RepSpec,INr,fromart,toart,frcc,tocc,frdep,todep,testf,TrHs);
+      if (testf) then begin
+        varf = FindItemVAR(INr.Code,itsz,mask,mskrep,subsets);
+        PrintOneItemData(RepSpec,INr,varf,lastgroup,itemout);
+      end;
+    end;
+  end;
+L99:;
+  EndJob;
+  return;
+end;

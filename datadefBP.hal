@@ -1,0 +1,271 @@
+// ui
+SourceFile("halcust/FIDAVISTA",3);
+SourceFile("halcust/FIDAVISTA/English",3);
+SourceFile("halcust/FIDAVISTA/Estonian",3);
+SourceFile("halcust/FIDAVISTA/Exports",3);
+SourceFile("halcust/FIDAVISTA/Imports",3);
+SourceFile("halcust/FIDAVISTA/Latvian",3);
+SourceFile("halcust/FIDAVISTA/Lithuanian",3);
+SourceFile("halcust/FIDAVISTA/Reports",3);
+SourceFile("halcust/FIDAVISTA/Tools",3);
+SourceFile("halcust/FIDAVISTA/WActions",3);
+SourceFile("halcust/FIDAVISTA/Maintenances",3);
+SourceFile("halcust/FIDAVISTA/RActions",3);
+
+// datadef
+begin
+
+  RecordBegin(FidaVistaVc,-,"");
+  RecordField(BankRef,M4Code,60,0);
+  RecordField(TypeCode,M4Str,5,0);
+  RecordField(TypeName,M4Str,100,0);
+  RecordField(RegDate,M4Date,0,0);
+  RecordField(BookDate,M4Date,0,0);
+  RecordField(ValueDate,M4Date,0,0);
+  RecordField(ExtId,M4Str,10,0);
+  RecordField(BenExtId,M4Str,5,0);
+  RecordField(DocNo,M4Str,60,0);
+  RecordField(CorD,M4Str,5,0);
+  RecordField(AccAmt,M4Val,0,0);
+  RecordField(FeeAmt,M4Val,0,0);
+  RecordField(PmtInfo,M4Str,200,0);
+  RecordField(CPSAccNo,M4Str,60,0);
+  RecordField(CPSSubAccNo,M4Str,60,0);
+  RecordField(CPSAHName,M4Str,200,0);
+  RecordField(CPSAHLegalId,M4Str,20,0);
+  RecordField(CPSAHAddress,M4Str,70,0);
+  RecordField(CPSAHExtension,M4Str,255,0);
+  RecordField(CPSBankCode,M4Str,20,0);
+  RecordField(CPSBankName,M4Str,200,0);
+  RecordField(CPSCcy,M4Str,5,0);
+  RecordField(CPSAmt,M4Val,0,0);
+  RecordField(CPSCurRate,M4Val,0,0);
+  RecordField(CPSGiro,M4Str,5,0);
+  RecordField(CPSExtension,M4Str,255,0);
+  RecordField(Extension,M4Str,255,0);
+  RecordField(ImportDate,M4Date,0,0);
+  RecordField(ImportTime,M4Time,0,0);
+  RecordField(ImportUser,M4Code,10,UserVc);
+  RecordField(ImportStatus,M4Int,0,0);
+  RecordField(Math,M4Matrix,0,0);
+  RecordField(CUCode,M4Code,20,CUVc);
+  RecordField(DoneFlag,M4Mark,0,0);
+  RecordField(Ccy,M4Str,5,0);
+  RecordField(FileName,M4Str,20,0);
+  RecordField(TransNr,M4Long,0,0);
+  RecordField(md5hash,M4Str,32,0);
+  RecordField(OurAccNo,M4Str,60,0);
+  RecordField(ImpFormat,M4Str,60,0); // RGS: FV-213
+  
+  ArrayBegin(Math,-,1);
+  ArrayField(LogDate,M4Date,0,0);
+  ArrayField(LogTime,M4Time,0,0);
+  ArrayField(LogMessage,M4Str,200,0);
+  EndArray;
+  
+  MainKeyBegin(md5hash,0);
+  KeySegment(md5hash);
+  
+  KeyBegin(BankRef);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(CorD);
+  KeySegment(CorD);
+  KeySegment(RegDate);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(RegDate);
+  KeySegment(RegDate);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(CPSAHLegalId);
+  KeySegment(CPSAHLegalId);
+  KeySegment(RegDate);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(md5hash);
+  
+  KeyBegin(CPSBankCode);
+  KeySegment(CPSBankCode);
+  KeySegment(RegDate);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(TypeCodeLegalId);
+  KeySegment(TypeCode);
+  KeySegment(CPSAHLegalId);
+  KeySegment(RegDate);
+  KeySegment(BankRef);
+  KeySegment(md5hash);
+  
+  KeyBegin(TypeCodeDate);
+  KeySegment(TypeCode);
+  KeySegment(RegDate);
+  KeySegment(BankRef);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(CPSCcy); // -- //
+  KeySegment(CPSCcy);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CorD);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(CUCode); // -- //
+  KeySegment(CUCode);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CorD);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(BookDate); // -- //
+  KeySegment(BookDate);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CorD);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(CPSAHName); // -- //
+  KeySegment(CPSAHName);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CorD);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(ImportDate); // -- //
+  KeySegment(ImportDate);
+  KeySegment(ImportTime);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(FileName);
+  KeySegment(FileName);
+  KeySegment(TransNr);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  
+  KeyBegin(DoneFlag);
+  KeySegment(DoneFlag);
+  KeySegment(BankRef);
+  KeySegment(TypeCode);
+  KeySegment(CPSAHLegalId);
+  KeySegment(md5hash);
+  EndRecord;
+  
+  BlockBegin(FidaVistaPatBlock,-,"");
+  //BlockInServer;//edz@07.12.10; FV-17
+  //BlockForAllCompanies;
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(Pattern,M4Str,80,0);
+  ArrayField(Type,M4Set,790,0);
+  ArrayField(Comment,M4Str,100,0);
+  EndArray;
+  EndBlock;
+  
+  BlockBegin(FidaVistaParamsBlock,-,"");
+  //BlockInServer;//edz@07.12.10; FV-17
+  //BlockForAllCompanies;
+  RecordField(ImportFolder,M4Str,80,0);
+  RecordField(AfterFolder,M4Str,80,0);
+  RecordField(ExportFolder,M4Str,80,0);
+  RecordField(OKIPFlag,M4Int,0,0);
+  RecordField(Encoding,M4Str,10,0);
+  RecordField(ImpSales,M4Int,0,0);
+  RecordField(ImpPurch,M4Int,0,0);
+  RecordField(ImpTrans,M4Int,0,0);
+  RecordField(SalesPrepay,M4Int,0,0);
+  RecordField(PurchPrepay,M4Int,0,0);
+  RecordField(SalesSum4Match,M4Int,0,0);
+  RecordField(SalesDebtMatch,M4Int,0,0);
+  RecordField(AutorunReport,M4Int,0,0);
+  RecordField(SalesPayOld,M4Int,0,0);//FV-14; edz
+  RecordField(AllowCcyMismatch,M4Int,0,0);
+  RecordField(PurchSum4Match,M4Int,0,0);//FV-4; edz:
+  RecordField(PurchDebtMatch,M4Int,0,0);
+  RecordField(PurchPayOld,M4Int,0,0);
+  RecordField(OKOPFlag,M4Int,0,0);//:edz
+  RecordField(NoVATNr,M4Int,0,0);//fv-29; edz
+  RecordField(NoBankAcc,M4Int,0,0);//fv-29; edz
+  RecordField(OpenCU,M4Int,0,0);//fv-16; edz
+  RecordField(AttachExisting,M4Int,0,0);//fv-31; edz
+  RecordField(ExpComment,M4Int,0,0);//fv-42; edz
+  RecordField(ExpDate,M4Int,0,0);//fv-42; edz
+  RecordField(ImpPP,M4Int,0,0);//fv-53; edz
+  RecordField(DisallowDuplicateBankRef,M4Int,0,0);//fkc-15; edz
+  RecordField(DisallowOlder,M4Date,0,0);//fv-58; edz
+  RecordField(ExpCountry,M4Int,0,0);//fv-114; edz
+  RecordField(MatchSumNoAccNoRegNr,M4Int,0,0);//fv-117; edz
+  RecordField(NoPrepayIfFoundVIVc,M4Int,0,0);//fv-122; edz
+  RecordField(UseTaxCodeAsCur,M4Int,0,0);
+  RecordField(TH5Flag,M4Int,0,0);
+  RecordField(OKPPFlag,M4Int,0,0);//fv-141; edz
+  RecordField(UpdateIV,M4Int,0,0);//alk-199; edz
+  RecordField(SLIgnorePrepayVAT,M4Int,0,0);//fv-155; edz
+  RecordField(PLIgnorePrepayVAT,M4Int,0,0);//fv-155; edz
+  RecordField(AddPMObjectToTR,M4Int,0,0);//opt-82; edz
+  RecordField(StripQuotes,M4Int,0,0);//fv-173; edz
+  RecordField(ImpPPSales,M4Int,0,0);//kame-142; edz
+  RecordField(ExportAMK,M4Int,0,0);//latg-72; edz
+  RecordField(ImpCountry,M4Int,0,0);//fv-178; edz
+  RecordField(FindOP,M4Int,0,0);//RGS: FV-207
+  RecordField(BankFee,M4Int,0,0);//FV-212 GLS
+  RecordField(ExpType,M4Int,0,0);//FV-212 GLS
+  EndBlock;
+
+  BlockBegin(FidaVistaAccBlock,-,"");
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(BankAcc,M4Str,40,0);
+  ArrayField(Pattern,M4Str,50,0);
+  ArrayField(Acc,M4Str,20,0);
+  ArrayField(Objects,M4UStr,60,0);
+  ArrayField(Comment,M4Str,100,0);
+  ArrayField(Type,M4Set,791,0);//fv-53; edz
+  ArrayField(User,M4Code,10,UserVc);//fv-53; edz
+  ArrayField(TypeNamePattern,M4Str,100,0);//fv-148; edz
+  EndArray;
+  EndBlock;
+  
+  //fv-157; edz:
+  BlockBegin(FidaVistaCommBlock,-,"");
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(POSPattern,M4Str,80,0);
+  ArrayField(CommPattern,M4Str,80,0);
+  ArrayField(Comment,M4Str,100,0);
+  EndArray;
+  EndBlock;
+  //:edz
+  
+  //fv-167; edz:
+  BlockBegin(FidaVistaTRBlock,-,"");
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(Cust,M4Code,20,CUVc);
+  EndArray;
+  EndBlock;
+  //:edz
+
+  return;
+end;

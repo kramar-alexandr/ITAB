@@ -1,0 +1,515 @@
+// ui
+//c81160120
+external inner function string 255 GetCurrentStoreName();
+external inner function Boolean CompaniesInClientMode();
+external inner function Boolean ProductInDemoMode();
+remote inner function string 255 GetCompanyShortCode(string);
+external inner function Boolean AnyModuleAvailable();
+external inner function Boolean IsCloudControllerClient();
+external inner function Boolean AcceptanceStatusColumnTest(string);
+external inner function Integer FlipCharCode(Integer,Integer);
+external inner procedure RateField(real,real,real,string,integer,string,boolean,real,real,string,boolean);
+external inner function boolean AddBicToMasterWindow(integer,var real,var real,real,real,real,real);
+external inner function Boolean IsIntEnabActive(var string,var string,var Boolean,var string);
+external inner function Boolean TouchScreenLookVertical();
+external inner procedure SysEClass_Tool(Integer,var real,var real);
+external inner procedure GTransEClass_Tool(Integer,var real,var real);
+external inner procedure GTrans2EClass_Tool(Integer,var real,var real,var real);
+external inner procedure GBaseEClass_Tool(Integer,var real,var real);
+external inner procedure TransGenVClass_Tool(Integer,var real,var real);
+external inner procedure GetCurUser(var record UserVc);
+external inner procedure JobRClass_LAT();
+external inner function string 60 UserDefined(string,string);
+external outer function string 255 MasterBannerURL();
+external inner procedure ItemStatusUserSettings(string,var Boolean,var Boolean,var Boolean,var Boolean,var Boolean,var Boolean,var Boolean,var Boolean,var Boolean,var Boolean,var Boolean,var Boolean,var Boolean,var Boolean);
+external inner function Boolean AllowedInCountry(integer);
+external inner function Integer ResourceWindowResourceType();
+external inner function Boolean ResPlan_Rental();
+external inner function Boolean ResPlan_ProdOperations();
+remote inner function Boolean ReadPOSButtons(string,string,longint,var string,var string,var string,var record POSButtonsVc,var Integer);
+external inner function Boolean TouchScreenLook();
+external inner procedure ExtractObj(string,var Integer,var string);
+external inner function Boolean IsSessionOpen(string,string,Date,Time);
+external inner procedure CntNPTSPaymentCurrencies(var Array string,var Array string,var Array Integer,var Array string,var Integer);
+remote inner procedure CntPOSCurrencies(var Array string,var Array Boolean,var Integer);
+external inner function Boolean CheckOffLineRecords(Boolean);
+external inner function string 60 TileUserDefined(string,Integer,var Integer);
+external inner function Boolean CUVATNrColumn;
+external inner function Integer GetInternetEnablerCountry();
+external inner function Integer CntVarietyCode(Integer,var Array string);
+external inner function Boolean UseTaxTemplatesforTaxCalc();
+remote inner procedure TablesViewWClassDo(record LocalMachineBlock,string,Array string,Array string,Array string,Array string,Array Integer,var Integer,var LongInt);
+external inner function string 20 GetMenuCode(string);
+external inner procedure DrawModifierButtons(var Integer);
+remote inner procedure ForkLiftQueueArray(string,string,var Array string,var Array string,var Array string,var Array string,var Array val,var Array Integer,var Array string,var Integer,Boolean,LongInt,LongInt,string);
+
+external inner function Boolean DisplayLoginButtons();
+external inner function Integer LoginShortcutsLines(Integer);
+external inner function Integer LoginShortcutsPos(Real,Integer);
+
+external inner procedure DefineTTRRowTypes(Integer);
+external inner function real ItemButtons(string,Integer);
+external inner procedure HWStoreWClassAddProducts(Integer);
+external inner function Boolean HasCharts();
+external inner function Boolean HasNewRegistration();
+external inner function Boolean ActivityIsForAcceptanceOrFYI(record ActVc,Boolean,Boolean);
+// TravelLog
+external inner function Integer LoginShortcuts();
+external inner function Boolean TestConfigurationEnabler(string);
+remote inner function Integer CustomerSalesPaymentTermType(string);
+// POS Standalone
+external inner function Boolean DefCustCodeSetup();
+
+external inner function Boolean HasInAppsAvailable();
+external inner function Integer CountCountries();
+
+// Language functions ENG
+external inner function Boolean DisplayLoginKeyPad_ENG();
+external inner function string 255 VATZoneEditFieldLabelENG(Integer);
+external inner function real VATZoneButtonsLabelsENG(real,real,real,real);
+external inner procedure LoginButtons2_ENG(Real,Real);
+external inner procedure FORMDEF_ENG();
+external inner function string 255 DemoMsgWClassTitle_ENG(Boolean,Boolean);
+external inner procedure TBEClassDef_ENG();
+external inner function string 255 VATZoneNameENG();
+external inner procedure TSERW_ENG();
+external inner procedure TSERWNT_ENG();
+external inner procedure TSERWTouch_ENG();
+external inner procedure TSERWTEST_ENG();
+external inner procedure INVFORM_ENG(Boolean);
+external inner procedure DisplayRecordDetails_ENG(LongInt,LongInt,string,date,time,string,string,string,string,string,string,string,string,string,string,string,Integer,string,string,string,val,string,Boolean,string,string);
+external inner procedure DrawPOSInterface_ENG(string,string,record POSButtonsVc,Integer,string,Integer);
+external inner procedure DisplayRecordDetailsCustDisplay_ENG(LongInt,LongInt,string,date,time,string,string,string,string,string,string,Integer,string,string,string,val);
+external inner function string 255 ResDayWClassWindowTitle_ENG();
+external inner function string 255 ResMonWClassWindowTitle_ENG();
+external inner function string 255 RTMonWClassWindowTitle_ENG();
+external inner procedure SetupNightAuditWindowControls_ENG(Boolean);
+external inner procedure CURClassDefinitionENG();
+external inner function real DrawPaymentModesButtons_IV_ENG(real);
+external inner function real FunctionButtons_ENG(string);
+external inner procedure CreditCardWindowHeader_ENG(Boolean,Boolean,Real);
+external inner procedure CreditCardWindowButtons_ENG(string,string,real);
+external inner procedure CreditCardWindowInvoiceDetail_ENG(Real);
+external inner procedure CreditCardWindowDeliveryDetail_ENG(Real);
+external inner function real DrawPaymentModesButtons_ENG();
+external inner procedure DrawBarMenuTiles_ENG(string);
+external inner procedure DrawRestPMOtherPay_ENG();
+external inner procedure DisplayRecordDetailsRA_ENG(LongInt,LongInt,string,date,time,string,string,string,string,string,string,Integer,string,LongInt,Date,string,LongInt,string);
+external inner procedure DrawModifierButtons2_ENG(var integer,var integer);
+external inner procedure OKCancel_ENG();
+external inner procedure DefineElearningURLCacheLClass_ENG();
+external inner procedure DefineElearningURLCacheDClass_ENG();
+external inner function real TravelLogDeductions_ENG(real,real);
+external inner procedure LoginButtons_ENG(Real);
+external inner procedure FORMDEF2_ENG();
+external inner procedure FORMDEF3_ENG();
+external inner procedure ARS2RClass_ENG();
+external inner procedure ALLVATRClass_ENG();
+
+
+// Language functions LAT
+external inner function Boolean DisplayLoginKeyPad_LAT();
+external inner function string 255 VATZoneEditFieldLabelLAT(Integer);
+external inner function real VATZoneButtonsLabelsLAT(real,real,real,real);
+external inner procedure LoginButtons2_LAT(Real,Real);
+external inner procedure FORMDEF_LAT();
+external inner function string 255 DemoMsgWClassTitle_LAT(Boolean,Boolean);
+external inner procedure TBEClassDef_LAT();
+external inner function string 255 VATZoneNameLAT();
+external inner procedure TSERW_LAT();
+external inner procedure TSERWNT_LAT();
+external inner procedure TSERWTouch_LAT();
+external inner procedure TSERWTEST_LAT();
+external inner procedure INVFORM_LAT(Boolean);
+external inner procedure DisplayRecordDetails_LAT(LongInt,LongInt,string,date,time,string,string,string,string,string,string,string,string,string,string,string,Integer,string,string,string,val,string,Boolean,string,string);
+external inner procedure DrawPOSInterface_LAT(string,string,record POSButtonsVc,Integer,string,Integer);
+external inner procedure DisplayRecordDetailsCustDisplay_LAT(LongInt,LongInt,string,date,time,string,string,string,string,string,string,Integer,string,string,string,val);
+external inner function string 255 ResDayWClassWindowTitle_LAT();
+external inner function string 255 ResMonWClassWindowTitle_LAT();
+external inner function string 255 RTMonWClassWindowTitle_LAT();
+external inner procedure SetupNightAuditWindowControls_LAT(Boolean);
+external inner procedure CURClassDefinitionLAT();
+external inner function real DrawPaymentModesButtons_IV_LAT(real);
+external inner function real FunctionButtons_LAT(string);
+external inner procedure CreditCardWindowHeader_LAT(Boolean,Boolean,Real);
+external inner procedure CreditCardWindowButtons_LAT(string,string,real);
+external inner procedure CreditCardWindowInvoiceDetail_LAT(Real);
+external inner procedure CreditCardWindowDeliveryDetail_LAT(Real);
+external inner function real DrawPaymentModesButtons_LAT();
+external inner procedure DrawBarMenuTiles_LAT(string);
+external inner procedure DrawRestPMOtherPay_LAT();
+external inner procedure DisplayRecordDetailsRA_LAT(LongInt,LongInt,string,date,time,string,string,string,string,string,string,Integer,string,LongInt,Date,string,LongInt,string);
+external inner procedure DrawModifierButtons2_LAT(var integer,var integer);
+external inner procedure OKCancel_LAT();
+external inner procedure DefineElearningURLCacheLClass_LAT();
+external inner procedure DefineElearningURLCacheDClass_LAT();
+external inner function real TravelLogDeductions_LAT(real,real);
+external inner procedure LoginButtons_LAT(Real);
+external inner procedure FORMDEF2_LAT();
+external inner procedure FORMDEF3_LAT();
+external inner procedure ARS2RClass_LAT();
+external inner procedure ALLVATRClass_LAT();
+
+
+external inner function Boolean IsStandardUnused();
+external inner function Boolean IsEnterprise();
+external inner function Boolean StandardHansa();
+external inner function Boolean HasATOL();
+
+external inner function Boolean HasAccPeriods();
+external inner function Boolean HasAccessGroups();
+external inner function Boolean HasAddFee();
+external inner function Boolean HasApprovals();
+external inner function Boolean HasCCPayments();
+external inner function Boolean HasAdvancedAccounting();
+external inner function Boolean HasAdvancedCRM();
+external inner function Boolean HasAdvancedPricing();
+external inner function Boolean HasAdvancedProduction();
+external inner function Boolean HasAdvancedStock();
+external inner function Boolean HasAged();
+external inner function Boolean HasBar();
+external inner function Boolean HasBase2();
+external inner function Boolean HasBranch();
+external inner function Boolean HasBuyBack();
+external inner function Boolean HasCategories();
+//external inner function Boolean HasConsigmentStock();
+external inner function Boolean HasCommunicator();
+external inner function Boolean HasConsignmentStock();
+external inner function Boolean HasContactClassification();
+external inner function Boolean HasContactRelations();
+external inner function Boolean HasConsolidation();
+external inner function Boolean HasCountryPerCustomer();
+external inner function Boolean HasCreditLimit();
+external inner function Boolean HasCustItem();
+external inner function Boolean HasCustomerSearchKey();
+external inner function Boolean HasDownpayments();
+external inner function Boolean HasDefineColumns();
+external inner function Boolean HasDeliveryAddress();
+external inner function Boolean HasDepartments();
+external inner function Boolean HasETaxDocuments();
+external inner function Boolean HasEInvoicing();
+external inner function Boolean HasEndorsedChecks();
+external inner function Boolean HasExtraNLComment();
+external inner function Boolean HasExtTax();
+external inner function Boolean HasFavouriteActTypes();
+external inner function Boolean HasFiscalPrinter();
+external inner function Boolean HasFormEditor();
+external inner function Boolean HasFreightAdvanced();
+external inner function Boolean HasHideCostPrice();
+external inner function Boolean HasHotelInterface();
+external inner function Boolean HasGuestUserDefined();
+external inner function Boolean HasJewelleryInterface();
+external inner function Boolean HasIncomeAndExpenseBook();
+external inner function Boolean HasIOUChecks();
+external inner function Boolean HasItemClassification();
+external inner function Boolean HasItemGroups();
+external inner function Boolean HasKPIs();
+external inner function Boolean HasLanguages();
+external inner function Boolean HasLimitedAccess();
+external inner function Boolean HasLocalMachines();
+external inner function Boolean HasLoyaltyCards();
+external inner function Boolean HasMailTags();
+external inner function Boolean HasMainPartner();
+external inner function Boolean HasMultiCurrency();
+external inner function Boolean HasMultiLocations();
+external inner function Boolean HasNLBudget();
+external inner function Boolean HasNLBudgetClass();
+external inner function Boolean HasObjects();
+external inner function Boolean HasInvoiceOfficialSerNr();
+external inner function Boolean HasOfficialSerNr();
+external inner function Boolean HasOrderClasses();
+external inner function Boolean HasPreferedOfficialSerNr();
+external inner function Boolean HasNumberSeries();
+external inner function Boolean HasPersons();
+external inner function Boolean HasPocketScreen();
+external inner function Boolean HasPositions();
+external inner function Boolean HasPrepayments();
+external inner function Boolean HasProjects();
+external inner function Boolean HasPriceLists();
+external inner function Boolean HasQualityControl();
+external inner function Boolean HasReconLevel2();
+external inner function Boolean HasReminderLevel();
+external inner function Boolean HasRemoteBackup();
+external inner function Boolean HasResourceDisplayGroups();
+external inner function Boolean HasRussianPrepayment();
+external inner function Boolean HasRetGoodsToSupp();
+external inner function Boolean HasReturnedGoods();
+external inner function Boolean HasRoute();
+external inner function Boolean HasSalesman();
+external inner function Boolean HasSalesmanBonus();
+external inner function Boolean HasSalesGroup();
+external inner function Boolean HasSecondQuantity();
+external inner function Boolean HasSerialNumbers();
+external inner function Boolean HasServerInCloud();
+external inner function Boolean HasSettlementDiscount();
+external inner function Boolean HasSimulations();
+external inner function Boolean hasSimAccruals();
+external inner function Boolean HasSkypeConnection();
+external inner function Boolean HasSIPServerConnection();
+external inner function Boolean HasStrAsSignFType();
+external inner function Boolean HasTouchScreenDevice();
+external inner function Boolean HasTaxMatrix();
+external inner function Boolean HasTestFeatures();
+external inner function Boolean HasMetroTestFeatures();
+external inner function Boolean HasWorkOrders();
+external inner function Boolean HasThrouLocation();
+external inner function Boolean HasTouchScreenLook();
+external inner function Boolean HasTREO();
+external inner function Boolean HasVarieties();
+external inner function Boolean HasVATZone();
+external inner function Boolean HasWithholdingTax();
+external inner function Boolean HasWithholdingTaxAdvanced();
+external inner function Boolean HasWorkOrders();
+
+external inner function Boolean HasStandardCRM();
+external inner function Boolean HasStandardOrganizer();
+external inner function Boolean HasStandardCommunicator();
+
+external inner function Boolean HasEMail();
+external inner function Boolean HasExternalEMail();
+
+external inner function Boolean HasModAT2();
+external inner function Boolean HasModBA();
+external inner function Boolean HasModCheck();
+external inner function Boolean HasModCL();
+external inner function Boolean HasModCO();
+external inner function Boolean HasModCons();
+external inner function Boolean HasModCourses();
+external inner function Boolean HasModCredMan();
+external inner function Boolean HasModCRM();
+external inner function Boolean HasModEDI();
+external inner function Boolean HasModExp();
+external inner function Boolean HasModHotel();
+external inner function Boolean HasModHRM();
+external inner function Boolean HasModIN();
+external inner function Boolean HasModIntStock();
+external inner function Boolean HasModNL();
+external inner function Boolean HasPaymentGateway();
+external inner function Boolean HasModPO();
+external inner function Boolean HasModPOS();
+external inner function Boolean HasModPL();
+external inner function Boolean HasModPOProg();
+external inner function Boolean HasModPP();
+external inner function Boolean HasModProd();
+external inner function Boolean HasModQT();
+external inner function Boolean HasModRent();
+external inner function Boolean HasModRest();
+external inner function Boolean HasModRsrt();
+external inner function Boolean HasModSO();
+external inner function Boolean HasModSL();
+external inner function Boolean HasModSVO();
+external inner function Boolean HasModTS();
+external inner function Boolean HasModWHM();
+external inner function Boolean HasModDI();
+external inner function Boolean UsePostOKButton();
+external inner function Boolean HasBankImport();
+
+//VITO: JPD-39
+window JPD_SettingsTClass:2
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h1,v,vs;
+  
+  WindowBegin("JPD - System settings",JPD_SettingsTClass,CGSbl,-);
+  SetBlid(JPD_SettingsBlock);
+  SetWRect(64,80,610,100);
+  Sizeable(-1,-1,0,0);  
+  Tile(0,20,false,"0",DefaultCU);
+  v = 12; vs = 20; h = 310; h1 = 473;
+  TileButton(1,"Sales orders/Quotations");
+  TileButton(2,"Stock");
+  Tile(1,150,false,"1",DefaultCU);
+  EditFieldTL(h,v,-20,"Default customer", M4Code,Normal,20,DefaultCU,false,CUSClass);
+  EditFieldTL(h,v+=vs,77,"Copy Sales Orders/Quotations from companies",M4UStr,Normal,100,CompCodeFrom,false,0);
+  EditFieldTL(h1,v,-20,"to company", M4UStr,Normal,100,CompCodeTo,false,0);
+  EditFieldTL(h,v+=vs,77,"Auto Activities company", M4UStr,Normal,100,CompForAutoAct,false,0);//VITO: EBST-9
+  EditFieldTL(h,v+=vs,77,"Project object type", M4UStr,Normal,5,ProjObjType,false,OTSClass);//VITO: SIAJPD-19
+  Tile(2,220,false,"2",DefaultCU);
+  EndWindow;  
+end;
+//:VITO
+
+//VITO: JPD-50
+window JPD_INNrLimitsTClass:2
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h1,v,vs;
+
+  WindowBegin("JPD - Items numbers limitation ranges",JPD_INNrLimitsTClass,CGHbl,HBlRecType); 
+  SetBlid(JPD_INNrLimitsBlock);
+  SetWRect(20,80,612,333);
+  Sizeable(-1,-1,0,0);
+  MatrixBegin(h,v,-31,-20,-,99);
+  MatCol(1,24,"Item Nr. from",0,ArtNrFrom,false,0);
+  MatCol(1,132,"to",0,ArtNrTo,false,0);
+  MatCol(1,244,"Denied in company",0,DeniedInComp,false,Companies2SClass);
+  MatCol(1,354,"Source company",0,CreateComp,false,Companies2SClass);
+  MatCol(1,464,"Copy to company",0,CopyToComp,false,Companies2SClass);
+  EndMatrix;
+  EndWindow;
+end;  
+//:VITO
+
+//jpd-52; edz:
+window JPD_PurRClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,vm,vs;
+  WindowBegin("JPD - Specify Deficiency List",JPD_PurRClass,CGRcW,RcType);
+  SetWRect(20,80,450,380);
+  v = 6; vs = 20; h = 140;
+  EditFieldTL(h,v, 150,"Item No.",M4UStr,Normal,50,f1,false,INSClass);
+  PeriodField(h,v+=vs,"Period");//jpd-52; edz
+  if (HasItemGroups) then begin
+    EditFieldTL(h,v+=vs, 150,"Group",M4UStr,Normal,11,f3,false,ITSClass);
+  end;
+  if (HasItemClassification) then begin
+    EditFieldTL(h,v+=vs, 150,"Item Classification", M4UStr,Normal,60,f4,false,DISClass);
+    EditFieldTL(h,v+=vs, 70,"Classification Type",M4UStr,Normal,60,f5,false,CTypeSClass);
+  end;
+  if (HasMultiLocations) then begin
+    EditFieldTL(h,v+=vs, 150,"Location",M4UStr,Normal,10,FirstAcc,false,LocationSClass);
+  end;
+  if (HasDepartments) then begin
+    if (StandardHansa==false) then begin
+      EditFieldTL(h,v+=vs, 150,"Department",M4UStr,Normal,10,LastAcc,false,DepSClass);
+    end;
+  end;
+  if (HasSalesman) then begin
+    EditFieldTL(h,v+=vs ,100,"#Salesman#",M4UStr,Normal,10,AccStr,false,UserSClass);
+    if (StandardHansa==false) then begin
+      EditFieldTL(h,v+=vs ,50,"Sales Group",M4UStr,Normal,10,Stext,false,SalesGroupSClass);
+    end;
+  end;
+  if (IsEnterprise) then begin
+    CheckBox(h,v+=30,0,"Check Normal Order Qty on Purchase Item",flags[5]);
+    CheckBox(h,v+=16,0,"Skip Items without Balance",flags[3]);
+    CheckBox(h,v+=16,0,"Skip Items without Deficiency",flags[4]);
+  end;
+  if (HasVarieties) then begin
+    CheckBox(h,v+=16,0,"Show Varieties",flags[6]);
+  end;
+  //jpd-52; edz:
+  ButtonFrame(h-80,vm=(v+=41),125,2,"Show");
+  CheckBox(h-80,v,0,"Items from forecasts",flags[7]);
+  CheckBox(h-80,v+=16,0,"Items w/o forecasts",flags[8]);
+  EndFrame;
+  ButtonFrame(h+80,v=v-16,125,2,"View");
+  RadioButton(h+80,v,0,0,"Default",flags[9]);
+  RadioButton(h+80,v=v+16,1,0,"Split by months",flags[9]);
+  EndFrame;
+  //:edz
+  ButtonFrame(h,vm=(v+=41),123,3,"Sorting");
+  RadioButton(h,v,0,0,"No.",flags[2]);
+  if (HasItemGroups) then begin
+    RadioButton(h,v+=16,1,0,"Group",flags[2]);
+  end;
+  RadioButton(h,v+=16,2,0,"N_ame",flags[2]);
+  EndFrame;
+  EndWindow;
+end;
+//:edz
+
+//RRA: JPD-57
+window JPD_ItemSalesRClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,vm,vs;
+  WindowBegin("JPD - Specify Item Sales Statistics",JPD_ItemSalesRClass,CGRcW,RcType);
+  SetWRect(20,80,400,300);
+  h = 130; vs = 20;
+  PeriodField(h,v=6,"Period");
+  EditFieldTL(h,v+=vs, 150,"Item Group",   M4UStr,Normal,5,f2,false,ITSClass);
+  if (HasItemClassification) then begin
+  EditFieldTL(h,v+=vs, 150,"Item Classification", M4UStr,Normal,60,f4,false,DISClass); 
+  end;
+  EndWindow;
+end;
+
+window JPD_CustSalesRClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,vm,vs;
+  WindowBegin("JPD - Specify Customer Sales Statistics",JPD_CustSalesRClass,CGRcW,RcType);
+  SetWRect(20,80,450,300);
+  h = 150; vs = 20;
+  PeriodField(h,v=6,"Period");
+  EditFieldTL(h,v+=vs, 150,"Customer Category",   M4UStr,Normal,5,f2,false,CCatSClass);  
+  if (HasContactClassification) then begin
+  EditFieldTL(h,v+=vs,150,"Classification",M4UStr,Normal,30,f4,false,CClassSClass);
+  end;
+  EndWindow;
+end;
+//:RRA
+
+//VITO: EBST-6
+window JPD_AutoTaskTClass:2
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h1,v,vs;
+
+  WindowBegin("JPD - Automatically Created Tasks",JPD_AutoTaskTClass,CGHbl,HBlRecType); 
+  SetBlid(JPD_AutoTaskBlock);
+  SetWRect(20,80,740,333);
+  Sizeable(-1,-1,0,0);
+  MatrixBegin(h,v,-31,-20,-,99);
+  MatCol(1,24,"Order Class",0,OrderClass,false,OrderClassSClass);
+  MatCol(1,144,"Activity type",0,ActType,false,ActTypeSClass);
+  MatCol(1,240,"Receiver",0,PersonType,false,SetSClass);//VITO: EBST-11; EBST-16
+  MatCol(1,360,"Person",0,Person,false,UserSClass);
+  MatCol(1,440,"Comment",0,Comment,false,0);
+  EndMatrix;
+  EndWindow;
+end;  
+//:VITO
+
+//VITO: EBST-10
+window JPD_AddClassToQTVClass:2
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h1,v,vs;
+  
+  WindowBegin("JPD - Insert class in Quotations",JPD_AddClassToQTVClass,CGMnt,RcType);
+  SetWRect(20,80,400,210);
+  EditFieldTL(150,20,150,"Class",M4Code,Normal,5,f1,false,QuoteClassSclass);
+  EndWindow;
+end;
+//:VITO
+
+window PFormDClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,vm,vs;
+  WindowBegin("Price Formula",PFormDClass,CGview,PFormView);
+  SetWRect(20,80,450,475);
+  UseView(PFormVc);
+  v = 10; vs = 20; h = 150;
+  EditField(h,v, 70,"Code",Normal,Code,false,0);
+  EditField(h,v+=vs ,200,"Description",Normal,Comment,false,0);
+  EditField(h,v+=vs ,55,"% Adjustment",Normal,Perc,true,0);
+  EditField(h,v+=vs ,55,"Add 1",Normal,Add1Val,true,0);
+  EditField(h,v+=vs ,80,"Round Off",Normal,RndTo,true,SetSClass);
+  EditField(h,v+=vs ,55,"Add 2",Normal,Add2Val,true,0);
+  if (IsEnterprise) then begin
+    ButtonFrame(h=100,vm=(v+=41),220,14,"Base Value");
+  end else begin
+    ButtonFrame(h=100,vm=(v+=41),220,2,"Base Value");
+  end;
+  RadioButton(h,v+=3,0,0,"Cost Price",SelBase);
+  RadioButton(h,v+=18,1,0,"Base Price",SelBase);
+  if (IsEnterprise) then begin
+    RadioButton(h,v+=18,2,0,"Last Purchase Price",SelBase);
+    RadioButton(h,v+=18,6,0,"Last Purchae Cost (incl. extras)",SelBase); //EBS
+    RadioButton(h,v+=18,3,0,"Weighted Average Purch. Price",SelBase);
+    RadioButton(h,v+=18,4,0,"Default Purchase Item",SelBase);
+    RadioButton(h,v+=18,5,0,"From Price List:",SelBase);
+    ButtonFrame(h+=23,(v+=25),h+65,6,"");
+    EditField(h+70,v+=3,110,"Price List",Normal,BasePriceList,false,PLDefSClass);
+    ButtonFrame(h+=10,(v+=38),h+35,3,"If Price Not Found In Price List");
+    RadioButton(h,v,0,0,"Don't Add Price",BasePriceListOption);
+    RadioButton(h,v+=16,1,0,"Add Price With Zero Value",BasePriceListOption);
+    RadioButton(h,v+=16,2,0,"Use Alt Price Formula",BasePriceListOption);
+    EditField(h+140,v,25,"",Normal,BasePriceListAltFormula,false,PFormSClass);
+  end;
+  EndWindow;
+end;

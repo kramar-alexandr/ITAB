@@ -1,0 +1,52 @@
+// ui
+SourceFile("halcust/VATDeclaration",3);
+SourceFile("halcust/VATDeclaration/Tools",3);
+SourceFile("halcust/VATDeclaration/Startup",3);
+SourceFile("halcust/VATDeclaration/WActions",3);
+
+begin
+
+  BlockBegin(VATDecl2010ABlock,-,"");
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(VATCode,M4Code,10,0);
+  ArrayField(Type,M4Set,666,0);
+  ArrayField(DealType,M4UStr,2,0);
+  ArrayField(Comment0,M4Str,255,0);
+  ArrayField(InclMinType,M4UStr,1,0);
+  ArrayField(MinSumOpt,M4Set,700,0); //MDS HERBE -1262
+  EndArray;
+  EndBlock;
+
+  BlockBegin(VATDecl2010BBlock,-,"");
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(VATCode,M4Code,10,0);
+  ArrayField(Type,M4Set,666,0);
+  ArrayField(DealType,M4UStr,2,0);
+  ArrayField(Comment0,M4Str,255,0);
+  EndArray;
+  EndBlock;
+
+  BlockBegin(VATDecl2010CBlock,-,"");
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(VATCode,M4Code,10,0);
+  ArrayField(Type,M4Set,10666,0);//CITR-258 GLS
+  ArrayField(DealType,M4Set,10667,0);//CITR-258 GLS
+  ArrayField(Comment0,M4Str,255,0);
+  ArrayField(InclMinType,M4UStr,1,0);
+  ArrayField(MinSumOpt,M4Set,10668,0);//MDS HERBE -1262//CITR-258 GLS
+  EndArray;
+  EndBlock;
+  
+  //VITO: EDS-12  
+  BlockBegin(VATDECL_SettsBlock,-,"");
+  RecordField(ExportFilesPath,M4Str,255,0);
+  RecordField(CLInFromTR,M4Int,0,0);//eds-27; edz
+  RecordField(TRRows,M4Int,0,0);//eds-27; edz
+  EndBlock;
+  //:VITO
+  
+  return;
+end;

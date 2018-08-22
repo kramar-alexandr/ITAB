@@ -1,0 +1,44 @@
+// ui
+//c81160120
+external function integer JPD_GetItemType(string);//VITO: JPD-42
+
+global
+function Boolean QTDClassActiveEditField(Integer wn,string fieldname,Integer fn,Integer wnst,Integer rownr,Integer changed)
+BEGIN
+  Boolean res;
+  record QTVc QTr;
+  row QTVc QTrw;
+  record INVc INr;
+  Integer nwn;
+  //VITO: JPD-42
+  integer itemtype;
+  
+  res = inner.QTDClassActiveEditField(wn,fieldname,fn,wnst,rownr,changed);
+  
+  if (res) then begin
+    if (fieldname == "Sum" and rownr > -1) then begin
+      res = false;
+    end;
+    if (fieldname == "rowGPprc") then begin
+      res = false;
+    end;
+    if (fieldname == "RowBasePriceCurncy") then begin
+      res = false;
+    end;  
+
+    if ((fieldname == "BasePrice" or fieldname == "BasePriceCurncy") and rownr > -1) then begin
+      // only allow for plain and service items
+      GetWindowRecord(wn,QTr);
+      MatRowGet(QTr,rownr,QTrw);
+      itemtype = JPD_GetItemType(QTrw.ArtCode);
+      if (itemtype == kItemTypeStructured or itemtype == kItemTypeStocked) then begin
+        res = false;
+      end;
+    end;
+  
+  end;
+  //:VITO
+   
+  QTDClassActiveEditField = res;
+  RETURN;
+END;

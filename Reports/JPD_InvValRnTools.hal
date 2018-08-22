@@ -1,0 +1,55 @@
+//c81160120
+//jpd-72; auth: edz
+procedure SetCols(record RcVc RepSpec,var array integer acols)
+begin
+  integer pos,width;
+
+  width = 70;
+  
+  if (RepSpec.flags[3]!=0) then begin
+    width = 50;
+  end;
+  
+  acols[acols.length] = 0;
+  pos = pos + 80;
+  acols[acols.length] = pos;
+  pos = pos + 200;
+  acols[acols.length] = pos;
+  pos = pos + width;
+  acols[acols.length] = pos;
+  pos = pos + width;
+  if (RepSpec.flags[3]!=0) then begin
+    acols[acols.length] = pos;
+    pos = pos + width;
+  end;
+  acols[acols.length] = pos;
+  acols[acols.length] = 1;
+
+  return;
+end;
+
+procedure BubbleSortArrayByReference_STRING_ASC(array string tosort,var array integer ref)
+begin
+  integer i;
+  integer tmp;
+  boolean swapped;
+  
+  for (i=0;i<tosort.length;i=i+1) begin
+    ref[i] = i;
+  end;
+  
+  swapped = true;
+  while (swapped) begin
+    swapped = false;
+    for (i=0;i<tosort.length-1;i=i+1) begin
+      if (tosort[ref[i]] > tosort[ref[i+1]]) then begin
+        tmp = ref[i];
+        ref[i] = ref[i+1];
+        ref[i+1] = tmp;
+        swapped = true;
+      end;
+    end;
+  end;
+
+  return;
+end;

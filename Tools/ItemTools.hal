@@ -1,0 +1,17 @@
+// ui
+global
+function integer JPD_GetItemType(string artcode)
+begin
+  record INVc INr;
+  integer res;
+  
+  res = -1;
+  
+  INr.Code = artcode;
+  if (ReadFirstMain(INr,1,true)) then begin
+    res = INr.ItemType;
+  end;
+  
+  JPD_GetItemType = res;
+  return;
+end;

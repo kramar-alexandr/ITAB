@@ -1,0 +1,138 @@
+// ui
+event startup
+begin
+
+  SetLangMode(LangLatvian,"LAT",0);
+
+  Module("Bankas pal´gs","",730,modFV);
+  
+  Import("FiDAViSta (Latvija)",0,FidaVistaIn,modFV);
+  Import("Telehansa (Igaunija)",BankEstIn,BankEstIn,modFV);//fv-96; edz
+  Import("LITAS-ESIS (Lietuva)",0,BankLitIn,modFV);
+  Import("Veidot MU, balstoties uz neapm. r•ú.",APListIn,APListIn,modFV);//fv-94; edz
+  Import("SEPA (ISO20022)",SEPAIn,SEPAIn,modFV);//fv-164; edz
+  Import("First Data",FirstDataIClass,FirstDataIn,modFV);//alk-290; edz
+  
+  Register("Import•tie faili","Import•tie faili",FidaVistaVc,modFV);
+  Register("Kontakti","Kontakti",CUVc,modFV);
+  Register("R•úini","R•úini",IVVc,modFV);
+  Register("Maks‚jumi","Maks‚jumi",IPVc,modFV);
+  Register("Ien‚koäie r•úini","Ien‚koäie r•úini",VIVc,modFV);
+  Register("Maks‚jumu uzdevumi","Maks‚jumu uzdevumi",OPVc,modFV);
+  Register("Izmaks‚tie avansi","Izmaks‚tie avansi",PPVc,modFV);
+  
+  Export("Maks‚jumu uzdevumu eksports",FidaVista_OPEClass,FidaVista_OPEn,modPL);
+  Export("Maks‚jumu uzdevumu eksports",FidaVista_OPEClass,FidaVista_OPEn,modFV);
+  Export("Izmaks‚to avansu eksports",FidaVista_PPEClass,FidaVista_PPEn,modFV);//fv-47; edz
+  Export("Izmaks‚to avansu eksports",FidaVista_PPEClass,FidaVista_PPEn,modExp);//fv-47; edz
+  Export("Algu maks‚jumi",BPPayrollEClass,BPPayrollEn,modPY);//herbe-244; edz
+  Export("Algu maks‚jumi",BPPayrollEClass,BPPayrollEn,modFV);//herbe-244; edz
+  Export("Pieg. neapmaks‚to r•ú. ìurn‚ls",APListEClass,APListEn,modFV);//fv-94; edz
+  
+  Setting("Bankas pal´gs - Aprakstu uzst‚d´jumi",FidaVistaPatTClass,modFV);
+  Setting("Bankas pal´gs - Parametri",FidaVistaParamsTClass,modFV);
+  Setting("Bankas pal´gs - Bankas kontu piesaiste kontiem",FidaVistaAccTClass,modFV);
+  Setting("Bankas pal´gs - POS komisiju veidoäana",FidaVistaCommTClass,modFV);//fv-157; edz
+  Setting("Samaksas veidi",PMTClass,modFV);//fv-127; edz
+  Setting("Bankas pal´gs - Banku klienti",FidaVistaTRTClass,modFV);//fv-167; edz
+  
+  Report("Import•to failu statistika",FidaVistaRClass,FidaVistaRn,0,modFV);
+  
+  Maintenance("Dz•st Import•to failu ierakstus",FidaVistaRemoveVClass,FidaVistaRemoveMn,modFV);//fv-103; edz
+
+  SetBegin(790);
+  SetText(0,"-");
+  SetText(1,"R•úins");
+  SetText(2,"Pavadz´me");
+  SetText(3,"Kl. pasðt´jums");
+  SetText(4,"Atsauksme");//fv-93; edz
+  EndSet;
+  
+  //fv-53; edz:
+  SetBegin(791);
+  SetText(0,"-");
+  SetText(1,"Gr‚matojums");
+  SetText(2,"Izm. avanss");
+  EndSet; 
+  //:edz
+
+  StrSetBegin(10000);
+  StrSetText(31946,"S‚k‚s Eksports Maks‚jumu uzdevumu eksports (FiDAViSta)");
+  StrSetText(31947,"Beidz‚s Eksports Maks‚jumu uzdevumu eksports (FiDAViSta)");
+  StrSetText(31948,"S‚k‚s Imports FiDAViSta");
+  StrSetText(31949,"Beidz‚s Imports FiDAViSta");
+  StrSetText(31950,"Fails import•ts - ");
+  StrSetText(31951,"Neizdev‚s atpaz´t pret•jo pusi p•c bankas konta vai re®.nr./pers.k.");
+  StrSetText(31952,"Atpaz´ta dar´juma pret•j‚ puse - ");
+  StrSetText(31953,"Nav nor‚d´ta dar´juma pret•j‚ puse - bankas dar´jums/kred´tkarte?");
+  StrSetText(31954,"FiDAViSta importa statistika");
+  StrSetText(31955,"Import•ts fails");
+  StrSetText(31956,"Dokuments nav izveidots");//fv-28; edz
+  StrSetText(31957,"Izveidots maks‚jums");
+  StrSetText(31958,"Neatbilstoäs re®.nr.,bet atbilstoäs r•úina nr. un summa");
+  StrSetText(31959,"Atäúir´gas valðtas");
+  StrSetText(31960,"R•úins jau apmaks‚ts");
+  StrSetText(31961,"R•úins ar ä‚du numuru nav atrasts");
+  StrSetText(31962,"Atrasts r•úins ar maks‚jumam atbilstoäu summu");
+  StrSetText(31963,"Maks‚juma summa sakr´t ar visu klienta par‚da summu");
+  StrSetText(31964,"Neizdev‚s uzmin•t r•úinu. Import• k‚ priekäapmaksu");
+  StrSetText(31965,"Pievienots maks‚jumam");
+  StrSetText(31966,"Maks‚jumu imports nav iesl•gts");
+  StrSetText(31967,"Maks‚jumu uzdevumu imports nav iesl•gts");
+  StrSetText(31968,"Maks‚jumu inteli®ent‚ mekl•äana nav iesl•gta");
+  StrSetText(31969,"Izveidots gr‚matojums");
+  StrSetText(31970,"Apmaks‚ts r•úins");//FV-14; edz
+  StrSetText(31971,"Atlikus´ summa pievienota r•úinam");//FV-14; edz
+  StrSetText(31972,"Izveidots maks‚juma uzdevums");//FV-4; edz
+  StrSetText(31973,"Pievienots maks‚juma uzdevumam");//FV-4; edz
+  StrSetText(31974,"Maks‚juma summa sakr´t ar par‚du summu");//FV-4; edz
+  StrSetText(31975,"Izveidots jauns kontakts");//FV-16; edz
+  StrSetText(31976,"Kontakts ar ä‚du bankas kontu vai PVN re®.nr. jau re®istr•ts");//FV-16; edz
+  StrSetText(31977,"Nav atrasts bankas konts vai PVN re®.nr.");//FV-29; edz
+  StrSetText(31978,"Ierakstam jau piesaist´ts kontakts");//FV-29; edz
+  StrSetText(31979,"Importa fail‚ tika atrasti ");//FV-35; edz
+  StrSetText(31980," ieraksti.");//FV-35; edz
+  StrSetText(31981," Ieimport•ti tika ");//FV-35; edz
+  StrSetText(31982,"Avanss");
+  StrSetText(31983,"Netika izeksport•tas visas avansa rindas");
+  StrSetText(31984,"Izveidots izmaks‚tais avanss");//fv-53; edz
+  StrSetText(31985,"Algas_maksajums");//herbe-244; edz
+  StrSetText(31986,"Nepiecieäams ievad´t izmaksu tipu sagatavoäan‚ 'Algu parametri'");//herbe-244; edz
+  StrSetText(31987,"Atjaunojiet licenci");//reserved for enabler functionality
+  StrSetText(31988,"Gr‚matojums netika izveidots, jo netika atrasts konts");//fv-86; edz
+  StrSetText(31989,"Ieraksts ar ä‚du Op.numuru jau re®istr•ts");//fkc-15; edz
+  StrSetText(31990,"J‚nor‚da valðta");
+  StrSetText(31991,"Datums vec‚ks par atºauto");//fv-58; edz
+  StrSetText(31992,"Nav nodefin•tas numuru s•rijas");//fv-99; edz
+  StrSetText(31993,"Netika ieimport•ti: ");//fv-116; edz
+  StrSetText(31994,"Priekäapmaksa netika izveidota, jo atrasts apmaks‚ts r•úins: ");//fv-122; edz
+  StrSetText(31995,"á‚ds maks‚jumu uzdevums jau ir re®istr•ts");//fv-124; edz
+  //alk-115; edz:
+  StrSetText(31996,"N.p.k");
+  StrSetText(31997,"Uzv‚rds, V‚rds");
+  StrSetText(31998,"Pers.kods");
+  StrSetText(31999,"Konta Nr.");
+  StrSetText(32000,"Summa");
+  //:edz
+  StrSetText(31001,"R•úina");//fv-138; edz
+  StrSetText(31002,"datums liel‚ks par maks‚juma datumu");//fv-138; edz
+  StrSetText(31003,"Importa faila re®istr‚cijas numurs nesakr´t ar komp‚nijas re®istr‚cijas numuru");//fv-140; edz
+  //fv-144; edz:
+  StrSetText(31004,"Op. numurs");
+  StrSetText(31005,"Op. tips");
+  StrSetText(31006,"Summa");
+  StrSetText(31007,"Statuss");
+  StrSetText(31008,"FV kontakts");
+  StrSetText(31009,"Saist´t‚ ieraksta kontakts");
+  //:edz
+  StrSetText(31010,"Fails netika import•ts. Nav ievad´ts samaksas veids kontam: ");//kame-116; edz
+  StrSetText(31011,"Nedr´kst dz•st apstr‚d‚tu ierakstu");//kame-117; edz
+  StrSetText(31012,"Izmaks‚t‚ avansa Nr.");//coll-47; edz
+  StrSetText(31013,"Nesakr´t samaksas veids izmaks‚tajam avansam un algu maks‚jumam");//opt-93; edz
+  StrSetText(31014,"Izmaks‚taj‚ avans‚ atºauts izmantot tikai vienu personu!");//fv-169; edz
+  StrSetText(31015,"Nepareizs faila form‚ts");//fv-174; edz
+  StrSetText(31016,"Maks‚juma uzdevums atrasts un gr‚matots");//RGS: fv-207
+  EndStrSet;
+
+  return;
+end;

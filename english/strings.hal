@@ -1,0 +1,74 @@
+// ui
+event startup
+begin
+
+  SetLangMode(LangLatvian,"ENG",0);
+
+  SString(-100000,"Sales Order was successfully created in partner company.");
+  SString(-100001,"Sales Order wasn't created in partner company.");
+  SString(-100002,"Sales Orders copying not allowed from this company.");
+  SString(-100003,"Sales Order has been modified. Please contact responsible person for manual entry of required changes.");
+
+  SString(-100004,"This Item number is denied in current company!");//VITO: JPD-50
+
+  //VITO: JPD-51
+  SString(-100005,"Item copied successfully to company(ies) ");
+  SString(-100006,"Item is not copied to company(ies) ");
+  SString(-100007,"Item is not copied, because it is not in the range, specified in setting JPD - Items numbers limitation ranges!");
+  SString(-100008,"Item is not copied, because there are no companies to copy to, specified in setting JPD - Items numbers limitation ranges!");
+  //:VITO
+
+  //jpd-52; edz:
+  SString(-100009,"Average");
+  SString(-100010,"Min. Q.");
+  SString(-100011,"Stock");
+  SString(-100012,"'=Shops");//VITO: EBST-5; added "'" due to Excell
+  SString(-100013,"Forecast");
+  SString(-100014,"Forecast");
+  SString(-100015,"Net");
+  SString(-100016,"Open");
+  SString(-100017,"Shops incl. PO");
+  SString(-100018,"PO");
+  SString(-100019,"New");
+  SString(-100020,"Deficiency");
+  SString(-100021,"Must specify full month");
+  SString(-100022,"Period can't exceed 12 months");
+  SString(-100023,"No items were selected");
+  SString(-100024,"Description");
+  SString(-100025,"/Shop");
+  SString(-100026,"(Shops)");
+  SString(-100027,"(Matr.)");
+  SString(-100028,"PO");
+  SString(-100029,"Min Q");
+  //:edz
+
+  //VITO: EBST-6
+  SString(-100040,"Activities wasn't created: ");
+  SString(-100041,"This Order Class does not exist!");
+
+  SString(-100042,"Activities");
+  SString(-100043,"Must be created: ");
+  SString(-100044,"Was created: ");
+  SString(-100045,"Errors");
+  SString(-100046,"This Activity type does not exist: ");
+  SString(-100047,"Activities weren't saved: ");
+  //:VITO
+
+  SString(-100048,"Need to fill field 'Coordinator'");//VITO: EBST-11
+  SString(-100049,"Issue Date"); //EBS
+
+  SetBegin(900);
+  SetText(0,"-");
+  SetText(1,"C");
+  EndSet;
+
+  //VITO: EBST-11
+  SetBegin(901);
+  SetText(0,"Person");
+  SetText(1,"Coordinator");
+  SetText(2,"Salesman");//VITO: EBST-16
+  EndSet;
+  //:VITO
+
+  return;
+end;

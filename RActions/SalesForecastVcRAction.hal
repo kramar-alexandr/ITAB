@@ -1,0 +1,14 @@
+//c80150615
+global
+function LongInt SalesForecastVcRecordDuplicate(var record SalesForecastVc SalesForecastr,record SalesForecastVc SalesForecast2r,LongInt stat,LongInt long4)
+BEGIN
+  LongInt res;
+  Date blankd;
+
+  SalesForecastr.Code = "";//jpd-52; edz
+  
+  res = inner.SalesForecastVcRecordDuplicate(SalesForecastr,SalesForecast2r,stat,long4);
+
+  SalesForecastVcRecordDuplicate = res; 
+  RETURN;
+END;

@@ -1,0 +1,23 @@
+// ui
+external inner function Boolean UserHasLimitedAccess(var string,var string);
+
+//jpd-52; edz:
+global
+procedure JPD_PurRClassReportDefaults(Integer wn)
+BEGIN
+  record RcVc RepSpec;
+  
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  ReportDefaults(RepSpec,"JPD_PurRClass");  
+  //RepSpec.flags[3] = 1;//jpd-52; edz
+  //RepSpec.flags[4] = 1;//jpd-52; edz
+  RepSpec.flags[5] = 1;
+  RepSpec.flags[7] = 1;//jpd-52; edz
+  if (UserHasLimitedAccess(RepSpec.AccStr,RepSpec.Stext)) then begin
+  end;
+  PutWindowRecord(wn,RepSpec);
+  SelectWindow(wn);
+  RETURN;
+END;
+//:edz

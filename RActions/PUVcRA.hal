@@ -1,0 +1,43 @@
+external inner updating procedure PUUpdatePricesMn(record RcVc);
+
+updating
+procedure Run_UpdatePriceMaint(longint sernr)
+begin
+  record RcVc RepSpec;
+
+  RepSpec.long1 = sernr;
+  RepSpec.flags[1] = 0;
+  RepSpec.flags[2] = 1;
+  PUUpdatePricesMn(RepSpec);
+
+  return;
+end;
+
+global
+updating function LongInt PUVcRecordSaveAfter(var record PUVc PUr,record PUVc PU2r,LongInt stat,LongInt long4)
+begin
+  LongInt res;
+
+  res = inner.PUVcRecordSaveAfter(PUr,PU2r,stat,long4);
+
+  if (PUr.OKFlag!=0) then begin
+    Run_UpdatePriceMaint(PUr.SerNr);
+  end;
+  PUVcRecordSaveAfter = res;
+  return;
+end;
+
+global
+updating function LongInt PUVcRecordUpdateAfter(var record PUVc PUr,record PUVc PU2r,LongInt stat,LongInt long4)
+begin
+  LongInt res;
+
+  res = inner.PUVcRecordUpdateAfter(PUr,PU2r,stat,long4);
+
+  if ((PUr.OKFlag!=0) and (PU2r.OKFlag==0)) then begin
+    Run_UpdatePriceMaint(PUr.SerNr);
+  end;
+
+  PUVcRecordUpdateAfter = res;
+  return;
+end;

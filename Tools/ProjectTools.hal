@@ -1,0 +1,95 @@
+external inner function Boolean GetItemNameStr(Integer,var string,string,string,string);
+
+//VITO: SIAJPD-19
+function string 255 GetObjWithType(string objectlist,string objecttype,boolean alltypedf)
+begin
+  record ObjVc Objr;
+  string 255 res,ostr;
+  longint pos;
+
+  res = "";
+  pos = 0;
+
+  while (GetNextSubstring(objectlist,pos,",",ostr)) begin
+    Objr.Code = ostr;
+    if (ReadFirstMain(Objr,1,true)) then begin
+      if (OBjr.OTCode == objecttype) then begin
+        if (res != "") then begin
+          res = res & ",";
+        end;
+        res = res & ostr;
+        if (!alltypedf) then begin
+          goto LGetObjWithType;
+        end;
+      end;
+    end;
+  end;
+  LGetObjWithType:;
+
+  GetObjWithType = res;
+
+  return;
+end;
+
+global
+function boolean FindProjectObjectAndName(string objects,var string projobj,var string objname)
+begin
+  record ObjVc Objr;
+  record JPD_SettingsBlock JPD_Settingsb;
+  string 255 obj;
+  boolean res;
+
+  BlockLoad(JPD_Settingsb);
+
+  obj = GetObjWithType(objects,JPD_Settingsb.ProjObjType,false);
+  if nonblank(obj) then begin
+    Objr.Code = obj;
+    if (ReadFirstMain(Objr,1,true)) then begin
+      res = true;
+      projobj = obj;
+      objname = Objr.Comment;
+    end;
+  end;
+
+  FindProjectObjectAndName = res;
+  return;
+end;
+
+// kso: jpd-9
+global
+function string 100 JPD_TBIVGetItemNameFromOR(record TBIVVc TBIVr,integer tnr,string langcode,string deftext,string itemname)
+begin
+  record ORVc ORr;
+  record SHVc SHr;
+  row ORVc ORrw;
+  row SHVc SHrw;
+  string 100 res;
+
+  // default to what master code did
+  GetItemNameStr(tnr,res,langcode,deftext,itemname);
+
+  // look up the item name from sales order (in case it was changed to a custom string there)
+  switch (TBIVr.oVc) begin
+    case 4: // delivery
+      SHr.SerNr = TBIVr.SerNr;
+      if (ReadFirstMain(SHr,1,true)) then begin
+        MatRowGet(SHr,TBIVr.Row,SHrw);
+        if (SHrw.ArtCode == TBIVr.ArtCode) then begin
+          ORr.SerNr = SHr.OrderNr;
+          if (ReadFirstMain(ORr,1,true)) then begin
+            MatRowGet(ORr,SHrw.OrdRow,ORrw);
+            if (ORrw.ArtCode == TBIVr.ArtCode) then begin // can i get more defensive?
+              res = ORrw.Spec;
+            end;
+          end;
+        end;
+      end;
+
+    otherwise
+      // do nothing and leave default value
+  end;
+
+  JPD_TBIVGetItemNameFromOR = res;
+  return;
+end;
+// :kso jpd-9

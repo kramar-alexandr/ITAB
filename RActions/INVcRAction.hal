@@ -1,0 +1,139 @@
+external inner function Boolean SetInSet2(string,string);//VITO: JPD-51
+remote updating procedure CopyItemToPartnerCompany(record INVc,string,var string,var string);//VITO: JPD-51
+external procedure GenerateMessage(string,string);//VITO: JPD-51
+
+//VITO: JPD-50
+global
+function string 10 GetCompanyCode(integer companyrownr,var string companyname)
+begin
+  record CompaniesBlock Companiesb;
+  row CompaniesBlock Companiesbrw;
+  string 10 res;
+  
+  companyname = "";
+  BlockLoad(Companiesb);
+  MatRowGet(Companiesb,companyrownr-1,Companiesbrw);
+  res = Companiesbrw.CompCode;
+  companyname = Companiesbrw.CompName;
+  
+  GetCompanyCode = res;
+
+  return;
+end;
+
+function boolean ItemNrIsDeniedInThisCompany(string artcode)
+begin
+  record JPD_INNrLimitsBlock Limitsb;
+  row JPD_INNrLimitsBlock Limitsbrw;
+  record INVc INr; //RRA JPD-50
+  integer rwcnt,i;
+  string 255 companyname;
+  boolean res,copy;
+  
+  res = false;
+  //RRA: JPD-50
+  copy = false;
+  INr.Code = artcode;
+  if((ReadFirstKey("Code",INr,1,true))) then begin
+    copy = true;
+  end;
+  //:RRA JPD-50
+  
+  if(copy == false) then begin //RRA JPD-50
+    BlockLoad(Limitsb);
+    rwcnt = MatRowCnt(Limitsb);
+    if (rwcnt > 0) then begin
+      for (i=0;i<rwcnt;i=i+1) begin
+        MatRowGet(Limitsb,i,Limitsbrw);
+        if (Limitsbrw.DeniedInComp == GetCompanyCode(CurrentCompany,companyname)) then begin
+          if (artcode >= Limitsbrw.ArtNrFrom and artcode <= Limitsbrw.ArtNrTo) then begin
+            res = true;
+            i = rwcnt;
+          end;
+        end;
+      end;
+    end;
+  end;//RRA JPD-50
+  
+  ItemNrIsDeniedInThisCompany = res;
+  
+  return;
+end;
+//:VITO
+
+//VITO: JPD-51
+global
+function boolean MustCopyItemToPartnerCompany(string artcode,var string companiestocopy)
+begin
+  record JPD_INNrLimitsBlock Limitsb;
+  row JPD_INNrLimitsBlock Limitsbrw;
+  integer rwcnt,i;
+  string 255 companyname;
+  boolean res;
+  
+  res = false;
+  companiestocopy = "";
+  BlockLoad(Limitsb);
+  rwcnt = MatRowCnt(Limitsb);
+  if (rwcnt > 0) then begin
+    for (i=0;i<rwcnt;i=i+1) begin
+      MatRowGet(Limitsb,i,Limitsbrw);
+      if (Limitsbrw.CreateComp == GetCompanyCode(CurrentCompany,companyname)) then begin
+        if (artcode >= Limitsbrw.ArtNrFrom and artcode <= Limitsbrw.ArtNrTo) then begin
+          res = true;
+          if (companiestocopy == "") then begin
+            companiestocopy = companiestocopy & Limitsbrw.CopyToComp;
+          end else begin
+            if (SetInSet2(Limitsbrw.CopyToComp,companiestocopy) == false) then begin
+              companiestocopy = companiestocopy & "," & Limitsbrw.CopyToComp;
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+  
+  MustCopyItemToPartnerCompany = res;
+  
+  return;
+end;
+//:VITO
+
+
+
+global
+updating function LongInt INVcRecordCheck(var record INVc INr,record INVc IN2r,LongInt stat,LongInt long4)
+begin
+  LongInt res;
+  string 255 companiestocopy,okcomp,notokcomp;
+  longint error;
+  
+  //VITO: JPD-50
+  res = inner.INVcRecordCheck(INr,IN2r,stat,long4);
+
+  if (res != -1) then begin
+    if (ItemNrIsDeniedInThisCompany(INr.Code)) then begin
+      RecordCheckError(-100004,"",-1,"Code");//T‚ds Artikula kods ir aizliegts tekoäaj‚ komp‚nij‚!
+      res = -1;
+      goto LINVcRecordCheck;
+    end;
+  end;
+  //:VITO
+  //VITO: JPD-51
+  if (res != -1) then begin
+    if (stat == Rs_insert) then begin
+      if (MustCopyItemToPartnerCompany(INr.Code,companiestocopy)) then begin
+        if (companiestocopy != "") then begin
+          CopyItemToPartnerCompany(INr,companiestocopy,okcomp,notokcomp);
+          GenerateMessage(okcomp,notokcomp);
+        end;
+      end;
+    end;
+  end;
+  //:VITO
+
+LINVcRecordCheck:;  
+  INVcRecordCheck = res;
+  
+  return;
+end;

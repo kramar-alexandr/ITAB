@@ -1,0 +1,183 @@
+// ui
+procedure ReadImportTagUZERRecord(record UserVc Userr)
+begin
+  row UserVc Userrw;
+  integer rwcnt;
+  
+  RecordNew(Userr);
+  Userr.Code = ImportField;
+  Userr.Name = ImportField;
+  Userr.OldPassWord = ImportField;
+  Userr.AccessGroup = ImportField;
+  Userr.CurOurContact = ImportField;
+  Userr.LastOrdNr = StringToLongint(ImportField);
+  Userr.LastShipNr = StringToLongint(ImportField);
+  Userr.LastInvNr = StringToLongint(ImportField);
+  Userr.LastPurNr = StringToLongint(ImportField);
+  Userr.LastPayNr = StringToLongint(ImportField);
+  Userr.LastTRNr = StringToLongint(ImportField);
+  Userr.LastVINr = StringToLongint(ImportField);
+  Userr.LastOPNr = StringToLongint(ImportField);
+  Userr.TerminatedFlag = StringToInt(ImportField);
+  Userr.Job = ImportField;
+  Userr.JobGroup = ImportField;
+  Userr.DisAllowOther = StringToInt(ImportField);
+  Userr.Location = ImportField;
+  Userr.Machines = ImportField;
+  Userr.Tiller = ImportField;
+  Userr.Bonus = StringToVal(ImportField,M4Val);
+  Userr.CUCode = ImportField;
+  Userr.CUName = ImportField;
+  Userr.Phone1 = ImportField;
+  Userr.Phone2 = ImportField;
+  Userr.Fax1 = ImportField;
+  Userr.Fax2 = ImportField;
+  Userr.Comment = ImportField;
+  Userr.PersAcc = ImportField;
+  Userr.PersObjx = ImportField;
+  Userr.BankAcc = ImportField;
+  Userr.BankName = ImportField;
+  Userr.CostPrHour = StringToVal(ImportField,M4Val);
+  Userr.PricePrHour = StringToVal(ImportField,M4Val);
+  Userr.emailAddr = ImportField;
+  Userr.IDCode = ImportField;
+  Userr.Spec = ImportField;
+  Userr.limitedAccess = StringToInt(ImportField);
+  Userr.NewPassWord = ImportField;
+  Userr.LangCode = ImportField;
+  Userr.SalesGroup = ImportField;
+  Userr.Department = ImportField;
+  Userr.LastCLInNr = StringToLongint(ImportField);
+  Userr.LastCLOutNr = StringToLongint(ImportField);
+  Userr.FTPLogin = StringToInt(ImportField);
+  Userr.WebConf = ImportField;
+  Userr.WebStartPage = ImportField;
+  Userr.CostAcc = ImportField;
+  Userr.LastIVCashNr = StringToLongint(ImportField);
+  Userr.Closed = StringToInt(ImportField);
+  Userr.OnlyVoiceLogin = StringToInt(ImportField);
+  Userr.UserEditCtlf = StringToInt(ImportField);
+  Userr.DateOrder = StringToInt(ImportField);
+  Userr.LeadingZDay = StringToInt(ImportField);
+  Userr.LeadingZMonth = StringToInt(ImportField);
+  Userr.LeadingCentury = StringToInt(ImportField);
+  Userr.DateSep = ImportField;
+  Userr.DecimalPt = ImportField;
+  Userr.ThousandSep = ImportField;
+  Userr.ForceTimeEntry = StringToInt(ImportField);
+  Userr.DateCreated = StringToDate(ImportField);
+  Userr.Supervisor = ImportField;
+  Userr.OneFunction = ImportField;
+  Userr.TypeOfUser = StringToInt(ImportField);
+  Userr.thousSepf = StringToInt(ImportField);
+  Userr.CanUseOS = StringToInt(ImportField);
+  Userr.Magic = StringToLongint(ImportField);
+  Userr.Newf = StringToInt(ImportField);
+  Userr.LastTTRNr = StringToLongint(ImportField);
+  Userr.CustCode = ImportField;
+  Userr.WindowType = StringToInt(ImportField);
+  Userr.RegistrationNumber = StringToLongint(ImportField);
+  Userr.StartLevel = StringToInt(ImportField);
+  Userr.ServLocation = ImportField;
+  Userr.ReservLocAccess = ImportField;
+  Userr.ReservLocation = ImportField;
+  Userr.MinPLCode = ImportField;
+  Userr.Magic2 = StringToLongint(ImportField);
+  Userr.DiscPassword = ImportField;
+  Userr.LastOfficialSerNr = ImportField;
+  Userr.LastDropSHNr = StringToLongint(ImportField);
+  
+  rwcnt = 0;
+  
+  while (NextImportLine(false)) begin
+    ClearRow(Userr,Userrw,1);
+    Userrw.Code = ImportField;
+    Userrw.PRCode = ImportField;
+    Userrw.Comment = ImportField;
+    MatRowPut(Userr,rwcnt,Userrw);
+    rwcnt = rwcnt + 1;
+  end;
+  
+  return;
+end;
+
+procedure ReadImportTagGlobalUserVcRecord(record GlobalUserVc GlobalUserr)
+begin
+  row GlobalUserVc GlobalUserrw;
+  integer rwcnt;
+  
+  RecordNew(GlobalUserr);
+  GlobalUserr.Code = ImportField;
+  GlobalUserr.Name = ImportField;
+  GlobalUserr.AccessGroup = ImportField;
+  GlobalUserr.emailAddr = ImportField;
+  GlobalUserr.NewPassWord = ImportField;
+  GlobalUserr.LangCode = ImportField;
+  GlobalUserr.FTPLogin = StringToInt(ImportField);
+  GlobalUserr.Closed = StringToInt(ImportField);
+  GlobalUserr.OnlyVoiceLogin = StringToInt(ImportField);
+  GlobalUserr.DateCreated = StringToDate(ImportField);
+  GlobalUserr.OneFunction = ImportField;
+  GlobalUserr.TypeOfUser = StringToInt(ImportField);
+  GlobalUserr.CanUseOS = StringToInt(ImportField);
+  GlobalUserr.Magic = StringToLongint(ImportField);
+  GlobalUserr.Newf = StringToInt(ImportField);
+  GlobalUserr.MainCRMCompany = ImportField;
+  GlobalUserr.CustCode = ImportField;
+  GlobalUserr.RegistrationNumber = StringToLongint(ImportField);
+  GlobalUserr.StartLevel = StringToInt(ImportField);
+  GlobalUserr.Magic2 = StringToLongint(ImportField);
+  GlobalUserr.DiscPassword = ImportField;
+  
+  rwcnt = 0;
+  
+  while (NextImportLine(false)) begin
+    ClearRow(GlobalUserr,GlobalUserrw,1);
+    GlobalUserrw.CompCode = ImportField;
+    GlobalUserrw.CompName = ImportField;
+    GlobalUserrw.AccessGroup = ImportField;
+    GlobalUserrw.StartLevel = StringToInt(ImportField);
+    MatRowPut(GlobalUserr,rwcnt,GlobalUserrw);
+    rwcnt = rwcnt + 1;
+  end;
+  
+  return;
+end;
+
+global
+updating procedure GLOBELIn()
+begin
+  record GlobalUserVc GlobalUserr;
+  
+  while (NextImportLine(false)) begin
+    ReadImportTagGlobalUserVcRecord(GlobalUserr);
+    logtext(0,"GlobalUserr.Code=" & GlobalUserr.Code);
+    RecordStore(GlobalUserr,false);
+  end;
+  
+  return;
+end;
+
+global
+updating procedure UZERIn()
+begin
+  record UserVc Userr;
+  
+  NextImportLine(false);
+  SetServerCompany(StringToInt(ImportField));  
+
+  while (NextImportLine(false)) begin
+    ReadImportTagUZERRecord(Userr);
+    logtext(0,"Userr.Code=" & Userr.Code);
+    RecordStore(Userr,false);
+  end;
+  
+  return;
+end;
+
+event startup
+begin
+  Import("IMANTS UZERS",0,UZERIn,modSY);
+  Import("IMANTS GLOBEL UZERS",0,GLOBELIn,modSY);
+return;
+end;

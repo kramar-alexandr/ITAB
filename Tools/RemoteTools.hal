@@ -1,0 +1,53 @@
+//VITO: JPD-51
+external inner function Boolean SetInSet2(string,string);
+external function string 10 GetCompanyCode(integer,var string);
+
+global
+updating procedure CopyItemToPartnerCompany(record INVc INr,string companiestocopy,var string okcomp,var string notokcomp)
+begin
+  record CompaniesBlock Companiesb;
+  row CompaniesBlock Companiesbrw;
+  record INVc newINr;
+  integer rwcnt,i;
+  string 10 curcomp;
+  string 255 companyname;
+
+  curcomp = GetCompanyCode(CurrentCompany,companyname);
+  okcomp = "";
+  notokcomp = "";
+  BlockLoad(Companiesb);
+  rwcnt = MatRowCnt(Companiesb);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(Companiesb,i,Companiesbrw);
+    if (SetInSet2(Companiesbrw.CompCode,companiestocopy)) then begin
+
+      SetServerCompany(StringToInt(Companiesbrw.CompCode));
+      newINr.Code = INr.Code;
+      if (ReadFirstMain(newINr,1,true) == false) then begin
+        RecordNew(newINr);
+        newINr.Code = INr.Code;
+        newINr.Name = INr.Name;
+        newINr.Unittext = INr.Unittext;
+        newINr.ItemType = INr.ItemType;//VITO: EBST-1; changed from kItemTypeStructured
+        if (RecordInsert(newINr,true)) then begin
+          if (okcomp == "") then begin
+            okcomp = Companiesbrw.CompCode;
+          end else begin
+            okcomp = okcomp & ", " & Companiesbrw.CompCode;
+          end;
+        end else begin
+          if (notokcomp == "") then begin
+            notokcomp = Companiesbrw.CompCode;
+          end else begin
+            notokcomp = notokcomp & ", " & Companiesbrw.CompCode;
+          end;
+        end;
+      end;
+
+    end;
+  end;//for
+  SetServerCompany(StringToInt(curcomp));
+
+  return;
+end;
+//:VITO

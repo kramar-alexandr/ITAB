@@ -1,0 +1,165 @@
+//c81160120
+//RRA: JPD-57
+external inner procedure HTClasses(string,string,var string);
+external inner procedure HTBranchIDs(string,string,var string);
+external inner function val GetCUTurnover(record CUVc,string,string,string,Date,Date,string,string,string,string,);
+external inner function val GetINTurnover(record INVc,string,string,string,string,Date,Date);
+external inner procedure HT2Per(Date, Date , var string);
+external inner function Boolean SetInSet2(string,string);
+
+global
+procedure JPD_CustSalesRn(record RcVc RepSpec)
+begin
+  record CUVc CUr;
+  record CCatVc CCatr;
+  string 50 frcc,tocc;
+  Boolean found,testf;
+  val s;
+  val tot,subtot;
+  string 255 tstr;
+  Integer rw;
+  
+  StartReportJob(USetStr(2500));
+   rw = 1;
+   HT2Per(RepSpec.sStartDate,RepSpec.sEndDate,tstr);
+   Header(rw,tstr,1);
+   rw = rw + 1;   
+  EndHeader;
+
+  StartFormat(15);
+  OutString(0,0,USetStr(2310),false);
+  OutString(1,0,USetStr(2466),true);
+  EndFormat;
+  Gray_Divider(0,1);
+  frcc = FirstInRange(RepSpec.f2,20);
+  tocc = LastInRange(RepSpec.f2,20);
+  CCatr.Code = frcc;
+  found = true;
+  while (LoopMain(CCatr,1,found)) begin
+    if (nonblank(tocc)) then begin
+      if (CCatr.Code>tocc) then begin
+        found = false;
+      end;
+    end;
+    
+    if(found) then begin
+      subtot = 0;
+      ResetLoop(CUr);
+      CUr.Code = "";
+      while (LoopMain(CUr,1,true)) begin
+        testf = true;
+        if(CUr.CustCat != CCatr.Code) then begin
+          testf = false;
+        end;
+        if(nonblank(RepSpec.f4)) then begin
+          if((SetInSet2(RepSpec.f4,CUr.Classification) == false)) then begin
+            testf = false;
+          end;
+        end;
+        if (CUr.CUType==0) then begin testf = false; end;
+        if(testf) then begin
+          s = GetCUTurnover(CUr,"","","salesexclvat",RepSpec.sStartDate,RepSpec.sEndDate,"","","","");
+          if(s > 0) then begin 
+            subtot = subtot + s;
+          end;
+        end;
+      end;
+      if(subtot > 0) then begin
+        OutString(0,0,CCatr.Comment,false);
+        OutValBiDi(1,0,subtot,M4Val,true,510);
+        EndFormat;
+        tot = tot + subtot;
+      end;
+    end;
+  end;
+    
+  Gray_Divider(0,1);
+  StartFormat(15);
+  OutString(0,0,USetStr(4906),false);
+  OutValBiDi(1,0,tot,M4Val,true,510);
+  EndFormat;
+  
+LCustSalesRn:;  
+  EndJob;
+  return;
+end;
+
+global
+procedure JPD_ItemSalesRn(record RcVc RepSpec)
+begin
+  record INVc INr;
+  record ITVc ITr;
+  string 50 frit,toit;
+  Boolean found,testf;
+  val s;
+  val tot,subtot;
+  string 255 tstr;
+  Integer rw;
+  
+  frit = FirstInRange(RepSpec.f2,10);
+  toit = LastInRange(RepSpec.f2,10);
+  
+  StartReportJob(USetStr(2469));
+   rw = 1;
+   HT2Per(RepSpec.sStartDate,RepSpec.sEndDate,tstr);
+   Header(rw,tstr,1);
+
+  EndHeader;
+ 
+  StartFormat(15);
+  OutString(0,0,USetStr(4895),false);
+  OutStringAdjustBiDi(1,0,USetStr(2466),true,M4Val,510);
+  EndFormat;
+  Gray_Divider(0,1);
+  
+  tot = 0;
+  
+  found = true;
+  ITr.Code = frit;
+  while (LoopMain(ITr,1,found)) begin
+    if (nonblank(toit)) then begin
+      if (ITr.Code>toit) then begin
+        found = false;
+      end;
+    end;
+	  if(found) then begin
+      subtot = 0;
+      ResetLoop(INr);
+      INr.Code = "";
+      while (LoopMain(INr,1,true)) begin
+        testf = true;
+        if(INr.Group != ITr.Code) then begin
+          testf = false;
+        end;
+        if(nonblank(RepSpec.f4)) then begin
+          if((SetInSet2(RepSpec.f4,INr.DispGroups) == false)) then begin
+            testf = false;
+          end;
+        end;
+        if(testf) then begin
+          s = GetINTurnover(INr,RepSpec.f6,RepSpec.LastAcc,"","salesexclvat",RepSpec.sStartDate,RepSpec.sEndDate);
+          if(s > 0) then begin 
+            subtot = subtot + s;
+          end;
+        end;
+      end;
+      if(subtot > 0) then begin
+        OutString(0,0,ITr.Comment,false);
+        OutValBiDi(1,0,subtot,M4Val,true,510);
+        EndFormat;
+        tot = tot + subtot;
+      end;
+    end;
+  end;
+    
+  Gray_Divider(0,1);
+  StartFormat(15);
+  OutString(0,0,USetStr(4906),false);
+  OutValBiDi(1,0,tot,M4Val,true,510);
+  EndFormat;
+  
+LItemSalesRn:;  
+  EndJob;
+  return;
+end;
+

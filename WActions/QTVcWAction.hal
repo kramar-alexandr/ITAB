@@ -1,0 +1,115 @@
+// ui
+//c81160120
+external inner function val MulRateToBase1(var string,val,val,val,val,val,val,roundmode);//VITO: JPD-42
+remote updating function longint RecordAction_raCreateORInOtherCompanies2(var record ORVc);//VITO: JPD-53
+external inner procedure NoDupObjs(string,var string);
+external inner procedure AutoObj(var string);
+
+external inner function Integer VerifySalesmen(string,var string);//VITO: EBST-11
+
+// EVS: JPD-66
+procedure ExpandObjectHierarchy(integer wn,boolean changed)
+begin
+  record QTVc QTr;
+  
+  if (changed) then begin
+    DeselectWindow(wn,false);
+    GetWindowRecord(wn,QTr);
+    AutoObj(QTr.Objects);
+    NoDupObjs(QTr.Objects,QTr.Objects);
+    PutWindowRecord(wn,QTr);
+  end;
+  
+return;
+end;
+// :EVS
+
+
+global
+function Boolean QTDClassAfterEditField(Integer wn,string pfieldname,Integer fn, Integer rownr,Integer changed)
+BEGIN
+  Boolean res;
+  //VITO: JPD-42
+  record QTVc QTr;
+  row QTVc QTrw;
+  string 50 fieldname;
+  
+  fieldname = pfieldname; // used for possible overrides when calling inner
+  
+  switch (fieldname) begin
+    case "BasePriceCurncy":
+      if (changed != 0) then begin//VITO: JPD-47
+        DeselectWindow(wn,false);
+        GetWindowRecord(wn,QTr);
+        MatRowGet(QTr,rownr,QTrw);
+        QTrw.BasePrice = MulRateToBase1(QTr.CurncyCode,QTrw.BasePriceCurncy,QTr.FrRate,QTr.ToRateB1,QTr.ToRateB2,QTr.BaseRate1,QTr.BaseRate2,DefaultCurRoundOff);
+        QTrw.RowBasePriceCurncy = QTrw.BasePriceCurncy*QTrw.Quant;
+        MatRowPut(QTr,rownr,QTrw);
+        PutWindowRecord(wn,QTr);
+        fieldname = "BasePrice"; // major pretend time - override to fake BasePrice input and trigger appropriate master code
+      end;
+  end; 
+  //:VITO
+  
+  res = inner.QTDClassAfterEditField(wn,fieldname,fn,rownr,changed);
+  
+  ExpandObjectHierarchy(wn,changed != 0); // EVS: JPD-66
+  
+  QTDClassAfterEditField = res;
+  RETURN;
+END;
+
+//VITO: JPD-53
+global
+updating procedure CopyQTToOtherCompORDsm()
+begin
+  record QTVc QTr;
+  integer normalmode,wn,nwn;
+  longint res;
+  string 255 tstr;
+  //VITO: EBST-11
+  string 255 tstr2;
+  integer errcode;
+
+  tstr2 = "";
+  //:VITO
+  normalmode = 0;
+  wn = CurWindow;
+  GetWindowRecord(wn,QTr);  
+  if (WindowState(wn) == normalmode) then begin
+    if (QTr.Closed == 0) then begin
+      //VITO: EBST-11
+      if (nonblank(QTr.Coordinator)) then begin
+        errcode = VerifySalesmen(QTr.Coordinator,tstr2);
+        if (errcode == 0) then begin
+        //:VITO
+          res = RecordAction_raCreateORInOtherCompanies2(QTr);
+          if (res > -1) then begin
+            CloseWindow(CurWindow);
+            nwn = OpenWindow("QTDClass",1,0,"","",QTr);
+            MessageBox(-100000,"");//Veiksm´gi izveidots Kl. pasðt´jums partnerkomp‚nij‚.
+          end else begin
+            tstr = USetStr(-100001);//Kl. pasðt´jums partnerkomp‚nij‚ netika izveidots.
+            if (res != 0) then begin
+              tstr = USetStr(res) & " " & tstr;
+            end;
+            MessageBox(0,tstr);
+          //VITO: EBST-11  
+          end;
+        end else begin
+          MessageBox(0,USetStr(errcode) & ": " & tstr2);
+        end;
+      end else begin
+        MessageBox(0,USetStr(-100048));//Nepiecieäams aizpild´t lauku 'Koordinators'
+      end;
+      //:VITO
+    end else begin
+      Beep;
+    end;
+  end else begin
+    Beep;
+  end;
+
+  return;
+end;
+//:VITO

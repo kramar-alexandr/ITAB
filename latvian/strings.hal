@@ -1,0 +1,99 @@
+// ui
+event startup
+begin
+
+  SetLangMode(LangLatvian,"LAT",2);
+
+  SString(-100000,"Veiksmīgi izveidots Kl. pasūtījums partnerkompānijā.");
+  SString(-100001,"Kl. pasūtījums partnerkompānijā netika izveidots.");
+  SString(-100002,"No šīs kompānijas Kl. pasūtījumu kopēšana nav atļauta.");
+  SString(-100003,"Kl. pasūtījums partnerkompānijā bija pārveidots. Lūgums kontaktēties ar atbildīgo personu, ja nepieciešams veikt izmaiņas.");
+
+  SString(-100004,"Tāds Artikula kods ir aizliegts tekošajā kompānijā!");//VITO: JPD-50
+
+  //VITO: JPD-51
+  SString(-100005,"Artikuls tika veiksmīgi kopēts uz kompāniju(ām) ");
+  SString(-100006,"Artikuls netika kopēts uz kompāniju(ām) ");
+  SString(-100007,"Artikuls netika kopēts, jo tas nav intervālā, definētā iestatījumā JPD - Artikulu numuru aizliegtie intervāli!");
+  SString(-100008,"Artikuls netika kopēts, jo nav definētas mērķa kompānijas iestatījumā JPD - Artikulu numuru aizliegtie intervāli!");
+  //:VITO
+
+  //jpd-52; edz:
+  //SString(-100009,"Vid. daudz. veikalam");
+  //SString(-100010,"Min. Daudz.");
+  //SString(-100011,"Noliktavā");
+  //SString(-100012,"Veikali noliktavā");
+  //SString(-100013,"Prognozēs");
+  //SString(-100014,"Daudz. iesk. progn.");
+  //SString(-100015,"Net");
+  //SString(-100016,"Pasūt.");
+  //SString(-100017,"Veikalos iesk. pasūt.");
+  //SString(-100018,"Min pas. daudz.");
+  //SString(-100019,"Apr. pas. daudz.");
+  //SString(-100020,"Iztrūkums");
+  SString(-100009,"Average");
+  SString(-100010,"Min. Q.");
+  SString(-100011,"Stock");
+  SString(-100012,"'=Shops");//VITO: EBST-5; added "'" due to Excell
+  SString(-100013,"Forecast");
+  SString(-100014,"Forecast");
+  SString(-100015,"Net");
+  SString(-100016,"Open");
+  SString(-100017,"Shops incl. PO");
+  SString(-100018,"PO");
+  SString(-100019,"New");
+  SString(-100020,"Deficiency");
+  SString(-100021,"Jānorāda pilns mēnesis");
+  SString(-100022,"Periods nedrīkst pārsniegt 12 mēnešus");
+  SString(-100023,"Nepieciešams norādīt artikulus, kurus rādīt");
+  SString(-100024,"Description");
+  SString(-100025,"/Shop");
+  SString(-100026,"(Shops)");
+  SString(-100027,"(Matr.)");
+  SString(-100028,"PO");
+  SString(-100029,"Min Q");
+  //:edz
+
+  //jpd-72; edz:
+  SString(-100030,"JPD - Noliktavas atlikums");
+  SString(-100031,"Artikuls");
+  SString(-100032,"Nosauk.");
+  SString(-100033,"Daudz.");
+  SString(-100034,"Pašizmaksa");
+  SString(-100035,"Summa");
+  SString(-100036,"Mērvienība");
+  SString(-100037,"Nepieciešams norādīt klasifikāciju");
+  SString(-100038,"Daudz.2");
+  SString(-100039,"Noliktava");
+  //:edz
+
+  //VITO: EBST-6
+  SString(-100040,"Aktivitātes netika izveidotas: ");
+  SString(-100041,"Tāda Klientu pasūtījumu klase neeksiste!");
+
+  SString(-100042,"Aktivitātes");
+  SString(-100043,"Jāizveido: ");
+  SString(-100044,"Izveidots: ");
+  SString(-100045,"Kļūdas");
+  SString(-100046,"Tāds Aktivitātes tips neeksiste: ");
+  SString(-100047,"Neizdevās saglabāt Aktivitātes: ");
+  //:VITO
+
+  SString(-100048,"Nepieciešams aizpildīt lauku 'Koordinators'");//VITO: EBST-11
+  SString(-100049,"Rēķ. dat."); //EBS
+
+  SetBegin(900);
+  SetText(0,"-");
+  SetText(1,"C");
+  EndSet;
+
+  //VITO: EBST-11
+  SetBegin(901);
+  SetText(0,"Persona");
+  SetText(1,"Koordinators");
+  SetText(2,"Pārdevējs");//VITO: EBST-16
+  EndSet;
+  //:VITO
+
+  return;
+end;

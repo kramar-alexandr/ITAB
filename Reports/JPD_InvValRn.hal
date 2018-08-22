@@ -1,0 +1,918 @@
+//c81160120
+//jpd-72; auth: edz
+external inner procedure HT2Per(date,date,var string);
+external inner procedure HTArts(string,string,var string);
+external inner procedure HTCusts(string,string,var string);
+external inner procedure HTLevCat(string,var string);
+external inner procedure HTCustCat(string,var string);
+external inner procedure HTCustClass(string,var string);
+external inner procedure HTVendClass(string,var string);
+external inner procedure HTItemClass(string,var string);
+external inner procedure HTArtGroup(string,var string);
+external inner procedure HTActTypes(string,string,var string);
+external inner procedure HTAccs(string,string,Integer,var string);
+external inner procedure HTVends(string,string,var string);
+external inner procedure HTSalesmen(string,string,var string);
+external inner procedure HTPersons(string,string,var string);
+external inner procedure HTSuppliers(string,string,var string);
+external inner function val FindCostPriceBackDated(string,string,string,val,Date,Boolean);
+
+procedure BubbleSortArrayByReference_STRING_ASC(array string tosort,var array integer ref)
+begin
+  integer i;
+  integer tmp;
+  boolean swapped;
+  
+  for (i=0;i<tosort.length;i=i+1) begin
+    ref[i] = i;
+  end;
+  
+  swapped = true;
+  while (swapped) begin
+    swapped = false;
+    for (i=0;i<tosort.length-1;i=i+1) begin
+      if (tosort[ref[i]] > tosort[ref[i+1]]) then begin
+        tmp = ref[i];
+        ref[i] = ref[i+1];
+        ref[i+1] = tmp;
+        swapped = true;
+      end;
+    end;
+  end;
+
+  return;
+end;
+
+procedure SetCols(record RcVc RepSpec,var array integer acols)
+begin
+  integer pos,width;
+
+  width = 70;
+  
+  if (RepSpec.flags[3]!=0) then begin
+    width = 50;
+  end;
+  
+  acols[acols.length] = 0;
+  pos = pos + 80;
+  acols[acols.length] = pos;
+  pos = pos + 200;
+  acols[acols.length] = pos;
+  pos = pos + width;
+  acols[acols.length] = pos;
+  pos = pos + width;
+  if (RepSpec.flags[3]!=0) then begin
+    acols[acols.length] = pos;
+    pos = pos + width;
+  end;
+  acols[acols.length] = pos;
+  acols[acols.length] = 1;
+
+  return;
+end;
+
+procedure DrawHeader(record RcVc RepSpec,var array integer acols)
+begin
+  integer rw;
+
+  if (RepSpec.flags[6]==3) then begin
+    StartFormat(15);
+    OutString(0,0,USetStr(-100039),false);
+    OutString(1,0,USetStr(-100033),true);
+    EndFormat;
+    Gray_Divider(0,1);
+  end else begin
+    SetCols(RepSpec,acols);
+    StartFormat(15);
+    rw = 0;
+    OutString(acols[rw],0,USetStr(-100031),false);
+    rw = rw + 1;
+    OutString(acols[rw],0,USetStr(-100032),false);
+    rw = rw + 1;
+    OutString(acols[rw],0,USetStr(-100036),false);
+    rw = rw + 1;
+    OutString(acols[rw],0,USetStr(-100033),true);
+    if (RepSpec.flags[3]!=0) then begin
+      rw = rw + 1;
+      OutString(acols[rw],0,USetStr(-100038),true);
+    end;
+    rw = rw + 1;
+    OutString(acols[rw],0,USetStr(-100034),true);
+    rw = rw + 1;
+    OutString(acols[rw],0,USetStr(-100035),true);
+    EndFormat;
+    Gray_Divider(0,1);
+  end;
+
+  return;
+end;
+
+procedure PrintData(record RcVc RepSpec,array string a_code,vector val v_quant,vector string v_name,vector string v_code,
+                    vector val v_quant,vector val v_quant2,vector val v_price,vector val v_sum,array string a_itemsernr,
+                    var val totalq,var val totalq2,var val totalsum,array string a_locations,vector val v_locquant,
+                    array integer acols,vector string v_unit,vector boolean v_hasserf,vector string v_itemreccode,
+                    vector date v_itemrecdate,vector val v_itemrecqty,vector val v_itemrecprice,vector longint v_itemlen,
+                    vector val v_itemlocqty,vector boolean v_itemloc,vector val v_itemloccostprice,vector val v_itemloccostsum,
+                    vector string v_itemlocs)
+begin
+  integer i,j,rw,type;
+  boolean testf,firstf,loopf;
+  longint pos;
+  array integer a_ref,a_ref2,a_ref3;
+  string 255 tstr,dblstr;
+
+  if (RepSpec.flags[6]==3) then begin
+    for (i=0;i<a_locations.length;i=i+1) begin      
+      StartFormat(15);
+      OutString(0,0,a_locations[i],false);
+      OutVal(1,0,v_locquant[a_locations[i]],M4UVal,true);
+      EndFormat;
+      totalq = totalq + v_locquant[a_locations[i]];
+    end;
+    Gray_Divider(0,1);
+    StartFormat(15);
+    OutVal(1,0,totalq,M45Val,true);
+    EndFormat;
+  end else begin
+  
+    BubbleSortArrayByReference_STRING_ASC(a_code,a_ref);
+    if (RepSpec.flags[2]!=0) then begin
+      BubbleSortArrayByReference_STRING_ASC(a_itemsernr,a_ref2);
+    end;
+    
+    for (i=0;i<a_code.length;i=i+1) begin
+      testf = true;
+      if (RepSpec.flags[0]!=0 and v_quant[a_code[a_ref[i]]]==0) then begin
+        testf = false;
+      end;
+      if (RepSpec.flags[1]!=0 and v_quant[a_code[a_ref[i]]]>=0) then begin
+        testf = false;
+      end;
+      if (testf) then begin
+        StartFormat(15);
+        rw = 0;
+        OutString(acols[rw],"DblINVc",v_code[a_code[a_ref[i]]],false);
+        rw = rw + 1;
+        OutString(acols[rw],0,v_name[a_code[a_ref[i]]],false);
+        rw = rw + 1;
+        OutString(acols[rw],0,v_unit[a_code[a_ref[i]]],false);
+        rw = rw + 1;
+        OutVal(acols[rw],0,v_quant[a_code[a_ref[i]]],M4UVal,true);
+        if (RepSpec.flags[3]!=0) then begin
+          rw = rw + 1;
+          OutVal(acols[rw],0,v_quant2[a_code[a_ref[i]]],M4UVal,true);
+        end;
+        rw = rw + 1;
+        OutVal(acols[rw],0,v_price[a_code[a_ref[i]]],M45Val,true);
+        rw = rw + 1;
+        type = M45Val;
+        if (RepSpec.flags[4]==1) then begin
+          type = M4Val;
+        end;
+        OutVal(acols[rw],0,v_sum[a_code[a_ref[i]]],type,true);
+        EndFormat;
+        if (RepSpec.flags[6]==1) then begin
+          if (v_itemlen[v_code[a_code[a_ref[i]]]]>0) then begin
+            Gray_Divider(0,1);
+            for (j=0;j<v_itemlen[v_code[a_code[a_ref[i]]]];j=j+1) begin
+              StartFormat(15);
+              rw = 0;
+              pos = 0;
+              GetNextSubstring(v_itemreccode[v_code[a_code[a_ref[i]]] & "|" & j],pos,":",tstr);
+              dblstr = "";
+              switch (tstr) begin
+                case "PUVc": dblstr = "DblPUVc";
+                case "RetPUVc": dblstr = "DblRetPUVc";
+                case "StockMovVc": dblstr = "DblStockMovVc";
+                case "SHVc": dblstr = "DblSHVc";
+                case "SDVc": dblstr = "DblSDVc";
+                case "RetVc": dblstr = "DblRetVc";
+              end;
+              GetNextSubstring(v_itemreccode[v_code[a_code[a_ref[i]]] & "|" & j],pos,":",tstr);
+              OutStringID(acols[rw]+50,dblstr,v_itemreccode[v_code[a_code[a_ref[i]]] & "|" & j],false,tstr);
+              OutDate(acols[rw]+200,0,v_itemrecdate[v_code[a_code[a_ref[i]]] & "|" & j],false);
+              rw = rw + 1;
+              //OutString(acols[rw],0,"",false);
+              rw = rw + 1;
+              //OutString(acols[rw],0,"",false);
+              rw = rw + 1;
+              OutVal(acols[rw],0,v_itemrecqty[v_code[a_code[a_ref[i]]] & "|" & j],M45Val,true);
+              if (RepSpec.flags[3]!=0) then begin
+                rw = rw + 1;
+                //OutString(acols[rw],0,"",false);
+              end;
+              rw = rw + 1;
+              OutVal(acols[rw],0,v_itemrecprice[v_code[a_code[a_ref[i]]] & "|" & j],M45Val,true);
+              rw = rw + 1;
+              OutVal(acols[rw],0,v_itemrecprice[v_code[a_code[a_ref[i]]] & "|" & j] * v_itemrecqty[v_code[a_code[a_ref[i]]] & "|" & j],type,true);
+              EndFormat;
+            end;
+            Black_Divider(0,1);
+          end;
+        end;
+        
+        if (RepSpec.flags[6]==2) then begin
+          if (nonblank(v_itemlocs[v_code[a_code[a_ref[i]]]])) then begin
+            Gray_Divider(0,1);
+            pos = 0;
+            while (GetNextSubstring(v_itemlocs[v_code[a_code[a_ref[i]]]],pos,",",tstr)) begin
+              if (v_itemlocqty[v_code[a_code[a_ref[i]]] & "|" & tstr]!=0) then begin
+                StartFormat(15);
+                rw = 0;
+                OutString(acols[rw],0,"",false);
+                rw = rw + 1;
+                OutString(acols[rw]+30,0,tstr,false);
+                rw = rw + 1;
+                OutString(acols[rw],0,"",false);
+                rw = rw + 1;
+                OutVal(acols[rw],0,v_itemlocqty[v_code[a_code[a_ref[i]]] & "|" & tstr],M45Val,true);
+                if (RepSpec.flags[7]==0) then begin
+                  rw = rw + 1;
+                  OutString(acols[rw],0,"",true);
+                  rw = rw + 1;
+                  OutString(acols[rw],0,"",true);
+                end else begin
+                  rw = rw + 1;
+                  OutVal(acols[rw],0,v_itemloccostprice[v_code[a_code[a_ref[i]]] & "|" & tstr],M45Val,true);
+                  rw = rw + 1;
+                  OutVal(acols[rw],0,v_itemloccostsum[v_code[a_code[a_ref[i]]] & "|" & tstr],M45Val,true);
+                end;
+                EndFormat;
+              end;
+            end;
+            Black_Divider(0,1);
+          end;
+        end;
+
+        if (RepSpec.flags[2]!=0) then begin
+          if (v_hasserf[v_code[a_code[a_ref[i]]]]) then begin
+            firstf = true;
+            for (j=0;j<a_itemsernr.length;j=j+1) begin
+              loopf = true;
+              if (left(a_itemsernr[a_ref2[j]],len(v_code[a_code[a_ref[i]]]))==v_code[a_code[a_ref[i]]]) then begin
+                if (firstf) then begin
+                  Gray_Divider(0,300);
+                end;
+                StartFormat(15);
+                if (firstf) then begin
+                  OutString(50,0,USetStr(12667),false);
+                  firstf = false;
+                end;
+                pos = 0;
+                GetNextSubString(a_itemsernr[a_ref2[j]],pos,"|",tstr);
+                GetNextSubString(a_itemsernr[a_ref2[j]],pos,"|",tstr);
+                OutString(150,0,tstr,false);
+                GetNextSubString(a_itemsernr[a_ref2[j]],pos,"|",tstr);
+                OutString(370,0,tstr,true);
+                EndFormat;
+                loopf = false;
+              end else begin
+                if (!loopf) then begin
+                  j = a_itemsernr.length;
+                end;
+              end;
+            end;
+            Gray_Divider(0,300);
+          end;
+        end;
+        totalq = totalq + v_quant[a_code[a_ref[i]]];
+        totalq2 = totalq2 + v_quant2[a_code[a_ref[i]]];
+        totalsum = totalsum + v_sum[a_code[a_ref[i]]];
+      end;
+    end;
+  end;
+
+  return;
+end;
+
+procedure PrintTotals(record RcVc RepSpec,val totalq,val totalq2,val totalsum,array integer acols)
+begin
+  integer rw;
+
+  Gray_Divider(0,1);
+  StartFormat(15);
+  rw = 0;
+  OutString(acols[rw],0,"",false);
+  rw = rw + 1;
+  OutString(acols[rw],0,"",false);
+  rw = rw + 1;
+  OutString(acols[rw],0,"",false);
+  rw = rw + 1;
+  OutVal(acols[rw],0,totalq,M45Val,true);
+  if (RepSpec.flags[3]!=0) then begin
+    rw = rw + 1;
+    OutVal(acols[rw],0,totalq2,M45Val,true);
+  end;
+  rw = rw + 1;
+  OutString(acols[rw],0,"",true);
+  rw = rw + 1;
+  OutVal(acols[rw],0,totalsum,M45Val,true);
+  EndFormat;
+
+  return;
+end;
+
+procedure ReportError(longint errorcode)
+begin
+
+  StartFormat(15);
+  OutString(0,0,USetStr(errorcode),false);
+  EndFormat;
+
+  return;
+end;
+
+global
+procedure JPD_InvValRClassReportDefaults(Integer wn)
+begin
+  record RcVc RepSpec;
+  
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  ReportDefaults(RepSpec,"JPD_InvValRClass");
+  RepSpec.flags[0] = 1;
+  PutWindowRecord(wn,RepSpec);
+  SelectWindow(wn);
+  
+  return;
+end;
+
+function boolean CheckObject(string objects,string checkobj,string checktyp)
+begin
+  boolean res;
+  longint pos;
+  string 255 tstr;
+  record ObjVc Objr;
+  
+  res = false;
+  
+  if (nonblank(objects)) then begin
+    res = true;
+    if (nonblank(checkobj)) then begin
+      if (!SetInSet(checkobj,objects)) then begin
+        res = false;
+      end;
+    end;
+    if (nonblank(checktyp) and res) then begin
+      res = false;
+      pos = 0;
+      while (GetNextSubstring(objects,pos,",",tstr)) begin
+        Objr.Code = tstr;
+        if (ReadFirstMain(Objr,1,true)) then begin
+          if (Objr.OTCode==checktyp) then begin
+            res = true;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+  CheckObject = res;
+  return;
+end;
+
+procedure CountRecordData(record ItemHistVc IHr,record RcVc RepSpec,var vector string v_itemreccode,var vector date v_itemrecdate,
+                          var vector val v_itemrecqty,var vector val v_itemrecprice,var vector longint v_itemlen,var vector val v_itemlocqty,
+                          var vector boolean v_itemloc,var vector val v_itemloccostprice,var vector val v_itemloccostsum,var vector string v_itemlocs)
+begin
+  date tdate;
+
+  tdate = RepSpec.d1;
+  if (blankdate(RepSpec.d1)) then begin
+    tdate = CurrentDate;
+  end;
+  
+  if (RepSpec.flags[6]==1) then begin
+    v_itemreccode[IHr.ArtCode & "|" & v_itemlen[IHr.ArtCode]] = IHr.FileName & ":" & IHr.TransNr;
+    v_itemrecdate[IHr.ArtCode & "|" & v_itemlen[IHr.ArtCode]] = IHr.TransDate;
+    v_itemrecqty[IHr.ArtCode & "|" & v_itemlen[IHr.ArtCode]] = IHr.Qty;//PUrw.Quant;
+    v_itemrecprice[IHr.ArtCode & "|" & v_itemlen[IHr.ArtCode]] = IHr.TotCostPrice/IHr.Qty;
+    if (v_itemrecprice[IHr.ArtCode & "|" & v_itemlen[IHr.ArtCode]]==blankval) then begin
+      v_itemrecprice[IHr.ArtCode & "|" & v_itemlen[IHr.ArtCode]] = 0;
+    end;
+    v_itemlen[IHr.ArtCode] = v_itemlen[IHr.ArtCode] + 1;
+  end;
+  if (RepSpec.flags[6]==2) then begin
+    v_itemlocqty[IHr.ArtCode & "|" & IHr.Location] = v_itemlocqty[IHr.ArtCode & "|" & IHr.Location] + IHr.Qty;
+    if (RepSpec.flags[7]!=0) then begin
+      if (!v_itemloc[IHr.ArtCode & "|" & IHr.Location]) then begin
+        v_itemloccostprice[IHr.ArtCode & "|" & IHr.Location] = FindCostPriceBackDated(IHr.ArtCode,IHr.Location,"",1,tdate,false);
+      end;
+      v_itemloccostsum[IHr.ArtCode & "|" & IHr.Location] = v_itemloccostsum[IHr.ArtCode & "|" & IHr.Location] + v_itemloccostprice[IHr.ArtCode & "|" & IHr.Location]*IHr.Qty;
+    end;
+    if (!v_itemloc[IHr.ArtCode & "|" & IHr.Location]) then begin
+      v_itemlocs[IHr.ArtCode] = v_itemlocs[IHr.ArtCode] & "," & IHr.Location;
+      v_itemloc[IHr.ArtCode & "|" & IHr.Location] = true;
+    end;
+  end;
+
+  return;
+end;
+
+function boolean GetDetailedRecordData(record ItemHistVc IHr,record RcVc RepSpec,var vector string v_itemreccode,var vector date v_itemrecdate,
+                               var vector val v_itemrecqty,var vector val v_itemrecprice,var vector longint v_itemlen,var vector val v_itemlocqty,
+                               var vector boolean v_itemloc,var vector val v_itemloccostprice,var vector val v_itemloccostsum,var vector string v_itemlocs)
+begin
+  boolean res;
+  record PUVc PUr;
+  row PUVc PUrw;
+  record RetPUVc RetPUr;
+  row RetPUVc RetPUrw;
+  record StockMovVc StockMovr;
+  row StockMovVc StockMovrw;
+  record IVVc IVr;
+  record IVCashVc IVCashr;
+  record SHVc SHr;
+  row SHVc SHrw;
+  record SDVc SDr;
+  row SDVc SDrw;
+  record SRVc SRr;
+  record RetVc Retr;
+  row RetVc Retrw;
+  record WSVc WSr;
+  record DispatchVc Dispatchr;
+  record ProdVc Prodr;
+  record ProdOperationVc ProdOpr;
+  record INTransferVc INTransferr;
+  record StockTakeVc StockTaker;
+  record OffHireVc OffHirer;
+  record InternMovVc InternMovr;
+  record QualConVc QualConr;
+  record ORVc ORr;
+  record POVc POr;
+  record ProdOrderVc ProdOrderr;
+  
+  res = false;
+  if (blank(RepSpec.f5) and blank(RepSpec.f6) and blank(RepSpec.f7)) then begin
+    res = true;
+  end;
+  if (res) then begin
+    if (RepSpec.flags[6]==1) then begin
+      res = false;
+    end;
+  end;
+  if (res) then begin
+    if (RepSpec.flags[6]==2) then begin
+      res = false;
+    end;
+  end;
+    
+  if (!res) then begin//varbðt visu laiku j‚laiì, sav‚d‚k iesp•ja ka atäúirsies dati
+    switch (IHr.FileName) begin
+      case "PUVc":
+        PUr.SerNr = IHr.TransNr;
+        if (ReadFirstMain(PUr,1,true)) then begin
+          MatRowGet(PUr,IHr.Row,PUrw);
+          if (IHr.ArtCode==PUrw.ArtCode) then begin
+            if (nonblank(RepSpec.f5)) then begin
+              if (PUr.VECode==RepSpec.f5) then begin
+                res = true;
+              end;
+            end else begin
+              res = true;
+            end;
+            if (nonblank(RepSpec.f6) or nonblank(RepSpec.f7) and res) then begin
+              res = CheckObject(PUr.Objects,RepSpec.f6,RepSpec.f7);
+              if (!res) then begin
+                res = CheckObject(PUrw.Objects,RepSpec.f6,RepSpec.f7);
+              end;
+            end;
+            if (res) then begin
+              CountRecordData(IHr,RepSpec,v_itemreccode,v_itemrecdate,v_itemrecqty,v_itemrecprice,v_itemlen,v_itemlocqty,
+                              v_itemloc,v_itemloccostprice,v_itemloccostsum,v_itemlocs);
+            end;
+          end else begin
+            res = false;
+          end;
+        end;
+      case "RetPUVc":
+        RetPUr.SerNr = IHr.TransNr;
+        if (ReadFirstMain(RetPUr,1,true)) then begin
+          MatRowGet(RetPUr,IHr.Row,RetPUrw);
+          if (IHr.ArtCode==RetPUrw.ArtCode) then begin
+            if (nonblank(RepSpec.f5)) then begin
+              if (RetPUr.VECode==RepSpec.f5) then begin
+                res = true;
+              end;
+            end else begin
+              res = true;
+            end;
+            if (nonblank(RepSpec.f6) or nonblank(RepSpec.f7) and res) then begin
+              res = CheckObject(RetPUr.Objects,RepSpec.f6,RepSpec.f7);
+              if (!res) then begin
+                res = CheckObject(RetPUrw.Objects,RepSpec.f6,RepSpec.f7);
+              end;
+            end;
+            if (res) then begin
+              CountRecordData(IHr,RepSpec,v_itemreccode,v_itemrecdate,v_itemrecqty,v_itemrecprice,v_itemlen,v_itemlocqty,
+                              v_itemloc,v_itemloccostprice,v_itemloccostsum,v_itemlocs);
+            end;
+          end else begin
+            res = false;
+          end;
+        end;
+      case "StockMovVc":
+        StockMovr.SerNr = IHr.TransNr;
+        if (ReadFirstMain(StockMovr,1,true)) then begin
+          MatRowGet(StockMovr,IHr.Row,StockMovrw);
+          if (IHr.ArtCode==StockMovrw.ArtCode) then begin
+            if (nonblank(RepSpec.f5)) then begin
+              res = false;
+            end else begin
+              res = true;
+            end;
+            if (nonblank(RepSpec.f6) or nonblank(RepSpec.f7) and res) then begin
+              res = CheckObject(StockMovr.Objects,RepSpec.f6,RepSpec.f7);
+              if (!res) then begin
+                res = CheckObject(StockMovrw.Objects,RepSpec.f6,RepSpec.f7);
+              end;
+            end;
+            if (res) then begin
+              CountRecordData(IHr,RepSpec,v_itemreccode,v_itemrecdate,v_itemrecqty,v_itemrecprice,v_itemlen,v_itemlocqty,
+                              v_itemloc,v_itemloccostprice,v_itemloccostsum,v_itemlocs);
+            end;
+          end else begin
+            res = false;
+          end;
+        end;
+      case "SHVc":
+        SHr.SerNr = IHr.TransNr;
+        if (ReadFirstMain(SHr,1,true)) then begin
+          MatRowGet(SHr,IHr.Row,SHrw);
+          if (IHr.ArtCode==SHrw.ArtCode) then begin
+            if (nonblank(RepSpec.f5)) then begin
+              if (SHr.CustCode==RepSpec.f5) then begin
+                res = true;
+              end;
+            end else begin
+              res = true;
+            end;
+            if (nonblank(RepSpec.f6) or nonblank(RepSpec.f7) and res) then begin
+              res = CheckObject(SHr.Objects,RepSpec.f6,RepSpec.f7);
+              if (!res) then begin
+                res = CheckObject(SHrw.Objects,RepSpec.f6,RepSpec.f7);
+              end;
+            end;
+            if (res) then begin
+              CountRecordData(IHr,RepSpec,v_itemreccode,v_itemrecdate,v_itemrecqty,v_itemrecprice,v_itemlen,v_itemlocqty,
+                              v_itemloc,v_itemloccostprice,v_itemloccostsum,v_itemlocs);
+            end;
+          end else begin
+            res = false;
+          end;
+        end;
+      case "SDVc":
+        SDr.SerNr = IHr.TransNr;
+        if (ReadFirstMain(SDr,1,true)) then begin
+          MatRowGet(SDr,IHr.Row,SDrw);
+          if (IHr.ArtCode==SDrw.ArtCode) then begin
+            if (nonblank(RepSpec.f5)) then begin
+              res = false;
+            end else begin
+              res = true;
+            end;
+            if (nonblank(RepSpec.f6) or nonblank(RepSpec.f7) and res) then begin
+              res = CheckObject(SDr.Objects,RepSpec.f6,RepSpec.f7);
+              if (!res) then begin
+                res = CheckObject(SDrw.Objects,RepSpec.f6,RepSpec.f7);
+              end;
+            end;
+            if (res) then begin
+              CountRecordData(IHr,RepSpec,v_itemreccode,v_itemrecdate,v_itemrecqty,v_itemrecprice,v_itemlen,v_itemlocqty,
+                              v_itemloc,v_itemloccostprice,v_itemloccostsum,v_itemlocs);
+            end;
+          end else begin
+            res = false;
+          end;
+        end;
+      case "RetVc":
+        Retr.SerNr = IHr.TransNr;
+        if (ReadFirstMain(Retr,1,true)) then begin
+          MatRowGet(Retr,IHr.Row,Retrw);
+          if (IHr.ArtCode==Retrw.ArtCode) then begin
+            if (nonblank(RepSpec.f5)) then begin
+              if (Retr.CustCode==RepSpec.f5) then begin
+                res = true;
+              end;
+            end else begin
+              res = true;
+            end;
+            if (nonblank(RepSpec.f6) or nonblank(RepSpec.f7) and res) then begin
+              res = CheckObject(Retr.Objects,RepSpec.f6,RepSpec.f7);
+              if (!res) then begin
+                res = CheckObject(Retrw.Objects,RepSpec.f6,RepSpec.f7);
+              end;
+            end;
+            if (res) then begin
+              CountRecordData(IHr,RepSpec,v_itemreccode,v_itemrecdate,v_itemrecqty,v_itemrecprice,v_itemlen,v_itemlocqty,
+                              v_itemloc,v_itemloccostprice,v_itemloccostsum,v_itemlocs);
+            end;
+          end else begin
+            res = false;
+          end;
+        end;
+      //case "SRVc":
+      //  //SRr.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(SRr,1,true)) then begin
+      //    res = true;
+      //  //end;
+      //case "WSVc":
+      //  WSr.SerNr = IHr.TransNr;
+      //  if (ReadFirstMain(WSr,1,true)) then begin
+      //    if (WSr.CustCode==RepSpec.f5 and nonblank(RepSpec.f5)) then begin
+      //      res = true;
+      //    end;
+      //  end;
+      //case "DispatchVc":
+      //  Dispatchr.SerNr = IHr.TransNr;
+      //  if (ReadFirstMain(Dispatchr,1,true)) then begin
+      //    if (Dispatchr.CustCode==RepSpec.f5 and nonblank(RepSpec.f5)) then begin
+      //      res = true;
+      //    end;
+      //  end;
+      //case "ProdVc":
+      //  //Prodr.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(Prodr,1,true)) then begin
+      //    res = false;
+      //  //end;
+      //case "ProdOperationVc":
+      //  //ProdOpr.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(ProdOpr,1,true)) then begin
+      //    res = false;
+      //  //end;
+      //case "IVVc":
+      //  IVr.SerNr = IHr.TransNr;
+      //  if (ReadFirstMain(IVr,1,true)) then begin
+      //    if (IVr.CustCode==RepSpec.f5 and nonblank(RepSpec.f5)) then begin
+      //      res = true;
+      //    end;
+      //  end;
+      //case "IVCashVc":
+      //  IVCashr.SerNr = IHr.TransNr;
+      //  if (ReadFirstMain(IVCashr,1,true)) then begin
+      //    if (IVCashr.CustCode==RepSpec.f5 and nonblank(RepSpec.f5)) then begin
+      //      res = true;
+      //    end;
+      //  end;
+      //case "INTransferVc":
+      //  //INTransferr.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(INTransferr,1,true)) then begin
+      //    //if (PUr.VECode==RepSpec.f5 and nonblank(RepSpec.f5)) then begin
+      //    res = false;
+      //    //end;
+      //  //end;
+      //case "Fut2ProdInVc":
+      //  //Prodr.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(Prodr,1,true)) then begin
+      //    res = false;
+      //  //end;
+      //case "Fut2ProdOutVc":
+      //  //Prodr.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(Prodr,1,true)) then begin
+      //    res = false;
+      //  //end;
+      //case "Fut2ProdOrderInVc":
+      //  //ProdOrderr.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(ProdOrderr,1,true)) then begin
+      //    res = false;
+      //  //end;
+      //case "Fut2ProdOrderOutVc":
+      //  //ProdOrderr.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(ProdOrderr,1,true)) then begin
+      //    res = false;
+      //  //end;
+      //case "Fut3ORVc":
+      //  ORr.SerNr = IHr.TransNr;
+      //  if (ReadFirstMain(ORr,1,true)) then begin
+      //    if (ORr.CustCode==RepSpec.f5 and nonblank(RepSpec.f5)) then begin
+      //      res = true;
+      //    end;
+      //  end;
+      //case "Fut1POVc":
+      //  POr.SerNr = IHr.TransNr;
+      //  if (ReadFirstMain(POr,1,true)) then begin
+      //    if (POr.VECode==RepSpec.f5 and nonblank(RepSpec.f5)) then begin
+      //      res = true;
+      //    end;
+      //  end;        
+      //case "StockTakeVc":
+      //  //StockTaker.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(StockTaker,1,true)) then begin
+      //    res = false;
+      //  //end;
+      //case "OffHireVc":
+      //  OffHirer.SerNr = IHr.TransNr;
+      //  if (ReadFirstMain(OffHirer,1,true)) then begin
+      //    if (OffHirer.CustCode==RepSpec.f5 and nonblank(RepSpec.f5)) then begin
+      //      res = true;
+      //    end;
+      //  end;
+      //case "InternMovVc":
+      //  //InternMovr.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(InternMovr,1,true)) then begin
+      //    res = false;
+      //  //end;
+      //case "QualConVc":
+      //  //QualConr.SerNr = IHr.TransNr;
+      //  //if (ReadFirstMain(QualConr,1,true)) then begin
+      //    res = false;
+      //  //end;
+    end;
+  end;
+
+  GetDetailedRecordData = res;
+  return;
+end;
+
+global
+procedure JPD_InvValRn(record RcVc RepSpec)
+begin
+  string 255 tstr,key;
+  integer rw,i,keycnt,j;
+  array integer acols;
+  record ItemHistVc IHr;
+  boolean TrHs,testf,skipf;
+  record INVc INr;
+  vector boolean v_hasgroup,v_hasclass,v_itemf,v_itemoutf,v_hasserf,v_locf,v_itemloc;
+  date tdate,tdate2;
+  vector string 255 v_name,v_code,v_unit,v_itemreccode,v_itemlocs;
+  vector date v_itemrecdate;
+  vector val v_quant,v_price,v_sum,v_quant2,v_locquant,v_itemrecqty,v_itemrecprice,v_itemlocqty,v_itemloccostprice,v_itemloccostsum;
+  vector longint v_itemlen;
+  array string 255 a_code,a_itemsernr,a_locations;
+  array integer a_ref,a_ref2;
+  val totalq,totalsum,bprice,qty,qty2,totalq2;
+   
+  StartReportJob(UsetStr(-100030));
+  rw = 1;
+  HT2Per(RepSpec.d1,RepSpec.d1,tstr);
+  Header(rw,tstr,1);
+  rw = rw + 1;
+  EndHeader;
+
+  skipf = false;
+  if (RepSpec.flags[11]==4 and blank(RepSpec.f3)) begin
+    ReportError(-100037);
+    skipf = true;
+  end;
+  
+  if (!skipf) then begin
+    DrawHeader(RepSpec,acols);
+
+    keycnt = 1;
+    if (nonblank(RepSpec.f1)) then begin
+      key = "ArtCodeLoc";
+      IHr.ArtCode = RepSpec.f1;
+    end;
+    if (nonblank(RepSpec.f4)) then begin
+      if (blank(key)) then begin
+        key = "SerNrPerLoc";
+      end else begin
+        keycnt = keycnt + 1;
+      end;
+      IHr.Location = RepSpec.f4;
+    end;
+    if (nonblankdate(RepSpec.d1)) then begin
+      if (blank(key)) then begin
+        key = "TransDate";
+      end else begin
+        if (key!="SerNrPerLoc") then begin
+          keycnt = keycnt + 1;
+        end;
+      end;
+      tdate.day = 1;
+      tdate.month = 1;
+      tdate.year = 1900;
+      IHr.TransDate = tdate;
+    end;
+    if (blank(key)) then begin
+      key = "SerNr";
+    end;
+    
+    TrHs = true;
+    while (LoopKey(key,IHr,keycnt,TrHs)) begin
+      if (key=="ArtCodeLoc") then begin
+        if (IHr.ArtCode!=RepSpec.f1) then begin
+          TrHs = false;
+        end;
+        if (nonblank(RepSpec.f4)) then begin
+          if (IHr.Location!=RepSpec.f4) then begin
+            TrHs = false;
+          end;
+        end;
+        if (nonblankdate(RepSpec.d1)) then begin
+          if (IHr.TransDate>RepSpec.d1) then begin 
+            TrHs = false;
+          end;
+        end;
+      end;
+      if (key=="SerNrPerLoc") then begin
+        if (IHr.Location!=RepSpec.f4) then begin
+          TrHs = false;
+        end;
+      end;
+      if (key=="TransDate") then begin
+        if (IHr.TransDate>RepSpec.d1) then begin 
+          TrHs = false;
+        end;
+      end;
+      if (TrHs) then begin
+        testf = true;
+        if (IHr.StockAffectf==0) then begin
+          testf = false;
+        end;
+        if (testf) then begin
+          if (nonblankdate(RepSpec.d1)) then begin
+            if (IHr.TransDate>RepSpec.d1) then begin 
+              testf = false;
+            end;
+          end;
+          if (blank(IHr.ArtCode)) then begin
+            testf = false;
+          end else begin
+            INr.Code = IHr.ArtCode;
+            if (!ReadFirstMain(INr,1,true)) then begin
+              testf = false;
+            end else begin
+              if (INr.Terminated!=0) then begin
+                if (RepSpec.flags[5]==0) then begin
+                  testf = false;
+                end;
+              end;
+            end;
+          end;
+          if (testf) then begin
+            if (!v_itemf[IHr.ArtCode]) then begin
+              v_itemf[IHr.ArtCode] = true;
+              if (nonblank(RepSpec.f2)) then begin
+                if (RepSpec.f2==INr.Group) then begin
+                  v_hasgroup[INr.Code] = true;
+                end;
+              end;
+              if (nonblank(RepSpec.f3)) then begin
+                if (SetInSet(RepSpec.f2,INr.DispGroups)) then begin
+                  v_hasclass[INr.Code] = true;
+                end;
+              end;
+            end;
+          end;
+          if (nonblank(RepSpec.f2) or nonblank(RepSpec.f3)) then begin
+            if (!v_hasgroup[INr.Code] or !v_hasclass[INr.Code]) then begin
+              testf = false;
+            end;
+          end;
+        end;
+        if (testf) then begin
+          testf = GetDetailedRecordData(IHr,RepSpec,v_itemreccode,v_itemrecdate,v_itemrecqty,v_itemrecprice,v_itemlen,v_itemlocqty,
+                                v_itemloc,v_itemloccostprice,v_itemloccostsum,v_itemlocs);
+        end;
+        if (testf) then begin
+          if (RepSpec.flags[6]==3) then begin
+            if (!v_locf[IHr.Location]) then begin
+              a_locations[a_locations.length] = IHr.Location;
+              v_locf[IHr.Location] = true;
+            end;
+            v_locquant[IHr.Location] = v_locquant[IHr.Location] + IHr.Qty;
+          end else begin
+            v_name[INr.Code] = INr.Name;
+            v_code[INr.Code] = INr.Code;
+            v_unit[INr.Code] = INr.Unittext;
+            qty = IHr.Qty;
+            qty2 = IHr.Qty2;
+            
+            if (RepSpec.flags[2]!=0) then begin
+              if (nonblank(IHr.SerialNr)) then begin
+                v_hasserf[IHr.ArtCode] = true;
+                a_itemsernr[a_itemsernr.length] = IHr.ArtCode & "|" & IHr.SerialNr & "|" & IHr.Qty;
+              end;
+            end;
+            
+            v_quant[INr.Code] = v_quant[INr.Code] + qty;
+            v_quant2[INr.Code] = v_quant2[INr.Code] + qty2;
+            if (v_price[INr.Code]<=0) then begin
+              tdate2 = RepSpec.d1;
+              if (blankdate(RepSpec.d1)) then begin
+                tdate2 = CurrentDate;
+              end;
+              bprice = FindCostPriceBackDated(INr.Code,RepSpec.f4,"",1,tdate2,false);
+              v_price[INr.Code] = bprice;
+            end;
+            v_sum[INr.Code] = v_sum[INr.Code] + v_price[INr.Code]*qty;
+            if (!v_itemoutf[INr.Code]) then begin
+              v_itemoutf[INr.Code] = true;
+              a_code[a_code.length] = INr.Code;
+            end;
+          end;
+        end;
+      end;
+    end;
+    
+    PrintData(RepSpec,a_code,v_quant,v_name,v_code,v_quant,v_quant2,v_price,v_sum,a_itemsernr,totalq,totalq2,
+              totalsum,a_locations,v_locquant,acols,v_unit,v_hasserf,v_itemreccode,v_itemrecdate,v_itemrecqty,v_itemrecprice,v_itemlen,
+              v_itemlocqty,v_itemloc,v_itemloccostprice,v_itemloccostsum,v_itemlocs)
+    PrintTotals(RepSpec,totalq,totalq2,totalsum,acols);
+  end;
+
+  EndJob;
+  return;
+end;
