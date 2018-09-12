@@ -6,6 +6,7 @@ begin
   string 255 outstringexp,flag;
   record INVc INr;
   integer qty;
+  string 20 price;
   
   IVr.SerNr = RepSpec.long1;
   if (ReadFirstMain(IVr,1,true)) then begin	  
@@ -25,7 +26,9 @@ begin
 						flag = "LV";
 					end;
 					qty = IVrw.Quant;
-					outstringexp = " " & IVrw.ArtCode & ";" & qty & ";" & IVrw.Price & ";" & flag & chr(13) & chr(10);
+					price = "";
+					price = Valtostring(IVrw.Price,M45Val,"",DEcimalSeparator,0);
+					outstringexp = " " & IVrw.ArtCode & ";" & qty & ";" & price & ";" & IVr.CurncyCode & ";" & flag & chr(13) & chr(10);
 					ExportPadString(outstringexp,len(outstringexp),"",false);
 				end;
 			end;		
