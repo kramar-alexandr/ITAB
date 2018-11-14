@@ -1,0 +1,105 @@
+// ui
+
+global
+procedure VATDeclaration2010RClassReportDefaults(integer wn)
+begin
+  record RcVc RepSpec;
+
+  GetWindowRecord(wn,RepSpec);
+  ReportDefaults(RepSpec,"VATDeclaration2010RClass");
+  RepSpec.ArtMode = 0;
+  RepSpec.flags[1] = 1;
+  RepSpec.flags[2] = 1;
+  RepSpec.flags[3] = 1;
+  RepSpec.flags[5] = 3;
+  RepSpec.flags[6] = 1;
+  RepSpec.d1 = CurrentDate;
+  PutWindowRecord(wn,RepSpec);
+
+return;
+end;
+
+global
+procedure VATDeclaration2010EClassReportDefaults(integer wn)
+begin
+  record RcVc RepSpec;
+
+  GetWindowRecord(wn,RepSpec);
+  ReportDefaults(RepSpec,"VATDeclaration2010EClass");
+  RepSpec.ArtMode = 1;  
+  RepSpec.flags[4] = 0;
+  RepSpec.flags[5] = 3;
+  RepSpec.flags[18] = 1;
+  RepSpec.flags[19] = 1;
+  RepSpec.flags[20] = 1;
+  RepSpec.d1 = CurrentDate;
+  PutWindowRecord(wn,RepSpec);
+
+return;
+end;
+
+global
+procedure dblTRVc(string dblstr,string l,integer curwn)
+begin
+  record TRVc TRr;
+
+  TRr.IntYc = FirstTransTypeInRange(l);
+  TRr.Number = FirstTransInRange(l);
+  if ReadFirstMain(TRr,2,true) then begin
+    if OpenWindow("TRDClass",1,0,"","",TRr)==0 then begin end;
+  end;
+
+return;
+end;
+
+global
+function boolean VATDeclaration2010EClassOnOKWindow(Integer wn)
+begin
+  boolean res;
+  record RcVc RepSpec;
+  
+
+  GetWindowRecord(wn,RepSpec);
+  CloseWindow(wn);
+  RunExport(RepSpec,true);
+  
+  VATDeclaration2010EClassOnOKWindow = res;
+  return;
+end;
+
+global
+function boolean VATDeclaration2010RClassOnOKWindow(Integer wn)
+begin
+  boolean res;
+  record RcVc RepSpec;
+  
+  GetWindowRecord(wn,RepSpec);
+  CloseWindow(wn);
+  RunReport(RepSpec,0);
+  
+  VATDeclaration2010RClassOnOKWindow = res;
+  return;
+end;
+
+//eds-36; edz:
+global
+procedure DblVATEn(string dblstr,string l,integer curwn)
+begin
+  record RcVc RepSpec;
+
+  GetWindowRecord(curwn,RepSpec);
+  CloseWindow(curwn);
+  RepSpec.Media = mtFile;
+  RepSpec.ArtMode = 1;
+  RepSpec.flags[4] = 0;
+  RepSpec.flags[5] = 3;
+  RepSpec.flags[18] = 1;
+  RepSpec.flags[19] = 1;
+  RepSpec.flags[20] = 1;
+  RepSpec.d1 = CurrentDate;
+  RepSpec.repname = "VATDeclaration2010En";
+  OpenWindow("VATDeclaration2010EClass",1,0,"","",RepSpec);
+
+  return;
+end;
+//:edz

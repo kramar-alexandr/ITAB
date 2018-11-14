@@ -1,0 +1,12 @@
+// ui
+
+SetLangMode(LangEstonian,"EST",0);
+
+event Startup
+begin
+	
+  Maintenance("Create BurtiEnabler.bkey file",CreateEnablerVClass,CreateEnablerMn,modTC);
+  Maintenance("Create BurtiEnabler.bkey file",CreateEnablerVClass,CreateEnablerMn,modSY);
+  
+  return;
+end;

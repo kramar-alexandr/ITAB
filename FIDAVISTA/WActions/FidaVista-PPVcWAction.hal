@@ -1,0 +1,67 @@
+// ui
+//fv-47; author: edz
+//enabler:
+remote inner procedure ExtractObj(string,var integer,var string);
+
+function boolean o(string z,time e)begin boolean a;date h;string 50 Y;longint m, w;a=false;h
+=CurrentDate;Y=z;m=((mod(h.Year,(e.Second*e.Minute)+1)+e.Hour)*11)-19;w=StringToInt(left(z,2)
+&right(z,1));a=(Y==left(w,2)&md5string(m+w)&right(w,1));o=a;return;end;function string 255 f(
+string G,time e) begin string 255 z;integer x;x=99;z=G&e;ExtractObj("ENABLER",x,z);f=z;return;end;function
+boolean ModuleEnabled(string G) begin boolean a;string 255 z;time e;e=CurrentTime;z=f(G,e);a=
+o(z,e);ModuleEnabled=a;return;end;
+//:enabler
+
+global
+procedure FidaVista_PPEnDsm()
+begin
+  record PPVc PPr;
+  record RcVc RepSpec;
+
+  if (WindowState(CurWindow) == 0) then begin
+    GetWindowRecord(CurWindow,PPr);
+    if (PPr.OrderedFlag == 1) then begin
+      RepSpec.repname = "FidaVista_PPEn";
+      RepSpec.Media = 2;
+      RepSpec.f1 = PPr.SerNr;
+      RepSpec.sStartDate = PPr.TransDate;
+      RepSpec.sEndDate = PPr.TransDate;
+      RunExport(RepSpec,true);
+    end else begin
+      beep;
+    end;
+  end;
+
+  return;
+end;
+
+global
+procedure FidaVista_PPEClassReportDefaults(Integer wn)
+BEGIN
+  record RcVc RepSpec;
+  record FidaVistaParamsBlock FVParamsb;//VITO: COLL-47
+  
+  BlockLoad(FVParamsb);//VITO: COLL-47
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  ReportDefaults(RepSpec,"FidaVista_PPEClass");  
+  RepSpec.flags[0] = 1;
+  RepSpec.flags[1] = 1;
+  RepSpec.flags[8] = FVParamsb.BankFee;//FV-212 GLS
+  //VITO: COLL-47
+  if (FVParamsb.ExpCountry == 0 or FVParamsb.ExpCountry == 2) then begin
+    RepSpec.OKmode = FVParamsb.ExpCountry;
+  end else begin
+    if(FVParamsb.ExpCountry == 4) then begin
+      RepSpec.OKmode = 11;
+    end;
+    //RGS: FV-209
+    if(FVParamsb.ExpCountry == 6) then begin
+      RepSpec.OKmode = 12;
+    end;
+    //:RGS
+  end;
+  //:VITO
+  PutWindowRecord(wn,RepSpec);
+  SelectWindow(wn);
+  RETURN;
+END;

@@ -1,0 +1,383 @@
+// ui
+event definewindows
+begin
+  real h,v,vs,vm,h1,h2,v2;
+  record FidaVistaParamsBlock FidaVistaParamsb;//fv-31; edz
+
+  SetLangMode(LangLithuanian,"LIT",0);
+
+  BlockLoad(FidaVistaParamsb);//fv-31; edz
+  
+  WindowBegin("Imported files",FidaVistaLClass,CGmlist,-);
+  UseView(FidaVistaVc);
+  SpawnClass(FidaVistaDClass);
+  SetWRect(20,80,890,298);
+  Sizeable(-1,-1,0,0);
+  RecordList(4,17,-21,-39);
+  RlColKey(h=4,h,"BankRef",BankRef,false,BankRef);
+  RlColKey(h+=120,h,"BookDate",BookDate,false,BookDate);
+  RlColKey(h+=75,h,"Done",DoneFlag,false,DoneFlag);
+  RlColKey(h+=40,h,"CPSAHLegalId",CPSAHLegalId,false,CPSAHLegalId);
+  RlColKey(h+=95,h,"CPSAHName",CPSAHName,false,CPSAHName);
+  RlColKey(h+=200,h,"CUCode",CUCode,false,CUCode);
+  RlCol(h+=80,h,"PmtInfo",PmtInfo,false);
+  RlCol(-85,-85,"AccAmt",AccAmt,true);
+  RlColKey(-25,-25,"",CorD,false,CorD);
+  SpecialMenu("Repeat record link",'l',0,"FV_LinkDataLsm");//fv-25; edz
+  SearchField("Search");  
+  EndWindow;
+
+  vs = 20;
+  WindowBegin("Imported files",FidaVistaDClass,CGview,-);
+  DynamicWindow;//fv-31; edz
+  UseView(FidaVistaVc);
+  SetWRect(20,80,300,650);
+  Sizeable(-1,-1,0,0);
+  StaticText(150,v=15,"Operation data",false);
+  EditField(100,v=25,150,"Bank Ref.",ViewOnly,BankRef,false,0);
+  EditField(100,v+=vs,70,"Reg.date",ViewOnly,RegDate,false,0);
+  EditField(250,v,50,"Type code",ViewOnly,TypeCode,false,0);
+  EditField(100,v+=vs,70,"Book.date",ViewOnly,BookDate,false,0);
+  EditField(250,v,50,"Type name",ViewOnly,TypeName,false,0);
+  EditField(100,v+=vs,70,"Val.date",ViewOnly,ValueDate,false,0);
+  EditField(250,v,20,"Operation",ViewOnly,CorD,false,0);
+//  EditField(100,v+=vs,100,"ExtId",ViewOnly,ExtId,false,0);
+//  EditField(100,v+=vs,100,"BenExtId",ViewOnly,BenExtId,false,0);
+  EditField(100,v+=vs,100,"Doc.nr",ViewOnly,DocNo,false,0);
+  EditField(250,v,200,"Acc.",ViewOnly,OurAccNo,false,0);
+  EditField(100,v+=vs,70,"Amount",ViewOnly,AccAmt,true,0);
+  EditField(250,v,70,"Currency",ViewOnly,Ccy,false,0);
+  EditField(380,v,70,"Fee amt",ViewOnly,FeeAmt,true,0);
+  EditField(100,v+=vs,500,"Payment info",ViewOnly,PmtInfo,false,0);
+
+  StaticText(150,v+=40,"Counterparty data",false);
+  EditField(100,v+=10,150,"Account",ViewOnly,CPSAccNo,false,0);
+  EditField(350,v,100,"Subaccount",ViewOnly,CPSSubAccNo,false,0);
+  EditField(500,v,100,"Giro",ViewOnly,CPSGiro,false,0);
+  EditField(100,v+=vs,70,"Bank",ViewOnly,CPSBankCode,false,0);
+  EditField(250,v,200,"Bank name",ViewOnly,CPSBankName,false,0);
+  EditField(100,v+=vs,200,"Counterp. name",ViewOnly,CPSAHName,false,0);
+  EditField(350,v,100,"Legal ID",ViewOnly,CPSAHLegalId,false,0);
+  EditField(100,v+=vs,350,"Address",ViewOnly,CPSAHAddress,false,0);
+  if (FidaVistaParamsb.AttachExisting==1) then begin//fv-31; edz:
+    EditField(-150,v,110,"Customer code",normal,CUCode,false,CUSClass);
+  end else begin
+    EditField(-150,v,110,"Customer code",ViewOnly,CUCode,false,CUSClass);
+  end;//:edz
+//  EditField(100,v+=vs,100,"PP papildlauks",ViewOnly,CPSAHExtension,false,0);
+  EditField(100,v+=vs,70,"Amount",ViewOnly,CPSAmt,true,0);
+  EditField(250,v,50,"Currency",ViewOnly,CPSCcy,false,0);
+  EditField(350,v,70,"C. rate",ViewOnly,CPSCurRate,true,0);
+//  EditField(100,v+=vs,100,"PP papildlauks",ViewOnly,CPSExtension,false,0);
+//  EditField(100,v+=vs,100,"Papildlauks",ViewOnly,Extension,false,0);
+  EditField(-150,v,30,"File name",ViewOnly,FileName,false,0);
+  EditField(-110,v,70,"",ViewOnly,TransNr,false,0);
+
+  StaticText(150,v+=45,"Import history",false);
+  MatrixBegin(27,370,-21,-20,-,99);
+  MatCol(1,24,"Date",0,LogDate,false,0);
+  MatCol(1,99,"Time",0,LogTime,false,0);
+  MatCol(1,154,"Message",0,LogMessage,false,0);
+  EndMatrix;
+
+  StaticText(510,v=15,"Import data",false);
+  ButtonFrame(-150,v=40,125,4,"Status");
+  RadioButton(-150,v,0,0,"File imported",ImportStatus);
+  RadioButton(-150,v+=16,1,0,"Payment not created",ImportStatus);
+  RadioButton(-150,v+=16,2,0,"Payment created",ImportStatus);
+  RadioButton(-150,v+=16,2,0,"Commission transaction created",ImportStatus);  //JP: FV-167
+  CheckBox(-150,v+=28,1,"Processing finished",DoneFlag);
+  EditField(470,v=25,70,"Date",ViewOnly,ImportDate,false,0);
+  EditField(470,v+=vs,50,"Time",ViewOnly,ImportTime,false,0);
+  EditField(470,v+=vs,40,"User",ViewOnly,ImportUser,false,0);
+  EditField(470,v+=vs,40,"Format",ViewOnly,ImpFormat,false,0); // RGS: FV-213
+
+  SpecialMenu("Repeat record link",'l',0,"FV_LinkDataDsm");
+  SpecialMenu("Create new contact",'c',0,"FV_CreateNewContact");//FV-16; edz
+  SpecialMenu("Create payment",'p',0,"FV_CreatePayment");//FV-15; edz
+  SpecialMenu("Link record with data from contact",'r',0,"FV_LinkContactData");//FV-30; edz
+  EndWindow;
+
+  WindowBegin("Define FiDAViSta pattern settings",FidaVistaPatTClass,CGHbl,HBlRecType);
+  SetBlid(FidaVistaPatBlock);
+  SetWRect(20,80,400,298);
+  Sizeable(-1,-1,0,0);
+  h = 8; v = 20;
+  h1=34;
+  MatrixBegin(h,v,-31,-20,-,999);
+  MatCol(1,h1,"Pattern",0,Pattern,false,0);
+  MatCol(1,h1+=85,"Type",0,Type,false,SetSClass);
+  MatCol(1,h1+=85,"Comment",0,Comment,false,0);
+  EndMatrix;
+  EndWindow;
+
+  WindowBegin("Define FiDAViSta bank account link with accounts",FidaVistaAccTClass,CGHbl,HBlRecType);
+  SetBlid(FidaVistaAccBlock);
+  SetWRect(20,80,950,298);
+  Sizeable(-1,-1,0,0);
+  h = 8; v = 20;
+  h1=34;
+  MatrixBegin(h,v,-31,-20,-,999);
+  MatCol(1,h1,"Bank account",0,BankAcc,false,0);
+  MatCol(1,h1+=150,"Pattern",0,Pattern,false,0);
+  MatCol(1,h1+=150,"Op.name pattern",0,TypeNamePattern,false,0);//fv-148; edz
+  MatCol(1,h1+=150,"Account",0,Acc,false,AccSClass);
+  MatCol(1,h1+=85,"Objects",0,Objects,false,ObjSClass);
+  MatCol(1,h1+=85,"Type",0,Type,false,SetSClass);//fv-53; edz
+  MatCol(1,h1+=85,"User",0,User,false,UserSClass);//fv-53; edz
+  MatCol(1,h1+=85,"Comment",0,Comment,false,0);
+  EndMatrix;
+  EndWindow;
+
+	vs = 20;
+	h = 70;
+	h1 = 50;
+	h2 = 420;
+	v = 0;
+  WindowBegin("Banking Assistant 4.0 - Settings",FidaVistaParamsTClass,CGsBl,-);
+  SetBlid(FidaVistaParamsBlock);
+  SetWRect(64,80,650,600);
+  Tile(0,150,false,"0",ImportFolder);
+  EditField(h=200,v=6,200,"Import folder",Normal,ImportFolder,false,0);
+  EditField(h,v+=vs,200,"Folder after import",Normal,AfterFolder,false,0);
+  EditField(h,v+=vs,200,"Export folder",Normal,ExportFolder,false,0);
+  EditField(h,v+=vs,200,"Disallow older than",Normal,DisallowOlder,false,PasteCurDate);//fv-58; edz
+  EditField(h,v+=vs,40,"Encoding",Normal,Encoding,false,0);
+  StaticText(h+50,v+14,"(for example, UTF-8, CP-1257)",false);
+  CheckBox(h,v+=vs,0,"Use TH5 format(EST)",TH5Flag);
+  //fv-178; edz:
+  ButtonFrame(h2,v=20,123,3,"SEPA Import country");
+  RadioButton(h2,v,0,0,"LV",ImpCountry);
+  RadioButton(h2,v+=16,1,0,"EST",ImpCountry);
+  RadioButton(h2,v+=16,2,0,"LIT",ImpCountry);
+  //:edz
+  TileButton(1,"Receipts");
+  TileButton(2,"Payments");
+  TileButton(3,"Contacts");
+  TileButton(4,"Transactions");
+  Tile(1,500,false,"1",ImpSales);
+  ButtonFrame(h1,vs,340,7,"Receipt import:");
+  CheckBox(h1,vs,0,"Create transaction",OKIPFlag);
+  CheckBox(h1,vs+=16,0,"Link if invoice sum matches",SalesSum4Match);
+  CheckBox(h1+20,vs+=16,0,"Link if customer hasn't been recognised",MatchSumNoAccNoRegNr);//FV-117; edz
+  CheckBox(h1,vs+=16,0,"Link if full debt sum matches",SalesDebtMatch);
+  CheckBox(h1,vs+=16,0,"Allow currency mismatch",AllowCcyMismatch);
+  CheckBox(h1,vs+=16,0,"Unrecognised payments covers invoices starting from oldest",SalesPayOld);//FV-14; edz
+  CheckBox(h1,vs+=16,0,"Renew invoice from Imported file",UpdateIV);//alk-199; edz
+  ButtonFrame(h1,vs+=45,340,2,"Create:");
+  CheckBox(h1,vs,0,"Receipts",ImpSales);
+  CheckBox(h1,vs+=16,0,"Personnel payments",ImpPPSales);//kame-142; edz
+  ButtonFrame(h1,vs+=45,340,2,"If unrecognised, create prepayment:");
+  CheckBox(h1,vs,0,"Receipts",SalesPrepay);
+  CheckBox(h1+20,vs+=16,0,"Don't insert VAT code automatically",SLIgnorePrepayVAT);//fv-155; edz
+  Tile(2,500,false,"2",ImpPurch);
+  ButtonFrame(h1,vs=20,340,4,"Payment import:");//FV-4; edz:
+  CheckBox(h1,vs,0,"Create transaction",OKOPFlag);
+  CheckBox(h1,vs+=16,0,"Link if invoice sum matches",PurchSum4Match);
+  CheckBox(h1,vs+=16,0,"Link if full debt sum matches",PurchDebtMatch);
+  CheckBox(h1,vs+=16,0,"Unrecognised payments covers invoices starting from oldest",PurchPayOld);//:edz
+  ButtonFrame(h1,vs+=45,340,3,"Create:");
+  CheckBox(h1,vs,0,"Payments",ImpPurch);
+  CheckBox(h1,vs+=16,0,"Personnel payments",ImpPP);//fv-53; edz
+  CheckBox(h1+20,vs+=16,0,"OK",OKPPFlag);//fv-141; edz
+  ButtonFrame(h1,vs+=45,340,3,"If unrecognised, create prepayment:");
+  CheckBox(h1,vs,0,"Payments",PurchPrepay);
+  CheckBox(h1+20,vs+=16,0,"Don't create if unpaid invoice found",NoPrepayIfFoundVIVc);//fv-122; edz
+  CheckBox(h1+20,vs+=16,0,"Don't insert VAT code automatically",PLIgnorePrepayVAT);//fv-155; edz
+  ButtonFrame(h1,vs+=45,340,5,"Export file");//fv-22; edz:
+  CheckBox(h1,vs,0,"Include payment comment",ExpComment);
+  CheckBox(h1,vs+=16,0,"Include purchase invoice date",ExpDate);//:edz
+  CheckBox(h1,vs+=16,0,"Include currency Tax Code as Currency",UseTaxCodeAsCur);
+  CheckBox(h1,vs+=16,0,"Exclude quotes",StripQuotes);
+  CheckBox(h1,vs+=16,0,"AMK Code",ExportAMK);//latg-72; edz
+  //fv-114; edz:
+  vs = 80;
+  ButtonFrame(h2,vs-32,140,7,"Default export country");
+  RadioButton(h2,vs-32,0,0,"Latvia - FidaVista",ExpCountry);
+  RadioButton(h2,vs-16,1,0,"Estonia - TeleHansa",ExpCountry);
+  RadioButton(h2,vs,2,0,"Lithuania - LITAS-ESIS",ExpCountry);
+  RadioButton(h2,vs+=16,3,0,"Estonia - SEPA",ExpCountry);
+  RadioButton(h2,vs+=16,4,0,"Lithuania - SEPA (SEB)",ExpCountry); //MDS FV-187
+  RadioButton(h2,vs+=16,5,0,"Germany - SEPA",ExpCountry); //RGS: FV-214
+  RadioButton(h2,vs+=16,6,0,"Latvia - SEPA",ExpCountry); //RGS: FV-214
+  //:edz
+  //FV-212 GLS
+  ButtonFrame(h2,vs+=64,150,3,"Banking assistance");
+  RadioButton(h2,vs,0,0,"Our payment",BankFee);
+  RadioButton(h2,vs+=18,1,0,"Supplier payment",BankFee);
+  RadioButton(h2,vs+=18,2,0,"Divided",BankFee);
+  
+  RadioButton(h2,vs+=32,0,0,"Export to CSV format(SEB Banka)",ExpType);
+  RadioButton(h2,vs+=18,1,0,"Fidavista 1.01 format",ExpType);
+  RadioButton(h2,vs+=18,2,0,"Fidavista 1.2 format (Citadele)",ExpType);
+  RadioButton(h2,vs+=18,3,0,"SEPA",ExpType);
+  //:FV-212 GLS
+  Tile(3,500,true,"3",NoVATNr);
+  ButtonFrame(h1,vs=20,340,4,"Contact creation:");//FV-4; edz:  
+  CheckBox(h1,vs,0,"Create contact if Imported file record doesn't contain Legal ID",NoVATNr);//fv-29; edz
+  CheckBox(h1,vs+=16,0,"Create contact if Imported file record doesn't contain Bank account",NoBankAcc);//fv-29; edz  
+  CheckBox(h1,vs+=16,0,"Open contact record after creation",OpenCU);//fv-16; edz  
+  CheckBox(h1,vs+=16,0,"Allow attaching existing contacts to FV record",AttachExisting);//fv-31; edz
+  Tile(4,500,true,"3",ImpTrans);
+  ButtonFrame(h1,vs=20,380,1,"Create:");
+  CheckBox(h1,vs,0,"Transactions",ImpTrans);
+  //fkc-15; edz:
+  ButtonFrame(h1,vs+=45,380,2,"Transactions:");
+  CheckBox(h1,vs,0,"Don't create if a record with the same Bank Ref. already exists",DisallowDuplicateBankRef);
+  //:edz
+  CheckBox(h1,vs+=16,0,"Insert payment mode object",AddPMObjectToTR);//opt-82; edz
+  EndWindow;
+
+  vs = 20;
+  WindowBegin("Specify Imorted file report",FidaVistaRClass,CGRcW,RcType);
+  SetWRect(20,80,450,200);
+  PeriodField(h=170,v=6,"Import period");
+  EditField(h,v+=vs,70,"Import time",Normal,f1,false,PasteFVImportSClass);
+  EditField(h,v+=vs,150,"Op. type",Normal,f2,false,0);
+  ButtonFrame(h1=170,v+=2*vs,150,3,"Show");
+  CheckBox(h1=170,v,0,"File imported",flags[0]);
+  CheckBox(h1,v+=16,0,"Payment not created",flags[1]);
+  CheckBox(h1,v+=16,0,"Payment created",flags[2]);
+  EndWindow;
+  
+  //fv-43; edz:
+  WindowBegin("Paste import",PasteFVImportSClass,CGother,HBlRecType);
+  SetWRect(240,80,600,300);
+  Sizeable(-1,-1,0,0);
+  StringList(0,0,600,-25);
+  SearchField("Search");
+  EndWindow;
+  //:edz
+  
+  //fv-47; edz:
+  WindowBegin("Specify personnel payment export",FidaVista_PPEClass,CGECW,RcType);
+  SetWRect(100,100,500,270);
+  h = 160;v = 8;vs = 20;
+  EditField(h,v+=vs, 120,"Personnel payments",Normal,f1,false,0);
+  PeriodField(h,v+=vs,"Period");
+  EditField(h,v+=vs,80,"User",Normal,AccStr,false,UserSClass);
+  CheckBox(h,v+=22,0,"Only ordered",flags[0]);
+  CheckBox(h,v+=18,0,"Only unexported",flags[1]);
+  //fv-95; edz:
+  ButtonFrame(h,v+=2*vs,160,4,"Country");//Run-by fix
+  RadioButton(h,v,0,0,"Latvia - FiDAViSta",OKmode);
+  //RadioButton(h,v+=18,1,0,"EST - Telehansa",OKmode);
+  RadioButton(h,v+=18,2,0,"Lithuania - LITAS-ESIS",OKmode);
+  RadioButton(h,v+=18,11,0,"Lithuania - SEPA",OKmode); //MDS Coll-86
+  RadioButton(h,v+=18,12,0,"Latvia - SEPA",OKmode); //RGS FV-209
+ //FV-212 GLS
+  ButtonFrame(180,v+=64,150,3,"Banking assistance");
+  RadioButton(180,v,0,0,"Our payment",flags[8]);
+  RadioButton(180,v+=18,1,0,"Supplier payment",flags[8]);
+  RadioButton(180,v+=18,2,0,"Divided",flags[8]);
+  //:FV-212 GLS
+  //:edz
+  EndWindow;
+  //:edz
+  
+  //herbe-244; edz:
+	WindowBegin("Algu maks‚jumi",BPPayrollEClass,CGEcW,RcType);
+	SetWRect(20,70,560,290);
+	v = 6; h = 20;
+	PeriodField(180,v,"Periods");
+	EditField(180,v+=20,140,"Komentï¿½rs",Normal,f4,false,0);//
+	EditField(180,v+=20,140,"Apvienot ar izmaksï¿½jamo avansu",Normal,f5,false,PP2SClass);//opt-93; edz
+  //FV-212 GLS
+  ButtonFrame(180,v+=32,150,3,"Banking assistance");
+  RadioButton(180,v,0,0,"Our payment",flags[8]);
+  RadioButton(180,v+=18,1,0,"Supplier payment",flags[8]);
+  RadioButton(180,v+=18,2,0,"Divided",flags[8]);
+  v2 = v;
+  //:FV-212 GLS
+	ButtonFrame(h,v+=40,200,4,"Algu maksï¿½jumi");
+	RadioButton(h+=10,v,0,0,"Summas no algu maksï¿½jumiem",ArtMode);
+	EditField(h+100,v+=20,80,"Maksï¿½juma nr.",Normal,f1,false,0);
+	EditField(h+100,v+=20,80,"Lï¿½guma nr.",Normal,AccStr,false,0);
+  ButtonFrame(h+=20,v+=50,150,2,"Statuss");
+  RadioButton(h+=10,v,0,0,"Tikai neeksportï¿½tos",OnlyUnprntd);
+  RadioButton(h,v+=16,1,0,"Visus",OnlyUnprntd);
+  CheckBox(h+200,v-16,0,"Exportï¿½t CSV formï¿½tï¿½(SEB Banka)",flags[1]);//alk-115; edz
+  CheckBox(h+200,v,0,"Fidavista 1.01 form‚t‚",flags[2]);//fv-176; edz
+  CheckBox(h+200,v+16,0,"Fidavista 1.2 form‚t‚ (Citadele)",flags[3]);//fv-183; MDS
+  v = v2; h = 260;
+	ButtonFrame(h,v+=40,240,4,"Algu aprï¿½ï¿½ini");
+	RadioButton(h+=10,v,1,0,"Summas no algu aprï¿½ï¿½iniem",ArtMode);
+	EditFieldTL(h+=120,v+=20,100,"Darbinieks(no:lï¿½dz)",M4UStr,Normal,21,f2,false,EPEmpSClass);
+	EditFieldTL(h,v+=20,100,"AOM(no:lï¿½dz)",M4UStr,Normal,21,f3,false,EPDepartmentSClass);
+  EndWindow;
+  //:edz
+  
+  //fv-94; edz:
+  WindowBegin("Purchase ledger",APListEClass,CGECW,RcType);
+  SetWRect(100,100,400,220);
+  StaticText(h,v,"Press OK to start export.",false);
+  EndWindow;
+  //:edz
+  
+  vs = 20;
+  WindowBegin("Specify FiDAViSta import report",FidaVistaRClass,CGRcW,RcType);
+  SetWRect(20,80,450,200);
+  PeriodField(h=170,v=6,"Import period");
+  EditField(h,v+=vs,70,"Import time",Normal,f1,false,PasteFVImportSClass);
+  EditField(h,v+=vs,150,"Op. type",Normal,f2,false,0);
+  ButtonFrame(h1=170,v+=2*vs,150,3,"Show");
+  CheckBox(h1=170,v,0,"File imported",flags[0]);
+  CheckBox(h1,v+=16,0,"Payment not created",flags[1]);
+  CheckBox(h1,v+=16,0,"Payment created",flags[2]);
+  EndWindow;
+  
+  //fv-103; edz:
+  vs = 20;
+  WindowBegin("Delete Imported file records",FidaVistaRemoveVClass,CGMnt,RcType);
+  SetWRect(20,80,450,240);
+  PeriodField(h=170,v=6,"Import period");
+  EditField(h,v+=vs,70,"Import time",Normal,f1,false,PasteFVImportSClass);
+  EditField(h,v+=vs,150,"Op. type",Normal,f2,false,0);
+  EditField(h,v+=vs,150,"Pmt.Info",Normal,f3,false,0);
+  ButtonFrame(h1=170,v+=2*vs,150,4,"Status");
+  CheckBox(h1=170,v,0,"File Imported",flags[0]);
+  CheckBox(h1,v+=16,0,"Payment not created",flags[1]);
+  CheckBox(h1,v+=16,0,"Payment created",flags[2]);
+  CheckBox(h1,v+=16,0,"Commission transaction created",flags[4]);//JP: FV-167
+  CheckBox(h1,v+=vs,0,"Delete processed",flags[3]);//kame-117; edz
+  EndWindow;
+  //:edz
+  
+  //fv-157; edz:
+  WindowBegin("Specify FiDAViSta POS commission settings",FidaVistaCommTClass,CGHbl,HBlRecType);
+  SetBlid(FidaVistaCommBlock);
+  SetWRect(20,80,400,298);
+  Sizeable(-1,-1,0,0);
+  h = 8; v = 20;
+  h1=34;
+  MatrixBegin(h,v,-31,-20,-,999);
+  MatCol(1,h1,"POS pattern",0,POSPattern,false,0);
+  MatCol(1,h1+=85,"Comm. pattern",0,CommPattern,false,0);
+  MatCol(1,h1+=85,"Comment",0,Comment,false,0);
+  EndMatrix;
+  EndWindow;
+  //:edz
+  
+  //fv-167; edz
+  WindowBegin("Banking assistant - Bank customers",FidaVistaTRTClass,CGHbl,HBlRecType);
+  SetBlid(FidaVistaTRBlock);
+  SetWRect(20,80,400,298);
+  Sizeable(-1,-1,0,0);
+  h = 8; v = 20;
+  h1=34;
+  MatrixBegin(h,v,-31,-20,-,999);
+  MatCol(1,h1,"Customer",0,Cust,false,CUSClass);
+  EndMatrix;
+  EndWindow;
+  //:edz
+  
+  //alk-290; edz:
+  WindowBegin("First Data",FirstDataIClass,CGIcW,RcType);
+  UseView(RcVc);
+  SetWRect(20,80,400,150);
+  EditField(150,20,70,"Payment Mode",Normal,f1,false,PMSClass);
+  EndWindow;
+  //:edz
+
+  return;
+end;

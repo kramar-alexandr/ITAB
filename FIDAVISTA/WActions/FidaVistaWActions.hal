@@ -1,0 +1,101 @@
+remote inner function boolean RemoteModuleEnabled(string);
+// ui
+//fv-47; author: edz
+
+global
+function boolean BPPayrollEClassOnOKWindow(Integer wn)
+begin
+  boolean res;
+  record RcVc RepSpec;
+
+  //RGS: HERBE-1591
+  if (!RemoteModuleEnabled("FIDAVISTA")) then begin
+    MessageBox(0,StringFromStringSet(10000,"31987")); // RGS: FV-195
+    CloseWindow(wn);
+    goto LFailEnabler;
+  end;
+  //:RGS
+  GetWindowRecord(wn,RepSpec);
+  CloseWindow(wn);
+  RunExport(RepSpec,true);
+
+LFailEnabler:;
+  BPPayrollEClassOnOKWindow = res;
+  return;
+end;
+
+global
+function boolean FidaVista_PPEClassOnOKWindow(Integer wn)
+begin
+  boolean res;
+  record RcVc RepSpec;
+
+  //RGS: HERBE-1591
+  if (!RemoteModuleEnabled("FIDAVISTA")) then begin
+    MessageBox(0,StringFromStringSet(10000,"31987")); // RGS: FV-195
+    CloseWindow(wn);
+    goto LFailEnabler;
+  end;
+  //:RGS
+  GetWindowRecord(wn,RepSpec);
+  CloseWindow(wn);
+  if (RepSpec.OKmode==2 and blank(RepSpec.f2)) then begin
+    MessageBox(0,StringFromStringSet(10000,"31990"));
+  end else begin
+    RunExport(RepSpec,true);
+  end;
+
+LFailEnabler:;
+  FidaVista_PPEClassOnOKWindow = res;
+  return;
+end;
+
+global
+function boolean FidaVista_OPEClassOnOKWindow(Integer wn)
+begin
+  boolean res;
+  record RcVc RepSpec;
+  
+  //RGS: HERBE-1591
+  if (!RemoteModuleEnabled("FIDAVISTA")) then begin
+    MessageBox(0,StringFromStringSet(10000,"31987")); // RGS: FV-195
+    CloseWindow(wn);
+    goto LFailEnabler;
+  end;
+  //:RGS
+  GetWindowRecord(wn,RepSpec);
+  CloseWindow(wn);
+  if (RepSpec.OKmode==2 and blank(RepSpec.f2)) then begin
+    MessageBox(StringFromStringSet(10000,"31990"),"");
+  end else begin
+    RunExport(RepSpec,true);
+  end;
+  
+LFailEnabler:;
+  FidaVista_OPEClassOnOKWindow = res;
+  return;
+end;
+
+//fv-94; edz:
+global
+function boolean APListEClassOnOKWindow(Integer wn)
+begin
+  boolean res;
+  record RcVc RepSpec;
+
+  //RGS: HERBE-1591
+  if (!RemoteModuleEnabled("FIDAVISTA")) then begin
+    MessageBox(0,StringFromStringSet(10000,"31987")); // RGS: FV-195
+    CloseWindow(wn);
+    goto LFailEnabler;
+  end;
+  //:RGS
+  GetWindowRecord(wn,RepSpec);
+  CloseWindow(wn);
+  RunExport(RepSpec,true);
+  
+LFailEnabler:;
+  APListEClassOnOKWindow = res;
+  return;
+end;
+//:edz

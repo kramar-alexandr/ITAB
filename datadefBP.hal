@@ -2,15 +2,15 @@
 SourceFile("halcust/FIDAVISTA",3);
 SourceFile("halcust/FIDAVISTA/English",3);
 SourceFile("halcust/FIDAVISTA/Estonian",3);
-SourceFile("halcust/FIDAVISTA/Exports",3);
-SourceFile("halcust/FIDAVISTA/Imports",3);
+SourceFile("halcust/serverBP/Exports",3);
+SourceFile("halcust/serverBP/Imports",3);
 SourceFile("halcust/FIDAVISTA/Latvian",3);
 SourceFile("halcust/FIDAVISTA/Lithuanian",3);
-SourceFile("halcust/FIDAVISTA/Reports",3);
-SourceFile("halcust/FIDAVISTA/Tools",3);
+SourceFile("halcust/serverBP/Reports",3);
+SourceFile("halcust/serverBP/Tools",3);
 SourceFile("halcust/FIDAVISTA/WActions",3);
-SourceFile("halcust/FIDAVISTA/Maintenances",3);
-SourceFile("halcust/FIDAVISTA/RActions",3);
+SourceFile("halcust/serverBP/Maintenances",3);
+SourceFile("halcust/serverBP/RActions",3);
 
 // datadef
 begin

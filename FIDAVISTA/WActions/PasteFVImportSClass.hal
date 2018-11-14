@@ -1,0 +1,92 @@
+// ui
+//fv-43; author: edz
+procedure GetLastFVImports(var array string fvtimes,var array string fvdates,var integer counter)
+begin
+  record FidaVistaVc FVr;
+  integer i;
+  time test;
+  boolean TrHs;
+  date sdate;
+  
+  test = "zzzzzzz";
+  TrHs = true;
+  counter = 10;
+  sdate = AddDay(CurrentDate,1);
+  FVr.ImportDate = sdate;//to include today's imports in loop
+  
+  while (LoopBackKey("ImportDate",FVr,2,TrHs)) begin
+    if (test!=FVr.ImportTime) then begin
+      fvdates[i] = FVr.ImportDate;
+      fvtimes[i] = FVr.ImportTime;
+      test = FVr.ImportTime;
+      i=i+1;
+      if !(i<counter) then begin
+        TrHs = false;
+      end;
+    end;
+  end;
+  
+  return;
+end;
+
+global
+function Boolean PasteFVImportSClassOnOpenWindow(Integer wn)
+begin
+  Array string 20 fvtimes,fvdates;
+  Integer i,counter;
+  record FidaVistaVc FVr;
+
+  GetLastFVImports(fvtimes,fvdates,counter);
+  for (i=0;i<counter;i=i+1) begin
+    if ((len(fvdates[i])+len(fvtimes[i])+3)>3) then begin//if there are date and time values
+      SetListString(wn,len(fvdates[i])+len(fvtimes[i])+3,fvdates[i] & " - " & fvtimes[i],false);
+    end;  
+  end;
+  
+  PasteFVImportSClassOnOpenWindow = false;
+  return;
+end;
+
+global
+function boolean PasteFVImportSClassOnOKWindow(integer wn)
+begin
+  integer rw,mwn,i,len1,dlen;
+  string 60 tstr,tstr1,tstr2;
+  string 1 s;
+  record RcVc RepSpec;
+
+  mwn = MotherWindow(wn);
+  tstr1 = "";
+  tstr2 = "";
+  
+  rw = SelectedListLine(wn);
+  if (rw > -1) then begin
+    tstr = GetListString(wn,rw);
+    len1 = len(tstr);
+    //time's length will be 8 symbols + 3 for separators
+    dlen = len1-11;
+    //
+    for (i=0;i<len1;i=i+1) begin
+      s = mid(tstr,i,1);
+      if (i<dlen) then begin//date
+        tstr1 = tstr1 & s;
+      end;
+      if (i>dlen+2) then begin//time
+        tstr2 = tstr2 & s;
+      end;
+    end;
+  end;
+  CloseWindow(wn);
+
+  if (mwn != 0) then begin
+    PasteString(mwn,tstr2);
+    GetWindowRecord(mwn,RepSpec);
+    RepSpec.Period2Str = tstr1 & ":" & tstr1;
+    PutWindowRecord(mwn,RepSpec);
+    WindowFieldGoto(mwn,RepSpec,-1,"Period2Str",true);
+    DeselectWindow(mwn,true);
+  end;
+  
+  PasteFVImportSClassOnOKWindow = false;
+  return;
+end;

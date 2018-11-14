@@ -1,0 +1,10 @@
+// ui
+event Startup
+begin
+  SetLangMode(LangLatvian,"LAT",0);
+	
+  Maintenance("Izveidot BurtiEnabler.bkey failu",CreateEnablerVClass,CreateEnablerMn,modTC);
+  Maintenance("Izveidot BurtiEnabler.bkey failu",CreateEnablerVClass,CreateEnablerMn,modSY);
+  
+  return;
+end;

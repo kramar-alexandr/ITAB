@@ -1,0 +1,23 @@
+remote function boolean BurtiFindExpiringEnablers(var array string,var array date,var integer);
+
+global
+updating function Boolean OnLogin()
+begin
+  boolean res;
+  array string 20 a_enabler;
+  array date a_validto;
+  integer acnt,i;
+  string 255 tstr;
+  
+  res = inner.OnLogin;
+  
+  if (BurtiFindExpiringEnablers(a_enabler,a_validto,acnt)) then begin
+    for (i=0;i<acnt;i=i+1) begin
+      tstr = tstr & chr(13) & a_enabler[i] & " - " & a_validto[i];
+    end;
+    MessageBox("","Expired or expiring enablers:" & chr(13) & tstr);
+  end;
+  
+  OnLogin = res;
+  return;
+end;

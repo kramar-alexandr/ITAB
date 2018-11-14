@@ -1,0 +1,18 @@
+// ui
+event DefineWindows
+begin
+  
+  SetLangMode(LangEnglish,"ENG",0);
+
+  WindowBegin("Create BurtiEnabler.bkey file",CreateEnablerVClass,CGMnt,RcType);
+  SetWRect(20,80,450,150);
+  EndWindow;
+  
+  WindowBegin("Create BurtiEnabler.bkey file",CreateEnablerDClass,CGview,-);
+  SetWRect(64,80,509,340);
+  UseView(MailVc);
+  TextField(3,0,-5,-1,Math,0);
+  EndWindow;
+  
+  return;
+end;

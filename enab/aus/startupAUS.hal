@@ -1,0 +1,10 @@
+// ui
+event Startup
+begin
+  SetLangMode(LangEnglish,"AUS",0);
+	
+  Maintenance("Create BurtiEnabler.bkey file",CreateEnablerVClass,CreateEnablerMn,modTC);
+  Maintenance("Create BurtiEnabler.bkey file",CreateEnablerVClass,CreateEnablerMn,modSY);
+  
+  return;
+end;

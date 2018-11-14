@@ -1,0 +1,33 @@
+// ui
+remote updating procedure RemoteCreateEnabler(record MailVc);
+
+global
+updating function boolean CreateEnablerDClassOnOKWindow(integer wn)
+begin
+  boolean res;
+  record MailVc Mailr;
+  string 255 filename,tstr;
+  integer pos,textsize;
+  
+  GetWindowRecord(wn,Mailr);
+  CloseWindow(wn);
+  RemoteCreateEnabler(Mailr);
+  
+  CreateEnablerDClassOnOKWindow = res;
+  return;
+end;
+
+global
+updating function boolean CreateEnablerVClassOnOKWindow(integer wn)
+begin
+  boolean res;
+  record RcVc RepSpec;
+  record MailVc Mailr;
+  
+  GetWindowRecord(wn,RepSpec);
+  CloseWindow(wn);
+  OpenWindow("CreateEnablerDClass",1,0,"","",Mailr);  
+  
+  CreateEnablerVClassOnOKWindow = res;
+  return;
+end;

@@ -1,0 +1,22 @@
+// ui
+remote updating function boolean FV_RemoteLinkFVData(record FidaVistaVc);//FV-228 GLS
+
+//fv-25; edz:
+global
+updating procedure FV_LinkDataLsm()
+begin
+
+  integer wn,i;
+  record FidaVistaVc FVr;
+
+  wn = CurWindow;
+  i = 1;
+  while (GetRecordFromBrowse(FVr,wn,i)) begin
+    if (FV_RemoteLinkFVData(FVr)) then begin end;
+    i = i+1;
+  end;
+  
+  UpdateBrowses("FidaVistaVc");
+  return;
+end;
+//:edz

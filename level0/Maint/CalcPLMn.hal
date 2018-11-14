@@ -95,17 +95,14 @@ begin
           end;
         //EBS -->
         case 6:
-          if (nonblank(PLDr.CurncyCode)) then begin
-            newpr = DivWithRateToBase1(PLDr.CurncyCode,CurrentDate,newpr,DefaultCurRoundOff);
+          if (PLDr.CurncyCode<>INp.LastPurchCurncyCode) then begin
+            if (nonblank(INp.LastPurchCurncyCode)) then begin
+              newpr = DivWithRateToBase1(INp.LastPurchCurncyCode,CurrentDate,newpr,DefaultCurRoundOff);
+            end;
+            if (nonblank(PLDr.CurncyCode)) then begin
+              newpr = DivWithRateToBase1(PLDr.CurncyCode,CurrentDate,newpr,DefaultCurRoundOff);
+            end;
           end;
-          // if (PLDr.CurncyCode<>INp.LastPurchCurncyCode) then begin
-          //   if (nonblank(INp.LastPurchCurncyCode)) then begin
-          //     newpr = DivWithRateToBase1(INp.LastPurchCurncyCode,CurrentDate,newpr,DefaultCurRoundOff);
-          //   end;
-          //   if (nonblank(PLDr.CurncyCode)) then begin
-          //     newpr = DivWithRateToBase1(PLDr.CurncyCode,CurrentDate,newpr,DefaultCurRoundOff);
-          //   end;
-          // end;
         //EBS <--
         otherwise
           if (nonblank(PLDr.CurncyCode)) then begin
@@ -491,3 +488,4 @@ begin
   end;
   return;
 end;
+

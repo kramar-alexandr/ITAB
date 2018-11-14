@@ -1,10 +1,12 @@
-SourceFile("halcust/enab/enabler",2);
+SourceFile("halcust/serverEN/enabler",2);
 SourceFile("halcust/enab/Tools",2);
-SourceFile("halcust/enab/RActions",2);
+SourceFile("halcust/serverEN/RActions",2);
+SourceFile("halcust/serverEN/Tools",2);
 SourceFile("halcust/enab/Latvian",3);
 SourceFile("halcust/enab/English",3);
 SourceFile("halcust/enab/Estonian",3);
 SourceFile("halcust/enab/SAF",3);
+SourceFile("halcust/enab/WActions",2);//HERBE-1591 GLS
 
 begin
 

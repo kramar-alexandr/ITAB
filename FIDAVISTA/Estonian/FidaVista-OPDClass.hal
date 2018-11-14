@@ -2,7 +2,6 @@
 //Take the customized things from this and merge it with the clients customized or standard OPDClass window.
 //Tip: search for //cust
 
-// // //RGS updated to 8.4
 // external inner function Boolean IsStandardUnused();
 // external inner function Boolean IsEnterprise();
 // external inner function Boolean StandardHansa();
@@ -164,78 +163,74 @@
 // external inner function Boolean HasIntegratedNL();
 // external inner function Boolean HasConsStockMoveInvoices();
 
-// SetLangMode(LangLatvian,"LAT",0);
 
 // window OPDClass:2
-//   wtag("language","LAT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+//   wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 // begin
 //   real h,h2,h3,h4,t,v,vm,vs;
 //   Integer tilenr;
 //   Integer f,flipnr;
 
-//   WindowBegin("Maks‚juma uzdevums",OPDClass,CGview,-);
+//   WindowBegin("Payment",OPDClass,CGview,-);
 //   SetWRect(20,80,640,464);
 //   Sizeable(-1,-1,0,0);
 //   UseView(OPVc);
-//   ActiveFieldOnNew("PayDate");    
+//   ActiveFieldOnNew("PayDate");
 //   h = 100; h2 = 280; h3 = 490; v = 6; vs = 20;
 //   if (IsEnterprise) then begin
-//   Tile(0,110,false,"",SerNr);
+//     Tile(0,110,false,"",SerNr);
 //   end;
 //   if (HasNumberSeries) then begin
-//   EditField(h,v, 80,"S•r. Nr",St_i,SerNr,false,TSerSClass);
+//     EditField(h,v,80,"No.",St_i,SerNr,false,TSerSClass);
 //   end else begin
-//     EditField(h,v,80,"Nr.",St_i,SerNr,false,0);  
+//     EditField(h,v,80,"No.",St_i,SerNr,false,0);
 //   end;
-//   EditField(h2,v,80,"Izrakst´ts",Normal,PayDate,false,PasteCurDate);
+//   EditField(h2,v,80,"Payment Date",Normal,PayDate,false,PasteCurDate);
 //   if (HasModNL) then begin
-//   EditField(h3,v,82,"Samaks‚ts",Normal,TransDate,false,PasteCurDate);
+//     EditField(h3,v,82,"Trans. Date",Normal,TransDate,false,PasteCurDate);
 //   end;
-//   EditField(h,v+=vs,30,"Samaksas veids",Normal,PayMode,false,PMSClass);  
-//   CheckBox(h4=-100,6,0,"Izrakst´ts",OrderedFlag);  
-//   CheckBox(h4=-100,6+vs,0,"Gr‚matot",DoneFlag);  
+//   EditField(h,v+=vs,30,"Payment Mode",Normal,PayMode,false,PMSClass);
+//   CheckBox(h4=-100,6,0,"Ordered",OrderedFlag);
+//   CheckBox(h4=-100,6+vs,0,"OK",DoneFlag);
 //   EnterSkip(Math);
-//   EditField(h2,v,120,"Nor•úinu konts",Normal,BankAcc,false,0);
-//   EditField(h3,v,82,"K‚rtoä. atsl.",Normal,SortCode,false,0);
-//     EditField(h,v+=vs,80,"Atsauksme",Normal,PayNumber,false,0);
+//   EditField(h2,v,120,"Own Bank A/C",Normal,BankAcc,false,0);
+//   EditField(h3,v,82,"#Sort Code#",Normal,SortCode,false,0);
+//   EditField(h,v+=vs,80,"Reference",Normal,PayNumber,false,0);
 //   if (HasAdvancedAccounting) then begin
-//   CheckBox(h2,v,0,"R•ú. Nr./Gr.",APonTR);
+//     CheckBox(h2,v,0,"#Supp.# Info on Trans.",APonTR);
 //   end;
 //   if (HasLanguages) then begin
-//   EditField(h3,v,82,"Valoda",Normal,LangCode,false,LangSClass);
+//     EditField(h3,v,82,"Language",Normal,LangCode,false,LangSClass);
 //   end;
 //   if (IsEnterprise) then begin
-//     EditField(h,v+=vs,472,"Koment‚rs",Normal,BankName,false,0);
+//     EditField(h,v+=vs,472,"Comment",Normal,BankName,false,0);
 //   end else begin 
 //     v = v + 10;
 //   end;
 //   EnterSkip(Math);
-// //  CheckBox(h,v=6,0,"Noraid´ts",RejectedFlag);//not used any more
-// //  CheckBox(h2,v,0,"R•ú.Nr/Gr",APonTR);
+// //  CheckBox(h,v=6,0,"Re_jected",RejectedFlag);//not used any more
+// //  CheckBox(h2,v,0,"#Supp.# Info on Trans.",APonTR);
 //   tilenr = 1;
 //   if (IsEnterprise) then begin
-//     TileButton(tilenr,"Maks.uzd."); tilenr = tilenr + 1; 
-//     TileButton(tilenr,"Banka"); tilenr = tilenr + 1; 
+//     TileButton(tilenr,"Payments"); tilenr = tilenr + 1;
+//     TileButton(tilenr,"Bank"); tilenr = tilenr + 1;
 //     tilenr = 1;
 //     Tile(tilenr,120,true,tilenr,Math); tilenr = tilenr + 1;
 //   end;
 // //  CheckBox(25,v=-39,0,"O_rdered",OrderedFlag);
 // //  CheckBox(25,v=-20,0,"OK",DoneFlag);
-//   if (HasLocalization("EST,LVA")) then begin
-//   HalPushButton(150,-50,150+100,-5,"EPaymentSignOPDsm","Parakst´t");
-//   HalPushButton(150,-25,150+100,-5,"EPaymentQueOPDsm","Nosðt. uz banku");
-//   HalPushButton(260,-25,250+110,-5,"FidaVista_OPEnDsm","Bankas Exports");//cust
-//   end;
+//     HalPushButton(150,-25,150+100,-5,"EPaymentQueOPDsm","Send to Bank");
+//     HalPushButton(260,-25,250+110,-5,"FidaVista_OPEnDsm","Bank Export");//cust
 //   if (HasMultiCurrency) then begin
-//   EditField(-300,-21,50,"Valðta",Normal,PayCurCode,false,CurncyCodeSClass);
+//     EditField(-300,-21,50,"Currency",Normal,PayCurCode,false,CurncyCodeSClass);
 //   end;
-//   EditField(-125,-21,85,"P‚rskait´t",Normal,CurPayVal,true,0);
+//   EditField(-125,-21,85,"Withdrawn",Normal,CurPayVal,true,0);
 //   h = 10;
 //   if (tilenr>1) then begin
-//     if (HasLocalization("EST,LVA")) then begin 
+//     if (HasLocalization("EST,LVA")) then begin
 //       MatrixBegin(h,v=24,-50,-50,-,200);
 //     end else begin
-//     MatrixBegin(h,v=24,-50,-40,-,200);
+//       MatrixBegin(h,v=24,-50,-40,-,200);
 //     end;
 //   end else begin
 //     if (HasLocalization("AUS,EST,LVA,RUS,POL") or HasMultiCurrency or HasObjects or ((Left(BuildProductCode,16)=="StandardAccounts" or IsSberbankProduct or BuildProductCode=="StandardBusiness" or (IsBooks and IsStandardProduct==false)) and HasLocalization("FIN"))) then begin
@@ -248,188 +243,188 @@
 //   MatTypedRow(stp);
 //   MatOverStrike(ovst);
 //   Flip(0);
-//   MatCol(t=kPaymentRowTypeNormal,24,"R•ú. Nr.",0,VISerNr,false,APSClass);
-//   MatCol(t ,105,"Pieg‚d‚t‚js",0,VECode,false,VESClass);
+//   MatCol(t=kPaymentRowTypeNormal,24,"Invoice No.",0,VISerNr,false,APSClass);
+//   MatCol(t,105,"#Supplier#",0,VECode,false,VESClass);
 //   EnterSkip(RecVal);
 //   MatCol(t=kPaymentRowTypeSettlementDiscount,24,"",0,VISerNr,false,APSClass);
-//   MatText(t,70,"Skonto atl.",true);
-//   MatCol(t,140,"Objekts",0,Objects,false,ObjSClass);
-//   MatCol(t,-360,"R•ú.val.",0,PInvCurncy,true,0);
-//   MatCol(t,-320,"R•ú.summa",0,PInvVal,true,0);
-//   MatCol(t,-240,"B.val.",0,BankCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-200,"B.summa",0,BankVal,true,0);
-//   MatCol(t,-120,"Nos.val.",0,RecCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-80,"Nos.summa",0,RecVal,true,0);
+//   MatText(t,70,"Set. Disc.",true);
+//   MatCol(t,140,"Tag/Object",0,Objects,false,ObjSClass);
+//   MatCol(t,-360,"PI.Cur",0,PInvCurncy,true,0);
+//   MatCol(t,-320,"Invoice Val",0,PInvVal,true,0);
+//   MatCol(t,-240,"B. Cur.",0,BankCurncy,true,CurncyCodeSClass);
+//   MatCol(t,-200,"Bank Amount",0,BankVal,true,0);
+//   MatCol(t,-120,"#S.# Cur.",0,RecCurncy,true,CurncyCodeSClass);
+//   MatCol(t,-80,"Sent Value",0,RecVal,true,0);
 //   MatCol(t=kPaymentRowTypeBankFee,24,"",0,VISerNr,false,APSClass);
-//   MatText(t,-480,"Bankas pakalpoj.",true);
-//   MatCol(t,-390,"R. val",0,PInvCurncy,true,0);
-//   MatCol(t,-350,"Apmaks‚t",0,PInvVal,true,0);
-//   MatCol(t,-260,"B.val",0,BankCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-220,"Bank.summa",0,BankVal,true,0);
-//   MatCol(t,-130,"N.val",0,RecCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-90,"Nos. summa",0,RecVal,true,0);
+//   MatText(t,-480,"Fee",true);
+//   MatCol(t,-390,"PI.Cur",0,PInvCurncy,true,0);
+//   MatCol(t,-350,"Invoice Val",0,PInvVal,true,0);
+//   MatCol(t,-260,"B. Cur.",0,BankCurncy,true,CurncyCodeSClass);
+//   MatCol(t,-220,"Bank Amount",0,BankVal,true,0);
+//   MatCol(t,-130,"#S.# Cur.",0,RecCurncy,true,CurncyCodeSClass);
+//   MatCol(t,-90,"Sent Value",0,RecVal,true,0);
 //   flipnr = 1;
 //   if (HasMultiCurrency or HasObjects or HasRussianPrepayment or ((Left(BuildProductCode,16)=="StandardAccounts" or IsSberbankProduct or BuildProductCode=="StandardBusiness" or (IsBooks and IsStandardProduct==false)) and HasLocalization("FIN,LVA")) or HasLocalization("AUS")) then begin
 //     Flip(flipnr); flipnr = flipnr + 1;
 //   end;
-//   MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
+//   MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
 //   if (HasMultiCurrency) then begin
-//   MatCol(t,-260,"B. val.",0,BankCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-220,"Bankas summa",0,BankVal,true,0);
-//   MatCol(t,-130,"N. val.",0,RecCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-90,"Nos. summa",0,RecVal,true,0);
+//     MatCol(t,-260,"B. Cur.",0,BankCurncy,true,CurncyCodeSClass);
+//     MatCol(t,-220,"Bank Amount",0,BankVal,true,0);
+//     MatCol(t,-130,"#S.# Cur.",0,RecCurncy,true,CurncyCodeSClass);
+//     MatCol(t,-90,"Sent Value",0,RecVal,true,0);
 //     Flip(flipnr); flipnr = flipnr + 1;
-//     MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
-//   MatCol(t,-350,"R. val.",0,PInvCurncy,true,0);
-//   MatCol(t,-310,"Neapmaks‚ts",0,PInvOutstand,false,0);
-//   MatCol(t,-220,"R•úina summa",0,PInvVal,true,0);
-//   MatCol(t,-130,"N. val.",0,RecCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-90,"Nos. summa",0,RecVal,true,0);
-//     if (HasLocalization("POL")) then begin  
+//     MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
+//     MatCol(t,-350,"I. Cur.",0,PInvCurncy,true,0);
+//     MatCol(t,-310,"Open Inv. Value",0,PInvOutstand,false,0);
+//     MatCol(t,-220,"Invoice Value",0,PInvVal,true,0);
+//     MatCol(t,-130,"#S.# Cur.",0,RecCurncy,true,CurncyCodeSClass);
+//     MatCol(t,-90,"Sent Value",0,RecVal,true,0);
+//     if (HasLocalization("POL")) then begin
 //       Flip(flipnr); flipnr = flipnr + 1;
-//       MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
-//       MatCol(t,-310,"B. val.",0,BankCurncy,true,CurncyCodeSClass);  
-//       MatCol(t,-270,"Bankas summa",0,BankVal,true,0);  
-//       MatCol(t,-180,"Uz B. val.1",0,ToRateB1BankVal,true,0);  
-//       MatCol(t,-110,"Bankas sum. val.1",0,B1BankVal,true,0);  
+//       MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
+//       MatCol(t,-310,"B. Cur.",0,BankCurncy,true,CurncyCodeSClass);
+//       MatCol(t,-270,"Bank Amount",0,BankVal,true,0);
+//       MatCol(t,-180,"To B. Cur. 1",0,ToRateB1BankVal,true,0);
+//       MatCol(t,-110,"Bank Amt. in Cur. 1",0,B1BankVal,true,0);
 //     end;
 //   end else begin
-//     MatCol(t,-270,"Neapm.r•ú.summa",0,PInvOutstand,false,0); 
-//     MatCol(t,-180,"R•úina summa",0,PInvVal,true,0); 
-//     MatCol(t,-90,"Nosðt. summa",0,RecVal,true,0); 
+//     MatCol(t,-270,"Open Inv. Value",0,PInvOutstand,false,0);
+//     MatCol(t,-180,"Invoice Value",0,PInvVal,true,0);
+//     MatCol(t,-90,"Sent Value",0,RecVal,true,0);
 //   end;
 //   if (IsEnterprise==false) then begin
 //     if (HasObjects) then begin
 //       Flip(flipnr); flipnr = flipnr + 1;
-//       MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
+//       MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
 //       if (HasRussianPrepayment) then begin
 //         if (HasModPO) then begin
-//           MatCol(t,-320,"Objekts",0,Objects,false,ObjSClass);  
-//           MatCol(t,-200,"Pasðt. Nr.",0,OrderNr,false,POSClass);  
+//           MatCol(t,-320,"Tags/Objects",0,Objects,false,ObjSClass);
+//           MatCol(t,-200,"Order No.",0,OrderNr,false,POSClass);
 //         end else begin
-//           MatCol(t,-260,"Objekts",0,Objects,false,ObjSClass);  
+//           MatCol(t,-260,"Tags/Objects",0,Objects,false,ObjSClass);
 //         end;
-//         MatCol(t,-100,"Priekäapm. Nr.",0,PrepayNr,false,OPPSClass);  
+//         MatCol(t,-100,"Prepayment No.",0,PrepayNr,false,OPPSClass);
 //       end else begin
-//       MatCol(t,-160,"Objekti",0,Objects,false,ObjSClass); 
+//         MatCol(t,-160,"Tags/Objects",0,Objects,false,ObjSClass);
 //       end;
 //     end else begin
 //       if (HasRussianPrepayment) then begin
 //         Flip(flipnr); flipnr = flipnr + 1;
-//         MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
+//         MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
 //         if (HasModPO) then begin
-//           MatCol(t,-200,"Pasðt. Nr.",0,OrderNr,false,POSClass);  
+//           MatCol(t,-200,"Order No.",0,OrderNr,false,POSClass);
 //         end;
-//         MatCol(t,-100,"Priekäapm. Nr.",0,PrepayNr,false,OPPSClass);  
+//         MatCol(t,-100,"Prepayment No.",0,PrepayNr,false,OPPSClass);
 //       end;
 //     end;
-//     if ((Left(BuildProductCode,16)=="StandardAccounts" or IsSberbankProduct or BuildProductCode=="StandardBusiness" or (IsBooks and IsStandardProduct==false)) and HasLocalization("FIN,LVA")) then begin 
+//     if ((Left(BuildProductCode,16)=="StandardAccounts" or IsSberbankProduct or BuildProductCode=="StandardBusiness" or (IsBooks and IsStandardProduct==false)) and HasLocalization("FIN,LVA")) then begin
 //       Flip(flipnr); flipnr = flipnr + 1;
-//       MatCol(t,360,"Bankas ats.",0,BankRefStr,false,0);  
-//       MatCol(t,-250,"Uz bankas k.",0,BankAcc,false,VEBankAccSClass);
-//       MatCol(t,-110,"PVN-k",0,VATCode,false,VATCodeSClass);  
-//       MatCol(t,-80,"PVN v•rt.",0,VATVal,false,0);  
+//       MatCol(t,360,"Bank Reference",0,BankRefStr,false,0);
+//       MatCol(t,-250,"To Bank A/C",0,BankAcc,false,VEBankAccSClass);
+//       MatCol(t,-110,"#V-Cd#",0,VATCode,false,VATCodeSClass);
+//       MatCol(t,-80,"#VAT# Value",0,VATVal,false,0);
 //     end;
 //     if (HasRussianPrepayment==false and HasPrepayments) then begin 
 //       Flip(flipnr); flipnr = flipnr + 1;
-//       MatCol(t=kPaymentRowTypeNormal,190,"Priekäapmaksas Nr.",0,PrepayNr,false,OPPSClass);
-//       MatCol(t,-130,"S. Val.",0,RecCurncy,true,CurncyCodeSClass);
-//       MatCol(t,-90,"SaÀemts",0,RecVal,true,0);
+//       MatCol(t=kPaymentRowTypeNormal,190,"Prepayment No.",0,PrepayNr,false,OPPSClass);
+//       MatCol(t,-130,"#S.# Cur.",0,RecCurncy,true,CurncyCodeSClass);
+//       MatCol(t,-90,"Sent Value",0,RecVal,true,0);      
 //     end;
 //     if (HasLocalization("AUS")) then begin
 //       Flip(flipnr); flipnr = flipnr + 1;
-//       MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
-//       MatCol(t,-270,"Sam. Veids",0,PayMode,false,PMSClass);
-//       MatCol(t,-220,"‰eka Nr.",0,ChequeNr,false,0);
-//       MatCol(t,-130,"S. val.",0,RecCurncy,true,CurncyCodeSClass); 
-//       MatCol(t,-90,"Sam. v•rt´ba",0,RecVal,true,0);       
+//       MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
+//       MatCol(t,-270,"P. Mode",0,PayMode,false,PMSClass);
+//       MatCol(t,-220,"#Cheque# No.",0,ChequeNr,false,0);
+//       MatCol(t,-130,"#S.# Cur.",0,RecCurncy,true,CurncyCodeSClass);
+//       MatCol(t,-90,"Sent Value",0,RecVal,true,0);
 //       Flip(flipnr); flipnr = flipnr + 1;
-//       MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0); 
-//       MatCol(t,-160,"Uz bankas kontu",0,BankAcc,false,VEBankAccSClass); 
-//       MatCol(t,-90,"#Sort Code#",0,SortCode,false,0);  //!!SAMETRANSLATION
+//       MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
+//       MatCol(t,-160,"To Bank A/C",0,BankAcc,false,VEBankAccSClass);
+//       MatCol(t,-90,"#Sort Code#",0,SortCode,false,0);
 //     end;
 //   end else begin
 //     if (StandardHansa==false) then begin
-//     Flip(flipnr); flipnr = flipnr + 1;
-//       MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
-//   MatCol(t,-270,"Sam.veid.",0,PayMode,false,PMSClass);
-//   MatCol(t,-220,"‰eka Nr.",0,ChequeNr,false,0);
-//   MatCol(t,-130,"N. val.",0,RecCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-90,"Nos. summa",0,RecVal,true,0);
+//       Flip(flipnr); flipnr = flipnr + 1;
+//       MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
+//       MatCol(t,-270,"P. Mode",0,PayMode,false,PMSClass);
+//       MatCol(t,-220,"#Cheque# No.",0,ChequeNr,false,0);
+//       MatCol(t,-130,"#S.# Cur.",0,RecCurncy,true,CurncyCodeSClass);
+//       MatCol(t,-90,"Sent Value",0,RecVal,true,0);
 //     end;
 //     Flip(flipnr); flipnr = flipnr + 1;
-//     MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
-//   MatCol(t,-320,"Pasðt. Nr.",0,OrderNr,false,POSClass);
-//   MatCol(t,-230,"Priekä. Nr.",0,PrepayNr,false,OPPSClass);
-//   MatCol(t,-130,"N. val.",0,RecCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-90,"Nosðt´ts",0,RecVal,true,0);
+//     MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
+//     MatCol(t,-320,"Order No.",0,OrderNr,false,POSClass);
+//     MatCol(t,-230,"Prepayment No.",0,PrepayNr,false,OPPSClass);
+//     MatCol(t,-130,"#S.# Cur.",0,RecCurncy,true,CurncyCodeSClass);
+//     MatCol(t,-90,"Sent Value",0,RecVal,true,0);
 //     Flip(flipnr); flipnr = flipnr + 1;
-//     MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
-//   MatCol(t,-310,"PVN kd",0,VATCode,false,VATCodeSClass);
-//   MatCol(t,-270,"PVN",0,VATVal,false,0);
-// //  MatCol(t,-200,"Papildu nodoklis",0,TAX1Sum,false,0);
-//   MatCol(t,-130,"S. val.",0,RecCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-90,"Nos. summa",0,RecVal,true,0);
+//     MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
+//     MatCol(t,-310,"#V-Cd#",0,VATCode,false,VATCodeSClass);
+//     MatCol(t,-270,"#VAT# Value",0,VATVal,false,0);
+// //  MatCol(t,-200,"Extra Tax",0,TAX1Sum,false,0);
+//     MatCol(t,-130,"#S.# Cur.",0,RecCurncy,true,CurncyCodeSClass);
+//     MatCol(t,-90,"Sent Value",0,RecVal,true,0);
 //     Flip(flipnr); flipnr = flipnr + 1;
-//     MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
-//   MatCol(t,-260,"Objekti",0,Objects,false,ObjSClass);
+//     MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
+//     MatCol(t,-260,"Tags/Objects",0,Objects,false,ObjSClass);
 //     if (StandardHansa==false) then begin
-//   MatCol(t,-130,"S.val",0,RecCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-90,"Nos. summa",0,RecVal,true,0);
-//     Flip(flipnr); flipnr = flipnr + 1;
-//       MatCol(t=kPaymentRowTypeNormal,190,"Noapaº.konts",0,RoundOffAcc,false,AccSClass);
-//       MatCol(t,-270,"Noapaº.",0,RoundOff,true,0);
-//       MatCol(t,-170,"Iemaksa",0,InstNr,false,APInstallSClass); 
-//       MatCol(t,-100,"Atsauksmes Nr.",0,rkPayNumber,false,0);  
+//       MatCol(t,-130,"#S.# Cur",0,RecCurncy,true,CurncyCodeSClass);
+//       MatCol(t,-90,"Sent Value",0,RecVal,true,0);
+//       Flip(flipnr); flipnr = flipnr + 1;
+//       MatCol(t=kPaymentRowTypeNormal,190,"Round Off A/C",0,RoundOffAcc,false,AccSClass);
+//       MatCol(t,-270,"Round Off",0,RoundOff,true,0);
+//       MatCol(t,-170,"#Instalment#",0,InstNr,false,APInstallSClass);
+//       MatCol(t,-100,"Reference Number",0,rkPayNumber,false,0);
 //     end else begin
-//       MatCol(t=kPaymentRowTypeNormal,-170,"Noapaº. konts",0,RoundOffAcc,false,AccSClass);
-//       MatCol(t,-80,"Noapaº.",0,RoundOff,true,0);  
+//       MatCol(t=kPaymentRowTypeNormal,-170,"Round Off A/C",0,RoundOffAcc,false,AccSClass);
+//       MatCol(t,-80,"Round Off A/C",0,RoundOff,true,0);
 //     end;
 //     Flip(flipnr); flipnr = flipnr + 1;
-//     MatCol(t=kPaymentRowTypeNormal,190,"Kreditoru konts",0,APAcc,false,AccSClass);
-//     MatCol(t,-370,"Bankas atsauksme",0,BankRefStr,false,0);
-//     MatCol(t,-270,"Uz bankas k.",0,BankAcc,false,VEBankAccSClass);  
-//     MatCol(t,-140,"K‚rt. kods",0,SortCode,false,0);  
-//     MatCol(t,-50,"Maks. uzd. k.",5,PaymentCode,false,PaymentCodeSClass);  
+//     MatCol(t=kPaymentRowTypeNormal,190,"Creditors A/C",0,APAcc,false,AccSClass);
+//     MatCol(t,-370,"Bank Reference",0,BankRefStr,false,0);
+//     MatCol(t,-270,"To Bank A/C",0,BankAcc,false,VEBankAccSClass);
+//     MatCol(t,-140,"#Sort Code#",0,SortCode,false,0);
+//     MatCol(t,-50,"P. Code",5,PaymentCode,false,PaymentCodeSClass);//whoever added it, why not using BankRefStr ?
 //     Flip(flipnr); flipnr = flipnr + 1;
-//     MatCol(t=kPaymentRowTypeNormal,200,"B.Val",0,BankCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-400,"Bankas sum.",0,BankVal,true,0);
-//   MatCol(t,-330,"Bankas pak.",0,BankFeeVal,true,0);
-//   MatCol(t,-270,"Uz B1 sum.",0,ToRateB1BankVal,true,0);
-//   MatCol(t,-200,"B1 summa",0,B1BankVal,true,0);
-//   MatCol(t,-130,"B2 summa",0,B2BankVal,true,0);
-// //  MatCol(t,-120,"Papild.%",0,BankFeePrc,true,0); /* What was this ?? */
+//     MatCol(t=kPaymentRowTypeNormal,200,"B. Cur.",0,BankCurncy,true,CurncyCodeSClass);
+//     MatCol(t,-400,"Bank Amt.",0,BankVal,true,0);
+//     MatCol(t,-330,"Bank Fee",0,BankFeeVal,true,0);
+//     MatCol(t,-270,"To B. Cur. 1",0,ToRateB1BankVal,true,0);
+//     MatCol(t,-200,"B. Cur. 1 V.",0,B1BankVal,true,0);
+//     MatCol(t,-130,"B. Cur. 2 V.",0,B2BankVal,true,0);
+// //  MatCol(t,-120,"Fee %",0,BankFeePrc,true,0); /* What was this ?? */
 //     if (StandardHansa==false) then begin
-//   MatCol(t,-60,"Koeficients",0,Coef,true,0);
+//       MatCol(t,-60,"Coef. Value",0,Coef,true,0);
 //     end;
 //     Flip(flipnr); flipnr = flipnr + 1;
-//     MatCol(t=kPaymentRowTypeNormal,-470,"B.val",0,BankCurncy,true,CurncyCodeSClass);
-//   MatCol(t,-430,"Bankas sum.",0,BankVal,true,0);
-//   MatCol(t,-350,"Kurss",0,FrRateBankVal,true,0);
-//   MatCol(t,-310,"Uz B1 sum.",0,ToRateB1BankVal,true,0);
-//   MatCol(t,-240,"Uz B2 sum.",0,ToRateB2BankVal,true,0);
-//   MatCol(t,-170,"B‚zes val. 1",0,BaseRate1BankVal,true,0);
-//     MatCol(t,-95,"B‚zes val. 2",0,BaseRate2BankVal,true,0);
+//     MatCol(t=kPaymentRowTypeNormal,-470,"B. Cur.",0,BankCurncy,true,CurncyCodeSClass);
+//     MatCol(t,-430,"Bank Amount",0,BankVal,true,0);
+//     MatCol(t,-350,"Rate",0,FrRateBankVal,true,0);
+//     MatCol(t,-310,"To B. Cur. 1",0,ToRateB1BankVal,true,0);
+//     MatCol(t,-240,"To B. Cur. 2",0,ToRateB2BankVal,true,0);
+//     MatCol(t,-170,"Base Rate 1",0,BaseRate1BankVal,true,0);
+//     MatCol(t,-95,"Base Rate 2",0,BaseRate2BankVal,true,0);
 // //    if (StandardHansa==false) then begin
 // //      MatCol(t,-30,"Coef. Value",0,Coef,true,0);
 // //    end;
 //   end;
-//   if (HasLocalization("ARG")) then begin 
+//   if (HasLocalization("ARG")) then begin
 //     Flip(flipnr); flipnr = flipnr + 1;
-//     MatCol(t=kPaymentRowTypeNormal,190,"Teksts",0,Comment,false,0);
-//     MatCol(t,-260,"S. veids",0,PayMode,false,PMSClass);
-//     MatCol(t,-200,"Iet. nod.",0,WHTax,false,WHTaxSClass);
-//     MatCol(t,-100,"Iet. nod. likme",0,WHTaxBase,false,0);
-// //    MatCol(t,-100,"Address",0,WHTaxAccumBase,false,0);
+//     MatCol(t=kPaymentRowTypeNormal,190,"Text",0,Comment,false,0);
+//     MatCol(t,-260,"P. Mode",0,PayMode,false,PMSClass);
+//     MatCol(t,-200,"W. Tax",0,WHTax,false,WHTaxSClass);
+//     MatCol(t,-100,"W. Tax Base",0,WHTaxBase,false,0);
+// //    MatCol(t,-100,"W. Tax Accumul.",0,WHTaxAccumBase,false,0);
 //   end;
 //   InsertRowTest;
 //   DeleteRowTest;
-//   RowMenuBegin(""); 
+//   RowMenuBegin("");
 //   if (HasSettlementDiscount) then begin
-//     RowMenuItem(0,"Skonto atlaide",' ',' ',4312,"CashDiscountOPDsm"); 
+//     RowMenuItem(0,"Add Settlement Discount",' ',' ',4312,"CashDiscountOPDsm");
 //   end;
 //   if (HasModPL and HasModNL) then begin
-//     RowMenuItem(0,"Bankas pakalpojums",' ',' ',4312,"NewFeeOPDsm"); 
+//     RowMenuItem(0,"Add Bank Fee",' ',' ',4312,"NewFeeOPDsm");
 //   end;
 //   EndRowMenu;
 //   EndMatrix;
@@ -440,109 +435,109 @@
 //   end;
 //   if (flipnr>2) then begin
 //     for (f=1;f<flipnr;f=f+1) begin
-//       VTab(-35,v,-16,v+vs,ToolFlip,f,chr(asc("A") + f - 1));  //!!SAMETRANSLATION
+//       VTab(-35,v,-16,v+vs,ToolFlip,f,chr(asc("A") + f - 1));
 //       v = v + vs;
 //     end;
 //   end;
 //   if (IsEnterprise) then begin
 //     Tile(tilenr,120,true,tilenr,BankAcc); tilenr = tilenr + 1;
-//   v=6; h= 100;
-//   EditField(h,v,120,"Bankas konts",Normal,BankAcc,false,0);
- 
-//   CheckBox(h2,v,0,"Starptautiskais maks‚juma uzdevums",ForeignPayment);
+//     v=6; h= 100;
+//     EditField(h,v,120,"Own Bank A/C",Normal,BankAcc,false,0);
+
+//     CheckBox(h2,v,0,"Foreign Payment",ForeignPayment);
 //     if (HasApprovals) then begin
-//       SoftEditField(h3=520,v,123,"",ViewOnly,"AcceptanceStatusFlag",false,0,M4Str,255);
+//       SoftEditField(h3=520,v,123,"Approval Status",ViewOnly,"AcceptanceStatusFlag",false,0,M4Str,255);
 // /*      
-//   ButtonFrame(h3=490,v=vm,123,6,"Apstiprin‚juma statuss");
-//   RadioButton(h3,v,kAcceptanceStateNotRequired,0,"Nav nepiecieäams",AcceptanceStatus);
-//   RadioButton(h3,v+=16,kAcceptanceStateNotStarted,0,"Nav s‚kts",AcceptanceStatus);
-//   RadioButton(h3,v+=16,kAcceptanceStateNotRequested,0,"Nav pras´ts",AcceptanceStatus);
-//   RadioButton(h3,v+=16,kAcceptanceStatePending,0,"Proces‚",AcceptanceStatus);
-//   RadioButton(h3,v+=16,kAcceptanceStateApproved,0,"Apstiprin‚ts",AcceptanceStatus);
-//   RadioButton(h3,v+=16,kAcceptanceStateRejected,0,"Noraid´ts",AcceptanceStatus);  
+//       ButtonFrame(h3=490,v=vm,123,6,"Approval Status");
+//       RadioButton(h3,v,kAcceptanceStateNotRequired,0,"Not Required",AcceptanceStatus);
+//       RadioButton(h3,v+=16,kAcceptanceStateNotStarted,0,"Not Started",AcceptanceStatus);
+//       RadioButton(h3,v+=16,kAcceptanceStateNotRequested,0,"Not Reuested",AcceptanceStatus);
+//       RadioButton(h3,v+=16,kAcceptanceStatePending,0,"Pending",AcceptanceStatus);
+//       RadioButton(h3,v+=16,kAcceptanceStateApproved,0,"Approved",AcceptanceStatus);
+//       RadioButton(h3,v+=16,kAcceptanceStateRejected,0,"Rejected",AcceptanceStatus);
 // */      
-// /*  
-//   CheckBox(25,v=-39,0,"O_rdered",OrderedFlag); //!!SAMETRANSLATION
-//   CheckBox(25,v=-20,0,"OK",DoneFlag); //!!SAMETRANSLATION
-//   HalPushButton(150,-30,150+100,-5,"EPaymentQueOPDsm","Send to Bank");  //!!SAMETRANSLATION
-// */  
+// /*
+//   CheckBox(25,v=-39,0,"O_rdered",OrderedFlag);
+//   CheckBox(25,v=-20,0,"OK",DoneFlag);
+//   HalPushButton(150,-30,150+100,-5,"EPaymentQueOPDsm","Send to Bank");
+// */
 //     end;
-//     ButtonFrame(h=40,vm=(v+=40),123,3,"Pieg‚d‚t‚ji");
-//     RadioButton(h,v,0,0,"Pa rind‚m",PayperSupplier);
-//     RadioButton(h,v+=16,1,0,"Pa pieg‚d‚t‚jiem",PayperSupplier);
-//     RadioButton(h,v+=16,2,0,"S•rija",PayperSupplier);
-//     ButtonFrame(h2=190,v=vm,123,3,"Mak‚juma veids");
-//     RadioButton(h2,v,0,0,"Standarta",PayMethod);
-//     RadioButton(h2,v+=16,1,0,"Steidzams",PayMethod);
-//     RadioButton(h2,v+=16,2,0,"±paäi steidzams",PayMethod);
-//     ButtonFrame(h3=340,v=vm,123,3,"Bankas komisija");
-//     RadioButton(h3,v,0,0,"M•s maks‚jam",Bankfees);
-//     RadioButton(h3,v+=16,1,0,"Pieg‚d‚t‚js maks‚",Bankfees);
-//     RadioButton(h3,v+=16,2,0,"Dal´ta",Bankfees);
+//     ButtonFrame(h=40,vm=(v+=40),123,3,"Payment Format");
+//     RadioButton(h,v,0,0,"Per Row",PayperSupplier);
+//     RadioButton(h,v+=16,1,0,"Per #Supplier#",PayperSupplier);
+//     RadioButton(h,v+=16,2,0,"Batch",PayperSupplier);
+//     ButtonFrame(h2=190,v=vm,123,3,"Payment Method");
+//     RadioButton(h2,v,0,0,"Normal",PayMethod);
+//     RadioButton(h2,v+=16,1,0,"Express",PayMethod);
+//     RadioButton(h2,v+=16,2,0,"Extra urgent",PayMethod);
+//     ButtonFrame(h3=340,v=vm,123,3,"Bank Fees");
+//     RadioButton(h3,v,0,0,"We pay",Bankfees);
+//     RadioButton(h3,v+=16,1,0,"#Suppliers# pay",Bankfees);
+//     RadioButton(h3,v+=16,2,0,"Shared",Bankfees);
     
-//   end;  
+//   end;
 //   if (GuiType==kGuiMetro) then begin // Temporarily disabled on Windows 8
-//     SpecialMenu("Maks‚juma uzdevuma statuss",'r',4,"OPStatusDsm");  
+//     SpecialMenu("Payment Status",'r',4,"OPStatusDsm");
 //     if (HasModPL and HasModNL) then begin
-//       SpecialMenu("Bankas pakalpojums",' ',3,"NewFeeOPDsm");  
+//       SpecialMenu("Add Bank Fee",' ',3,"NewFeeOPDsm");
 //     end;
 //     if (IsEnterprise) then begin
 // //    SpecMenuItem("Print Forms",' ',0); // any code for this one??, no code
-//   SpecialMenu("(-",' ',1,"");
-//       SpecialMenu("Skonto atlaide",' ',2,"CashDiscountOPDsm");  
+//       SpecialMenu("(-",' ',1,"");
+//       SpecialMenu("Add Settlement Discount",' ',2,"CashDiscountOPDsm");
 //     end;
 //     if (HasIntegratedNL) then begin
-//       SpecialMenu("Atv•rt gr‚matojumu",'t',5,"OpenTRFromOP");  
+//       SpecialMenu("Open #NL# Transaction",'t',5,"OpenTRFromOP");
 //     end;
 //   end else begin
-// //    SpecMenuItem("Print Forms",' ',0); // any code for this one??, no code
+//   //    SpecMenuItem("Print Forms",' ',0); // any code for this one??, no code
 //     if (HasIntegratedNL) then begin
-//   SpecialMenu("Atv•rt gr‚matojumu",'t',5,"OpenTRFromOP");
-//   end;
-//   if (IsEnterprise) then begin
-// //    SpecialMenu("Open Withholding Certificate",'',5,"OpenWHCertificateOPDsm");
-//     if (StandardHansa==false) then begin
-//   SpecialMenu("Pieäúirt ‹eka Nr.",' ',6,"AssignChequeOPDsm");
-//       SpecialMenu("Sagatavot ‹ekus",'e',9,"PrepChequesOPDsm");  
-//       SpecialMenu("Druk‚t ‹ekus",' ',9,"PrintChequesOPDsm");  
+//       SpecialMenu("Open #NL# Transaction",'t',5,"OpenTRFromOP");
 //     end;
-//   end;
-//   if (HasWithholdingTax) then begin
-//   SpecialMenu("Apr•úin‚t ietur•tos nodokºus",' ',11,"WithholdTaxesOPDsm");
-//   end;
-//   if (IsEnterprise) then begin
-//   SpecialMenu("Maks‚juma uzdevuma statuss",'r',4,"OPStatusDsm");
-//   SpecialMenu("Bankas izraksts",' ',12,"BankStOPDsm");
-//       if (HasLocalization("EST,LVA")) then begin  
-//   SpecialMenu("E-maks‚juma uzd. statuss",' ',13,"EPaymentStatusOPDsm");
+//     if (IsEnterprise) then begin
+//   //    SpecialMenu("Open Withholding Certificate",'',5,"OpenWHCertificateOPDsm");
+//       if (StandardHansa==false) then begin
+//         SpecialMenu("Assign #Cheque# Number",' ',6,"AssignChequeOPDsm");
+//         SpecialMenu("Prepare #Cheque#",'e',9,"PrepChequesOPDsm");
+//         SpecialMenu("Print #Cheques#",' ',9,"PrintChequesOPDsm");
 //       end;
-//   SpecialMenu("Druk‚t kases ieÀ./izd.",' ',4,"PrintCashInOutOPDsm");
-//       SpecialMenu("Bankas faila eksports",'',4,"BankingFileExportDsm");   //!!SAMETRANSLATION
+//     end;
+//     if (HasWithholdingTax) then begin
+//       SpecialMenu("Calculate Withholding Taxes",' ',11,"WithholdTaxesOPDsm");
+//     end;
+//     if (IsEnterprise) then begin
+//       SpecialMenu("Payment Status",'r',4,"OPStatusDsm");
+//       SpecialMenu("Bank Statement",' ',12,"BankStOPDsm");
+//       if (HasLocalization("EST,LVA")) then begin
+//         SpecialMenu("E-Payment Status",' ',13,"EPaymentStatusOPDsm");
+//       end;
+//       SpecialMenu("Print Cash IN-OUT",' ',4,"PrintCashInOutOPDsm");
+//       SpecialMenu("Banking File Export",'',4,"BankingFileExportDsm");
 //     end else begin
 //       if (HasLocalization("AUS")) then begin
-//         SpecialMenu("Bankas faila eksports",'',4,"BankingFileExportDsm");  //!!SAMETRANSLATION
+//         SpecialMenu("Banking File Export",'',4,"BankingFileExportDsm");
 //       end;
 //     end;
 //     if (HasApprovals) then begin
-//       SpecialMenu("Nosðt´t apstiprin‚äanai",' ',6,"OPSendforAcceptanceOPDsm");
-//       SpecialMenu("Atcelt apstiprin‚äanas piepras´jumu",' ',2,"CancelApprovalRequestDsm");
+//       SpecialMenu("Request Approval",' ',6,"OPSendforAcceptanceOPDsm");
+//       SpecialMenu("Cancel Approval Request",' ',2,"CancelApprovalRequestDsm");
 //     end;
-//     SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0); 
+//     SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);
 //     if (HasDownpayments) then begin
-//       SpecialMenu("Priekäapmaksu",' ',7,"DownPayFromOPDsm"); 
+//       SpecialMenu("Down Payment",' ',7,"DownPayFromOPDsm");
 //     end;
 //     if (IsEnterprise) then begin
-//       SpecialMenu("Kases izdevumu orderi",' ',8,"CLOutFromOPDsm"); 
+//       SpecialMenu("Cash Out",' ',8,"CLOutFromOPDsm");
 //     end;
 //     if (HaseMail) then begin
-//       SpecialMenu("E-pastu",'m',9,"CreateMailFromOPDsm"); 
+//       SpecialMenu("Email",'m',9,"CreateMailFromOPDsm");
 //     end;
 //     if (HasLocalization("HRV,RUS,SLV,SRB,SVN,UKR") and (HasIntegratedNL or IsEnterprise)) then begin
-//       SpecialMenu("PVN korekciju pieg‚d‚t‚jiem",' ',9,"VATCorrectionOPsm"); 
+//       SpecialMenu("#VAT# Correction #P/L#",' ',9,"VATCorrectionOPsm");
 //     end;
 //     if (HasLocalization("POL") and IsEnterprise) then begin
-//       SpecialMenu("PVN korekciju pieg‚d‚t‚jiem",' ',9,"VATCorrectionOPsm"); 
-//   end;
+//       SpecialMenu("#VAT# Correction #P/L#",' ',9,"VATCorrectionOPsm");
+//     end;
 //   end;
 //   EndWindow;
 // end;

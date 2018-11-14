@@ -1,0 +1,253 @@
+remote outer updating function LongInt BL_IPVcRecordCheck(record IPVc,record IPVc,LongInt,LongInt);
+remote outer updating function LongInt BL_IVVcRecordCheck(record IVVc,record IVVc,LongInt,LongInt);
+remote outer updating function LongInt BL_OPVcRecordCheck(record OPVc,record OPVc,LongInt,LongInt);
+remote outer updating function LongInt BL_ORVcRecordCheck(record ORVc,record ORVc,LongInt,LongInt);
+remote outer function LongInt BL_POVcRecordCheck(record POVc,record POVc,LongInt,LongInt);
+remote outer updating function LongInt BL_PUVcRecordCheck(record PUVc,record PUVc,LongInt,LongInt);
+remote outer updating function LongInt BL_QTVcRecordCheck(record QTVc,record QTVc,LongInt,LongInt);
+remote outer updating function LongInt BL_RetPUVcRecordCheck(record RetPUVc,record RetPUVc,LongInt,LongInt);
+remote outer updating function LongInt BL_RetVcRecordCheck(record RetVc,record RetVc,LongInt,LongInt);
+remote outer updating function LongInt BL_SHVcRecordCheck(record SHVc,record SHVc,LongInt,LongInt);
+remote outer function LongInt BL_TRVcRecordCheck(record TRVc,record TRVc,LongInt,LongInt);
+remote outer updating function LongInt BL_VIVcRecordCheck(record VIVc,record VIVc,LongInt,LongInt);
+
+
+
+global
+updating function LongInt IPVcRecordCheckClient(longint wn,record IPVc IPp,record IPVc IP2p,LongInt stat,LongInt long4)
+BEGIN
+  LongInt res;
+
+  res = 0;
+
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_IPVcRecordCheck(IPp,IP2p,stat,long4);
+  end;
+  
+  if (res!=-1) then begin
+    //res = inner.IPVcRecordCheckClient(wn,IPp,IP2p,stat,long4);
+  end;
+    
+LIPVcRecordCheck:;
+  IPVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+updating function LongInt IVVcRecordCheckClient(longint wn,record IVVc IVp,record IVVc IV2p,LongInt stat,LongInt long4)
+BEGIN
+  LongInt res;
+
+  res = 0;
+  
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_IVVcRecordCheck(IVp,IV2p,stat,long4);
+  end;
+
+  if (res!=-1) then begin
+    res = inner.IVVcRecordCheckClient(wn,IVp,IV2p,stat,long4);
+  end;
+    
+LIVVcRecordCheck:;
+  IVVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+updating function LongInt OPVcRecordCheckClient(longint wn,record OPVc OPp,record OPVc OP2p,LongInt stat,LongInt check)
+BEGIN
+  LongInt res;
+  
+  res = 0;
+
+  if (FileExists("halcust/datadefBL.hal")) then begin  
+    res = BL_OPVcRecordCheck(OPp,OP2p,stat,check);
+  end;
+  
+  if (res!=-1) then begin
+    //res = inner.OPVcRecordCheckClient(wn,OPp,OP2p,stat,check);
+  end;
+    
+LOPVcRecordCheck:;
+  OPVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+updating function LongInt ORVcRecordCheckClient(longint wn,record ORVc ORr,record ORVc OR2r,LongInt stat,LongInt check)
+BEGIN
+  LongInt res;
+
+  res = 0;
+
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_ORVcRecordCheck(ORr,OR2r,stat,check);
+  end;
+
+  if (res!=-1) then begin
+    //res = inner.ORVcRecordCheckClient(wn,ORr,OR2r,stat,check);
+  end;
+    
+LORVcRecordCheck:;
+  ORVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+function LongInt POVcRecordCheckClient(longint wn,record POVc POr,record POVc PO2r,LongInt stat,LongInt along4)
+BEGIN
+  LongInt res;
+
+  res = 0;
+
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_POVcRecordCheck(POr,PO2r,stat,along4);
+  end;
+
+  if (res!=-1) then begin
+    //res = inner.POVcRecordCheckClient(wn,POr,PO2r,stat,along4);
+  end;
+    
+LPOVcRecordCheck:;
+  POVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+updating function LongInt PUVcRecordCheckClient(longint wn,record PUVc PUr,record PUVc PU2r,LongInt stat,LongInt check)
+BEGIN
+  LongInt res;
+
+  res = 0;
+
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_PUVcRecordCheck(PUr,PU2r,stat,check);
+  end;
+
+  if (res!=-1) then begin
+    //res = inner.PUVcRecordCheckClient(wn,PUr,PU2r,stat,check);
+  end;
+    
+  PUVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+updating function LongInt QTVcRecordCheckClient(longint wn,record QTVc QTr,record QTVc QT2r,LongInt stat,LongInt check)
+BEGIN
+  LongInt res;
+
+  res = 0;
+
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_QTVcRecordCheck(QTr,QT2r,stat,check);
+  end;
+  
+  if (res!=-1) then begin
+    //res = inner.QTVcRecordCheckClient(wn,QTr,QT2r,stat,check);
+  end;
+    
+LQTVcRecordCheck:;
+  QTVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+updating function LongInt RetPUVcRecordCheckClient(longint wn,record RetPUVc RetPUp,record RetPUVc RetPU2p,LongInt stat,LongInt check)
+BEGIN
+  LongInt res;
+
+  res = 0;
+
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_RetPUVcRecordCheck(RetPUp,RetPU2p,stat,check);
+  end;
+
+  if (res!=-1) then begin
+    //res = inner.RetPUVcRecordCheckClient(wn,RetPUp,RetPU2p,stat,check);
+  end;
+    
+LRetPUVcRecordCheck:;
+  RetPUVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+updating function LongInt RetVcRecordCheckClient(longint wn,record RetVc Retp,record RetVc Ret2p,LongInt stat,LongInt check)
+BEGIN
+  LongInt res;
+
+  res = 0;
+
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_RetVcRecordCheck(Retp,Ret2p,stat,check);
+  end;
+
+  if (res!=-1) then begin
+    //res = inner.RetVcRecordCheckClient(wn,Retp,Ret2p,stat,check);
+  end;
+    
+LRetVcRecordCheck:;
+  RetVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+updating function LongInt SHVcRecordCheckClient(longint wn,record SHVc SHp,record SHVc SH2p,LongInt stat,LongInt check)
+BEGIN
+  LongInt res;
+
+  res = 0;
+
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_SHVcRecordCheck(SHp,SH2p,stat,check);;
+  end;
+
+  if (res!=-1) then begin
+    //res = inner.SHVcRecordCheckClient(wn,SHp,SH2p,stat,check);
+  end;
+    
+LSHVcRecordCheck:;
+  SHVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+function LongInt TRVcRecordCheckClient(longint wn,record TRVc TRp,record TRVc TR2p,LongInt stat,LongInt long4)
+BEGIN
+  LongInt res;
+
+  res = 0;
+
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_TRVcRecordCheck(TRp,TR2p,stat,long4);
+  end;
+
+  if (res!=-1) then begin
+    //res = inner.TRVcRecordCheckClient(wn,TRp,TR2p,stat,long4);
+  end;
+    
+LTRVcRecordCheck:;
+  TRVcRecordCheckClient = res;
+  RETURN;
+END;
+
+global
+updating function LongInt VIVcRecordCheckClient(longint wn,record VIVc VIp,record VIVc VI2p,LongInt stat,LongInt long4)
+BEGIN
+  LongInt res;
+  
+  res = 0;
+  
+  if (FileExists("halcust/datadefBL.hal")) then begin
+    res = BL_VIVcRecordCheck(VIp,VI2p,stat,long4);
+  end;
+  
+  if (res!=-1) then begin
+    //res = inner.VIVcRecordCheckClient(wn,VIp,VI2p,stat,long4);
+  end;
+    
+LVIVcRecordCheck:;
+  VIVcRecordCheckClient = res;
+  RETURN;
+END;

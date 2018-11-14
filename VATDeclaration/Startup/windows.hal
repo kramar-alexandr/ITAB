@@ -127,12 +127,17 @@ begin
   //VITO: EDS-12
   WindowBegin("PVN1 - Uzst‚d´jumi",VATDECL_SettsTClass,CGSbl,-);
   SetBlid(VATDECL_SettsBlock);
-  SetWRect(64,80,509,250);
+  SetWRect(64,80,509,350);
   h = 130; v = 20; vs = 20;
   EditField(h,v,-20,"Eksporta faila vieta",Normal,ExportFilesPath,false,0);
   CheckBox(h,v+=vs,0,"Kases ieÀ•mumu ordera dati no gr‚matojuma",CLInFromTR);//eds-27; edz
   CheckBox(h,v+=16,0,"Gr‚m. rind‚s",TRRows);//eds-27; edz
+  EditField(h,v+=vs,-20,"PVN form. prefiksi",Normal,VATFCalcPrefix,false,0); // EVS: HERBE-1570
+  StaticText(h,v+=vs*2,"Apvienot Pieg. r•úina un tam piesaist´tas priekäapmaksas",false);
+  StaticText(h,v+=15,"v•rt´bas, ja atäúiras PVN kodi ierakstos:",false);
+  CheckBox(h,v+=5,0,"Iesl•gts",MergeDiffVATVIPrep); // EVS: EDS-62
   StaticText(h,v+=vs,"",false);
+  EditField(h,v+=vs,-20,"Nodokºu likumu kodi",Normal,TaxRulesCodes,false,TaxRulesSClass); // ARA: EDS-56
   EndWindow;
   
 return;

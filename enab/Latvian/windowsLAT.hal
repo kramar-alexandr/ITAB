@@ -1,0 +1,18 @@
+// ui
+event DefineWindows
+begin
+  
+  SetLangMode(LangLatvian,"LAT",0);
+
+  WindowBegin("Izveidot BurtiEnabler.bkey failu",CreateEnablerVClass,CGMnt,RcType);
+  SetWRect(20,80,450,150);
+  EndWindow;
+  
+  WindowBegin("Izveidot BurtiEnabler.bkey failu",CreateEnablerDClass,CGview,-);
+  SetWRect(64,80,509,340);
+  UseView(MailVc);
+  TextField(3,0,-5,-1,Math,0);
+  EndWindow;
+  
+  return;
+end;

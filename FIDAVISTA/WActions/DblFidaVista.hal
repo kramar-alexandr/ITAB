@@ -1,0 +1,275 @@
+// ui
+remote updating function boolean FV_RemoteLinkFVData(record FidaVistaVc);//FV-228 GLS
+remote updating function boolean FV_DoSalesPrepay(record FidaVistaVc);//FV-15; edz//FV-228 GLS
+remote procedure LogFVMessage(var record FidaVistaVc,string);//FV-16; edz
+remote function boolean CheckIfUniqueVATNr(string,var string,var string);//FV-16; edz
+remote inner function Boolean GetNextCustNr(var string);
+
+
+global
+procedure DblFidaVistaVc(string dblstr,string l,Integer currepwn)
+begin
+  Integer wn;
+  record FidaVistaVc FVr;
+
+  if (nonblank(l)) then begin
+    FVr.md5hash = l;
+    if (ReadFirstMain(FVr,1,true)) then begin  
+      wn = OpenWindow("FidaVistaDClass",1,0,"","",FVr);
+    end; 
+  end;
+  return;
+end;
+
+global updating
+procedure FV_LinkDataDsm()
+begin
+  integer wn;
+  record FidaVistaVc FVr;
+
+  wn = CurWindow;
+  GetWindowRecord(wn,FVr);
+  if (FV_RemoteLinkFVData(FVr)) then begin
+    if (ReadFirstMain(FVr,1,true)) then begin
+      PutWindowRecord(wn,FVr);
+    end;
+  end else begin
+    Beep;
+  end;
+
+  return;
+end;
+
+//FV-15; edz:
+global updating
+procedure FV_CreatePayment()
+begin
+  integer wn;
+  record FidaVistaVc FVr;
+
+  wn = CurWindow;
+  if (WindowState(wn)==0) then begin
+    GetWindowRecord(wn,FVr);
+    if (FV_DoSalesPrepay(FVr)) then begin
+      if (ReadFirstMain(FVr,1,true)) then begin
+        PutWindowRecord(wn,FVr);
+      end;
+    end else begin
+      beep;
+    end;
+  end else begin
+    beep;
+  end;
+
+  return;
+end;
+//:edz
+
+//FV-16; edz:
+function boolean UniqueBankAcc(string acc, var string cuname, var string cunr)//FV-16; edz
+begin
+  record CUVc CUr;
+  boolean testf;
+  
+  testf = true;
+  CUr.BankAccount=acc;
+  
+  if (ReadFirstKey("BankAccount",CUr,1,true)) then begin
+    testf=false;
+    cuname=CUr.Name;
+    cunr=CUr.Code;
+  end;
+
+  UniqueBankAcc=testf;
+  return;
+end;
+
+//fv-30; edz:
+function boolean ExistingContact(string code)
+begin
+  boolean res,testf;
+  record CUVc CUr;
+  
+  testf=true;
+  res=false;
+  
+  while (LoopMain(CUr,1,testf)) begin
+    if (CUr.Code==code) then begin
+      res=true;
+      testf=false;
+    end;
+  end;
+  
+  ExistingContact = res;
+  return;
+end;
+//:edz
+
+global 
+updating function integer FV_TryCreateNewContact(var string name,var string nr)
+begin
+  integer wn,test;
+  record CUVc CUr;
+  record FidaVistaVc FVr;
+  record BankVc Bankr;
+  string 255 cuname,cunr,tstr;
+  boolean testf,TrHs;
+  record FidaVistaParamsBlock FidaVistaParamsb;
+  
+  tstr="";
+  testf=true;
+  TrHs=true;
+  BlockLoad(FidaVistaParamsb);
+  wn = CurWindow;
+  if (WindowState(wn)==0) then begin
+    GetWindowRecord(wn,FVr);
+    if (nonblank(FVr.CUCode)) then begin
+      if (ExistingContact(FVr.CUCode)) then begin
+        testf=false;
+        test=3;
+        goto failed;
+      end else begin
+        FVr.CUCode="";
+      end;
+    end;
+    if (FidaVistaParamsb.NoVATNr==0) then begin
+      if NonBlank(FVr.CPSAHLegalId) then begin
+        if (!CheckIfUniqueVATNr(FVr.CPSAHLegalId,cuname,cunr)) then begin
+          testf=false;
+          test=1;
+          goto failed;
+        end;
+      end else begin
+        testf=false;
+        test=2;
+        goto failed;
+      end;
+    end;
+    if (FidaVistaParamsb.NoBankAcc==0) then begin
+      if NonBlank(FVr.CPSAccNo) then begin
+        if (!UniqueBankAcc(FVr.CPSAccNo,cuname,cunr)) then begin
+          testf=false;
+          test=1;
+          goto failed;
+        end;
+      end else begin
+        testf=false;
+        test=2;
+        goto failed;
+      end;
+    end;
+    if (testf) then begin
+      RecordNew(CUr);
+      GetNextCustNr(tstr);
+      CUr.Code = tstr;
+      CUr.BankAccount = FVr.CPSAccNo;
+      CUr.RegNr2 = FVr.CPSAHLegalId;
+      CUr.VATNr = FVr.CPSAHLegalId;
+      if NonBlank(FVr.CPSAHName) then begin
+        CUr.Name=FVr.CPSAHName;
+      end;
+      if (NonBlank(FVr.CPSBankCode)) then begin
+        while (LoopMain(Bankr,1,TrHs)) begin
+          if (Bankr.SWIFT==FVr.CPSBankCode) then begin
+            CUr.AccOperator=Bankr.Code;
+            CUr.IBANCode=Bankr.Nr2;
+            TrHs=false;
+          end;
+        end;
+      end;
+      if (FVr.TypeCode=="OUTP") then begin
+        CUr.VEType = 1;
+      end;
+      if NonBlank(FVr.CPSAHAddress) then begin
+        CUr.InvAddr1 = FVr.CPSAHAddress;
+        CUr.DelAddr1 = FVr.CPSAHAddress;
+      end;
+      if (RecordStore(CUr,false)) then begin
+        LogFVMessage(FVr,StringFromStringSet(10000,"31975") & ": " & CUr.Code);
+        FVr.CUCode = CUr.Code;
+        RecordStore(FVr,true);
+        PutWindowRecord(wn,FVr);
+        CreateRecordLink(FVr,CurrentCompany,CUr,CurrentCompany);
+        CreateRecordLink(CUr,CurrentCompany,FVr,CurrentCompany);
+        if (FidaVistaParamsb.OpenCU != 0) then begin//fv-16; edz
+          OpenWindow("CUDClass",1,0,"","",CUr);
+        end;
+      end;
+    end;
+  end;
+  
+failed:;
+  if (nonblank(cuname)) then begin
+    name=cuname;
+    nr=cunr;
+  end;
+  
+  FV_TryCreateNewContact=test;
+  return;
+end;
+
+global
+updating procedure FV_CreateNewContact()
+begin
+  string 255 name,nr;
+  integer contact;
+  
+  contact = FV_TryCreateNewContact(name,nr);
+  
+  switch (contact) begin
+    case 1:
+      MessageBox(0,StringFromStringSet(10000,"31976") & " : " & nr & " - " & name);
+    case 2:
+      MessageBox(0,StringFromStringSet(10000,"31977"));
+    case 3:
+      MessageBox(0,StringFromStringSet(10000,"31978"));
+  end;
+
+  return;
+end;
+//:edz
+
+//fv-30; edz:
+global
+updating procedure FV_LinkContactData()
+begin
+  integer wn;
+  record FidaVistaVc FVr;
+  record CUVc CUr;
+  boolean testf;
+
+  testf = false;
+  wn = CurWindow;
+  GetWindowRecord(wn,FVr);
+  if (nonblank(FVr.CUCode)) then begin
+    if (!ExistingContact(FVr.CUCode)) then begin
+      testf = true;
+      FVr.CUCode="";
+      goto failed;
+    end;
+    CUr.Code = FVr.CUCode;
+    if (ReadFirstMain(CUr,1,true)) then begin
+      if (blank(FVr.CPSAHLegalId)) then begin
+        FVr.CPSAHLegalId = CUr.VATNr;
+        testf = true;
+      end;
+      if (blank(FVr.CPSAccNo)) then begin
+        FVr.CPSAccNo = CUr.BankAccount;
+        testf = true;
+      end;
+    end;
+    
+failed:;
+    if (testf) then begin
+      RecordStore(FVr,true);
+      if (ReadFirstMain(FVr,1,true)) then begin
+        PutWindowRecord(wn,FVr);
+      end;
+    end;
+  end else begin
+    Beep;
+  end;
+
+  return;
+end;
+//:edz

@@ -1,0 +1,110 @@
+remote inner function boolean RemoteModuleEnabled(string);
+// ui
+
+global
+function boolean ManSelDate(integer wn)
+begin
+  record RcVc RepSpec;
+  boolean res;
+  
+  res = false;  
+  GetWindowRecord(wn,RepSpec);
+  
+  if (RepSpec.ArtMode==1) then begin
+    res = true;
+  end;
+
+  ManSelDate = res;
+  return;
+end;
+
+global
+procedure FidaVista_OPEnDsm()
+begin
+  record OPVc OPr;
+  record RcVc RepSpec;
+  record FidaVistaParamsBlock FVParamsb;
+  
+  if (!RemoteModuleEnabled("FIDAVISTA")) then begin
+    MessageBox(0,StringFromStringSet(10000,"31987")); // RGS: FV-195
+    goto LFailEnabler;
+  end;
+  
+  BlockLoad(FVParamsb);
+  if (WindowState(CurWindow) == 0) then begin
+    GetWindowRecord(CurWindow,OPr);
+    if (OPr.OrderedFlag == 1) then begin
+// kso      if (OPr.ExportedFlag == 0) then begin//FV-20; edz
+        RepSpec.repname = "FidaVista_OPEn";
+        RepSpec.Media = 2;
+        RepSpec.f1 = OPr.SerNr;
+        RepSpec.sStartDate = OPr.TransDate;
+        RepSpec.sEndDate = OPr.TransDate;
+        RepSpec.OKmode = FVParamsb.ExpCountry;//fv-114; edz
+        RunExport(RepSpec,true);
+// kso      end;
+    end;
+  end;
+LFailEnabler:;
+  return;
+end;
+
+global
+procedure FidaVista_OPEClassReportDefaults(Integer wn)
+BEGIN
+  record RcVc RepSpec;
+  record FidaVistaParamsBlock FVParamsb;
+  
+  BlockLoad(FVParamsb);
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  ReportDefaults(RepSpec,"FidaVista_OPEClass");  
+  RepSpec.flags[0] = 1;
+  RepSpec.flags[1] = 1;//FV-20; edz
+  RepSpec.flags[2] = 1;
+  RepSpec.ArtMode = 1;
+  RepSpec.d1 = CurrentDate;
+  RepSpec.OKmode = FVParamsb.ExpCountry;//fv-114; edz
+  RepSpec.flags[8] = FVParamsb.BankFee;//FV-212 GLS
+  PutWindowRecord(wn,RepSpec);
+  SelectWindow(wn);
+  RETURN;
+END;
+
+//alk-297; edz:
+global
+procedure BPPayrollEClassReportDefaults(Integer wn)
+begin
+  record RcVc RepSpec;
+  record FidaVistaParamsBlock FVParamsb;
+  
+  BlockLoad(FVParamsb);
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  ReportDefaults(RepSpec,"PayrollToFidaVistaEClass"); 
+  //FV-212 GLS
+  //RepSpec.f6 = "OUR";
+  RepSpec.flags[8] = FVParamsb.BankFee;
+  RepSpec.flags[4] = FVParamsb.ExpType; //RGS: FV-219
+  //:FV-212 GLS
+  PutWindowRecord(wn,RepSpec);
+  SelectWindow(wn);
+  return;
+end;
+//:edz
+
+//fv-57; edz:
+global
+function Boolean FidaVista_OPEClassActiveEditField(Integer wn,string fieldname,Integer fn,Integer wnst,Integer rownr,Integer changed)
+BEGIN
+  Boolean res;
+
+  res = true;
+  switch (fieldname) begin
+    case "d1": res = ManSelDate(wn);
+  end;
+  
+  FidaVista_OPEClassActiveEditField = res;
+  RETURN;
+END;
+//:edz
