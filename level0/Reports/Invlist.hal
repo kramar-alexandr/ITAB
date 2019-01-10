@@ -574,6 +574,24 @@ LkInvoiceTypeCredit:;
   return;
 end;
 
+global function string 60 GetCustCountryName(string cocode)// Edit ************************** BPI Ukraine - KramarAlexandr - Thursday, 23 August 2018 15:46:08
+begin
+	record CUVc CUr;
+	record CountryVc Counr;
+	string 60 res;
+	
+	CUr.Code = cocode;
+	if(readfirstmain(CUr,1,true))then begin
+		Counr.Code = CUr.CountryCode;
+		if(readfirstmain(Counr,1,true))then begin
+			res = Counr.Comment;
+		end;
+	end;
+	
+	GetCustCountryName = res;
+return;
+end;
+
 global
 procedure InvoiceRn(record RcVc RepSpec)
 begin
@@ -772,14 +790,20 @@ begin
       OutString(120,0,USetStr(16709),false); //Salesman
       OutString(170,0,USetStr(15217),false); //Project
       OutString(240,0,USetStr(2354),false);
-      OutString(305,0,USetStr(2358),false);
+      if(RepSpec.flags[29]==1)then begin
+      	OutString(270,0,USetStr(16707),false);// Country Edit ************************** BPI Ukraine - KramarAlexandr - Thursday, 23 August 2018 15:40:01
+      end;
+      OutString(335,0,USetStr(2358),false);
     end else begin
       OutString(30,0,USetStr(2353),false);//60
       OutString(60,0,USetStr(12422),false); //Due date
       OutString(90,0,USetStr(16709),false); //Salesman
       OutString(140,0,USetStr(15217),false); //Project
       OutString(210,0,USetStr(2354),false);//110
-      OutString(285,0,USetStr(2358),false);//280
+      if(RepSpec.flags[29]==1)then begin
+				OutString(250,0,USetStr(16707),false);// Country Edit ************************** BPI Ukraine - KramarAlexandr - Thursday, 23 August 2018 15:40:01
+      end;
+      OutString(315,0,USetStr(2358),false);//280
     end;
     if (RepSpec.flags[15]!=0) then begin
       OutStringAdjust(5,0,USetStr(2328),true,M4Val);
@@ -1615,7 +1639,10 @@ LkInvoiceTypeCredit1:;
                 end;
                 //EBS <--
                 OutStringCut(240,300,0,IVr.Addr0,false,0); //EBS edit
-                OutString(305,0,tstr,false);
+                if(RepSpec.flags[29]==1)then begin
+									OutString(285,0,GetCustCountryName(IVr.CustCode),false);// Edit ************************** BPI Ukraine - KramarAlexandr - Thursday, 23 August 2018 15:41:42
+                end;
+                OutString(335,0,tstr,false);
               end else begin
                 if (RepSpec.flags[10]==3) then begin
                   if (nonblank(IVr.OfficialSerNr)) then begin
@@ -1635,7 +1662,10 @@ LkInvoiceTypeCredit1:;
                   OutString(140,0,"",false); //EBS - salesman
                 end;
                 OutStringCut(210,300,0,IVr.Addr0,false,0); //EBS edit
-                OutString(285,0,tstr,false);
+                if(RepSpec.flags[29]==1)then begin
+									OutStringCut(250,300,0,GetCustCountryName(IVr.CustCode),false,0); //// Edit ************************** BPI Ukraine - KramarAlexandr - Thursday, 23 August 2018 15:43:58
+                end;
+                OutString(315,0,tstr,false);
               end;
               if (RepSpec.flags[15]!=0) then begin
                 OutVal(5,0,ivnvat,M4Val,true);

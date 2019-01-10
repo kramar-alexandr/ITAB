@@ -1580,6 +1580,7 @@ if (true) then begin
       SpecialMenu("Request Approval",' ',6,"IVSendforAcceptanceIVDsm");
       SpecialMenu("Cancel Approval Request",' ',2,"CancelApprovalRequestDsm");
     end;
+    SpecialMenu("Export to file",' ',2,"BPIIVExpToFileDsm");// Edit ************************** BPI Ukraine - KramarAlexandr - Tuesday, 21 August 2018 09:57:47
     SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);
     if (HasModCRM) then begin
 //      SpecialMenu("Activity",'c',9,"CreateActFromIVDsm");
