@@ -1,0 +1,119 @@
+global 
+updating procedure ITAB_ImportItemsRemote(var record ORVc ORr,var string fn,var Integer rownr,var Longint err)
+begin
+  string 255 tstr,incode;
+  integer i,rwcnt;
+  row ORVc ORrw;
+  record INVc INr,IN2r;
+  boolean updf;
+  record RcVc RepSpec;
+  Boolean testf;
+  
+  rwcnt = MatRowCnt(ORr);
+
+  rownr = -1;
+  rwcnt = MatRowCnt(ORr);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(ORr,i,ORrw);
+    testf = true;
+    fn = "";
+    if (blank(ORrw.ArtCode)) then begin
+      testf = false;
+      fn = "ArtCode";
+    end;
+    /*
+    if (blank(ORrw.Objects)) then begin
+      testf = false;
+      fn = "Objects";
+    end;
+    */
+    if (blank(ORrw.SalesAcc)) then begin
+      testf = false;
+      fn = "SalesAcc";
+    end;
+    if (blank(ORrw.Spec)) then begin
+      testf = false;
+      fn = "Spec";
+    end;
+    if (blank(ORrw.Recepy)) then begin
+      testf = false;
+      fn = "Recepy";
+    end;
+    if (ORrw.OrderType<0) then begin
+      testf = false;
+      fn = "OrderType";
+    end;
+    INr.Code = ORrw.ArtCode;
+    if (ReadFirstMain(INr,1,true)) then begin
+      testf = false;
+      fn = "ArtCode";
+      err = 1000002;
+    end;
+    if (!testf) then begin
+      rownr = i;
+      if (err<0) then begin
+        err = 1058;
+      end;
+      goto LITAB_ImportItemsRemote;
+      
+    end;
+  end;  
+
+
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(ORr,i,ORrw);
+    tstr = Trim(ORrw.ArtCode);
+    incode = left(tstr,20);
+    RecordClear(INr);
+    RecordNew(INr);
+    INr.UUID = MakeUUID;
+    INr.Code = incode;
+    /*
+    if (ReadFirstMain(INr,1,true)) then begin
+      RecordCopy(IN2r,INr)
+      updf = true;
+    end else begin
+      RecordNew(INr);
+      INr.Code = incode;
+      updf = false;
+    end;
+    */
+
+    tstr = Trim(ORrw.Objects);
+    INr.DispGroups = left(tstr,60);
+    tstr = Trim(ORrw.SalesAcc);
+    INr.Group = left(tstr,5);
+    tstr = Trim(ORrw.Spec);
+    INr.Name = left(tstr,100);
+    tstr = Trim(ORrw.SerialNr);
+    INr.AlternativeCode = left(tstr,40);
+    tstr = Trim(ORrw.Recepy);
+    INr.Unittext = left(tstr,10);
+
+    tstr = Trim(ORrw.ShipNote);
+    INr.EUCodex = left(tstr,20);
+
+    
+    INr.UPrice1 = ORrw.Price;
+    INr.InPrice = ORrw.Sum;
+    INr.Width = ORrw.rowGP;
+    INr.Height = ORrw.TAX2Reb;
+    INr.Depth = ORrw.TAX1Reb;
+    INr.Weight = ORrw.Shipd2;
+    INr.ItemType = ORrw.OrderType;
+    RecordStore(INr,true);//rewrite if exists
+      /*
+      if (updf) then begin
+        RecordUpdate(IN2r,INr,false);
+      end else begin
+        RecordStore(INr,false);
+      end;
+      */
+  end;
+  for (i=rwcnt-1;i>=0;i=i-1) begin
+    MatRowDelete(ORr,i);
+  end;
+
+LITAB_ImportItemsRemote:;
+  return;
+end;

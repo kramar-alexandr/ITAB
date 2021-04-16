@@ -6,6 +6,13 @@ external function integer JPD_GetItemType(string);
 remote procedure UpdateORBasePrice(record ORVc,integer);
 
 remote updating function longint RecordAction_raCreateORInOtherCompanies(var record ORVc);//VITO: JPD-39
+external inner function Boolean HasModSL();
+remote inner function Integer ORTestApprovalStatus(record ORVc);
+remote inner function Boolean ORVc_AllowSales(record ORVc,var Integer,var LongInt);
+remote inner updating function Integer RecordAction_raPasteOrdInInv(var record IVVc,LongInt,Boolean,var Integer);
+remote updating function Integer JPD_GroupInvoiceItems(var record IVVc,record ORVc);
+external inner procedure IVOpenPrepExists(string);
+remote inner function Boolean DateWarned(Date,string);
 
 //jpd-29; edz:
 procedure ORDClassArtCode2EFAfter(integer wn,integer rownr,integer changedf)
@@ -194,3 +201,75 @@ begin
   return;
 end;
 //:VITO
+
+
+global
+updating procedure GroupIVFromORDsm()
+BEGIN
+  record ORVc ORr;
+  record IVVc IVr;
+  Integer wn,r,nwn,rownr;
+  Integer errcode;
+  Boolean testf;
+  LongInt ErrorCode;
+
+  wn = CurWindow;
+  DeselectWindow(wn,false);
+  if (WindowState(wn)==Rs_normal and HasModSL) then begin
+    GetWindowRecord(wn,ORr);
+//    if (ORr.Closed==0) then begin
+      if (UserCanAction("ORToInv",true)) then begin
+        testf = true;
+        r = ORTestApprovalStatus(ORr);
+        if (r!=0) then begin
+          MessageBox(r,"");
+          testf = false;
+        end;
+        if (!ORVc_AllowSales(ORr,rownr,ErrorCode)) then begin
+          WindowFieldGoto(wn,ORr,rownr,"ArtCode",true); 
+          MessageBox(ErrorCode,"");
+          testf = false;
+        end;
+        if (testf) then begin
+          r = RecordAction_raPasteOrdInInv(IVr,ORr.SerNr,true,errcode);
+          if (r==0) then begin
+            r = JPD_GroupInvoiceItems(IVr,ORr);
+          end;
+          if (r==0) then begin
+            if (MatRowCnt(IVr)!=0) then begin
+              nwn = OpenWindow("IVDClass",1,0,"","",IVr);
+              UpdateBrowses("ORVc");
+              IVOpenPrepExists(IVr.CustCode);
+              if (errcode>0) then begin
+                MessageBox(errcode,"");
+              end;
+            end else begin
+/*
+              if (IsProjOrder(ORr)) then begin
+                MessageBox(1096,"");
+              end;
+*/
+              Beep;
+            end;
+            if (DateWarned(IVr.TransDate,"IVVc")) then begin
+              MessageBox(1045,"");
+            end;
+          end else begin
+            if (r!=-1) then begin
+              MessageBox(r,"");
+            end else begin
+              Beep;
+            end;
+          end;
+        end;
+      end else begin
+        MessageBox(1274,StringFromStringSet(3,"ORToInv"));
+      end;
+//    end else begin
+//      MessageBox(1274,"");
+//    end;
+  end else begin
+    Beep;
+  end;
+  RETURN;
+END;

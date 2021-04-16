@@ -174,10 +174,11 @@ begin
   
   return;
 end;
-
+/*
 event startup
 begin
   Import("IMANTS UZERS",0,UZERIn,modSY);
   Import("IMANTS GLOBEL UZERS",0,GLOBELIn,modSY);
 return;
 end;
+*/

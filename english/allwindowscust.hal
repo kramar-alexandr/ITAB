@@ -476,6 +476,16 @@ begin
 end;
 //:VITO
 
+window ITAB_DeleteClosedINVClass:2
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h1,v,vs;
+  
+  WindowBegin("ITAB - Remove Closed Items",ITAB_DeleteClosedINVClass,CGMnt,RcType);
+  SetWRect(20,80,400,210);
+  EndWindow;
+end;
+
 window PFormDClass:1
   wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
@@ -511,5 +521,91 @@ begin
     RadioButton(h,v+=16,2,0,"Use Alt Price Formula",BasePriceListOption);
     EditField(h+140,v,25,"",Normal,BasePriceListAltFormula,false,PFormSClass);
   end;
+  EndWindow;
+end;
+
+window ITABINImpWClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,h1,vs;
+  
+  WindowBegin("ITAB - Create Items",ITABINImpWClass,CGOther,-);
+  UseView(ORVc);
+  SetWRect(20,80,1150,550);
+  Sizeable(1150,-1,1150,0);
+  h = 8; v = 20;
+  h1=34;vs = 20;
+  ColourPushButton(-550,10,-350,50,"ITAB_ImportItems","Create Items",35);
+  MatrixBegin(40,80,-50,-40,-,999);
+  MatCol(1,h1,"Class",0,Objects,false,DISClass);//mandatory
+  MatCol(1,h1+=85,"Group",0,SalesAcc,false,ITSClass);//mandatory
+  MatCol(1,h1+=85,"Code",0,ArtCode,false,INSClass);//mandatory
+  MatCol(1,h1+=85,"Description",0,Spec,false,0);
+  MatCol(1,h1+=120,"Unit",0,Recepy,false,UnitSClass);
+  MatCol(1,h1+=50,"Price",0,Price,false,0);
+  MatCol(1,h1+=50,"Cost",0,Sum,false,0);
+  MatCol(1,h1+=50,"Width",0,rowGP,false,0);
+  MatCol(1,h1+=50,"Height",0,TAX2Reb,false,0);  
+  MatCol(1,h1+=50,"Depth",0,TAX1Reb,false,0);  
+  MatCol(1,h1+=50,"Weight",0,Shipd2,false,0);  
+  MatCol(1,h1+=50,"Alt. Code",0,SerialNr,false,0);  
+  MatColTL(1,h1+=85,"Item Type",0,M4Set,Normal,10001,OrderType,false,SetSClass); 
+  MatCol(1,h1+=85,"Comm. Code",0,ShipNote,false,0);  
+  EndMatrix;
+  EndWindow;
+end;
+
+window JPD_GroupIVTClass:2
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h1,v,vs;
+  
+  WindowBegin("Group Invoice Settings",JPD_GroupIVTClass,CGSbl,-);
+  SetBlid(JPD_GroupIVBlock);
+  SetWRect(64,80,610,100);
+  Sizeable(-1,-1,0,0);  
+  v = 6; vs = 20; h = 210; h1 = 473;
+  EditField(h,v,120,"Group Invoice Item Code",Normal,GroupItem,false,INSClass);
+  EndWindow;  
+end;
+
+window PurOrdJRClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,vm,vs;
+  WindowBegin("Specify Purchase Order Journal",PurOrdJRClass,CGRcW,RcType);
+  SetWRect(20,80,470,270);
+  v= 6; vs = 20; h = 150;
+  PeriodField(h,v,"Period");
+  EditFieldTL(h,v+=vs, 150,"Purchase Order No.",   M4Str,Normal,30,f1,false,0);
+  EditFieldTL(h,v+=vs ,150,"#Supplier#",M4UStr,Normal,50,f2,false,VESClass);
+  if (HasCategories) then begin
+    EditFieldTL(h,v+=vs,60,"Category",M4UStr,Normal,11,f9,false,VGSClass);
+  end;
+  if (HasContactClassification) then begin
+    EditFieldTL(h,v+=20 ,150,"Classification",M4UStr,Normal,60,f4,false,CClassSClass);
+    EditFieldTL(h,v+=20 ,70,"Classification Type",M4UStr,Normal,30,f5,false,CTypeSClass);
+  end;
+  if (IsEnterprise) then begin
+    EditFieldTL(h,v+=vs ,150,"P/Order Class",M4UStr,Normal,5,FirstAcc,false,POrderClassSClass);
+  end;
+  if (HasMultiLocations) then begin
+    EditFieldTL(h,v+=vs, 100,"Location",M4UStr,Normal,10,f3,false,LocationSClass);
+  end;
+  EditFieldTL(h,v+=vs, 100,"Object (Order Rows)",M4UStr,Normal,10,ObjStr,false,ObjSClass);//cust
+  CheckBox(h,v+=vs,0,"Only late orders (Order Rows)",flags[10]);//cust
+  ButtonFrame(h=30,vm=(v+=41),123,4,"Function");
+  RadioButton(h,v,0,0,"Overview",ArtMode);
+  RadioButton(h,v+=16,1,0,"Detailed",ArtMode);
+  RadioButton(h,v+=16,2,0,"Excl. #VAT#",ArtMode);
+  RadioButton(h,v+=16,3,0,"Order Rows",ArtMode);//cust
+  ButtonFrame(h=175,v=vm,130,3,"Status");
+  RadioButton(h,v,0,0,"Skip Closed",flags[3]);
+  RadioButton(h,v+=16,1,0,"Include Closed",flags[3]);
+  RadioButton(h,v+=16,2,0,"Closed Only",flags[3]);
+  ButtonFrame(h=325,v=vm,100,2,"Status");
+  CheckBox(h,v,0,"OKed",flags[1]);
+  CheckBox(h,v+=16,0,"Not OKed",flags[2]);
+  
   EndWindow;
 end;

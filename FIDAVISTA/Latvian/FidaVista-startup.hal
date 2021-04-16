@@ -37,6 +37,7 @@ begin
   Setting("Bankas pal´gs - Banku klienti",FidaVistaTRTClass,modFV);//fv-167; edz
   
   Report("Import•to failu statistika",FidaVistaRClass,FidaVistaRn,0,modFV);
+  Report("Bankas kontu piesaiste kontiem grup•äana",FidaVistaAccRClass,FidaVistaAccRn,0,modFV); // JTE: FV-233
   
   Maintenance("Dz•st Import•to failu ierakstus",FidaVistaRemoveVClass,FidaVistaRemoveMn,modFV);//fv-103; edz
 
@@ -132,6 +133,24 @@ begin
   StrSetText(31014,"Izmaks‚taj‚ avans‚ atºauts izmantot tikai vienu personu!");//fv-169; edz
   StrSetText(31015,"Nepareizs faila form‚ts");//fv-174; edz
   StrSetText(31016,"Maks‚juma uzdevums atrasts un gr‚matots");//RGS: fv-207
+  StrSetText(31017,"Konvert•t‚ summa, izmantojot valðtas kursu, nesakr´t ar nor‚d´to summu. Op. numurs/-i: ");//ARA: FV-236
+  // KOS: FV-240
+  StrSetText(31018,"Maks‚jumu uzdevumi ar ä‚du nr : ");
+  StrSetText(31019," netika eksport•ti.");
+  // :KOS
+  // JTE: FV-233
+  StrSetText(31020,"Bankas kontu piesaiste kontiem grup•äana");
+  StrSetText(31021,"Bankas konts");
+  StrSetText(31022,"Raksts");
+  StrSetText(31023,"Op.nosauk. raksts");
+  StrSetText(31024,"Konts");
+  StrSetText(31025,"Objekts");
+  StrSetText(31026,"Tips");
+  StrSetText(31027,"Persona");
+  StrSetText(31028,"Koment‚rs");
+  // :JTE
+  StrSetText(31029,"Maks‚juma uzdevums atrasts un gr‚matots, t‚ Samaksas datums nomain´ts uz Gr‚matojuma datumu"); // ARA: HAL-1397
+  StrSetText(31030," kontam nav neviena objekta ar noteikto tipu"); // JTE: FV-247
   EndStrSet;
 
   return;

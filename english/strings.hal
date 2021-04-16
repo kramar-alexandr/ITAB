@@ -57,6 +57,9 @@ begin
   SString(-100048,"Need to fill field 'Coordinator'");//VITO: EBST-11
   SString(-100049,"Issue Date"); //EBS
 
+  SString(1000001,"Items imported successfully"); //Item Import
+  SString(1000002,"Item already exists"); //Item Import
+
   SetBegin(900);
   SetText(0,"-");
   SetText(1,"C");
@@ -69,6 +72,14 @@ begin
   SetText(2,"Salesman");//VITO: EBST-16
   EndSet;
   //:VITO
+
+  //CHN::Item import
+  SetBegin(10001);
+  SetText(0,"Plain");
+  SetText(1,"Stocked");
+  SetText(2,"Structured");
+  EndSet;
+  //CHN::Item import
 
   return;
 end;

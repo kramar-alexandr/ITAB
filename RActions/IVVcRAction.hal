@@ -1,0 +1,52 @@
+external inner procedure SetORFlags(record ORVc);
+
+global
+updating procedure JPD_CheckAndUpdateOrderInvoiced(record IVVc IVr,Boolean okf)
+begin
+  record ORVc ORr,oldORr;
+  row ORVc ORrw;
+  Integer i,rwcnt;
+  record JPD_GroupIVRowsVc GIVr;
+  row JPD_GroupIVRowsVc GIVrw;
+
+  if (IVr.OrderNr>-1) then begin
+    GIVr.InvoiceNr = IVr.SerNr;
+    if (ReadFirstMain(GIVr,1,true)) then begin
+      if (GIVr.OrderNr>-1) then begin
+        ORr.SerNr = GIVr.OrderNr;
+        if (ReadFirstMain(ORr,1,true)) then begin
+          RecordCopy(oldORr,ORr);
+          rwcnt = MatRowCnt(GIVr);
+          for (i=0;i<rwcnt;i=i+1) begin
+            MatRowGet(GIVr,i,GIVrw);
+            MatRowGet(ORr,GIVrw.OrdRow,ORrw);
+            if (okf) then begin
+              ORrw.Invd = ORrw.Invd + GIVrw.Qty;        
+            end else begin
+              ORrw.Invd = ORrw.Invd - GIVrw.Qty;                  
+            end;
+            MatRowPut(ORr,GIVrw.OrdRow,ORrw);
+          end;
+          SetORFlags(ORr);
+          if (RecordUpdate(oldORr,ORr,false)==0) then begin
+          end;
+        end;
+      end;
+    end;
+  end;
+
+
+  return;
+end;
+
+global
+updating function LongInt IVVcRecordRemoveAfter(var record IVVc IVr,record IVVc IV2r,LongInt long3,LongInt long4)
+begin
+  LongInt res;
+
+  res = inner.IVVcRecordRemoveAfter(IVr,IV2r,long3,long4);
+  JPD_CheckAndUpdateOrderInvoiced(IVr,false);
+
+  IVVcRecordRemoveAfter = res;
+  return;
+end;

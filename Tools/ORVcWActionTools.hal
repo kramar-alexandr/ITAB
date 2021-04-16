@@ -12,6 +12,11 @@ external inner function Boolean PasteCustInOR(var record ORVc);
 external inner function Boolean ORVc_PasteArtCode(var record ORVc,Integer,var string,var string,Boolean);
 external inner procedure ORVc_PasteQuant(var record ORVc,Integer,Boolean,var Boolean);
 //:VITO
+external inner procedure IVVc_PastePrice(var record IVVc,record IVVc,Integer,var string);
+external inner function Boolean IVVc_PasteArtCode(var record IVVc,Integer,var string,var string,Boolean,var Integer);
+external inner function string 60 AddObjectToObjectList(string,string);
+external inner procedure IVSumup(var record IVVc,Boolean);
+external updating procedure JPD_CheckAndUpdateOrderInvoiced(record IVVc,Boolean);
 
 //jpd-29; edz:
 global
@@ -245,3 +250,131 @@ begin
   return;
 end;
 //:VITO
+
+
+function Boolean FindGroupSection(vector string vItems,array string aItems,Integer rw,var string item)
+begin
+  Boolean res;
+  Integer i;
+
+  for (i=0;i<aItems.length;i=i+1) begin
+    if (SetInSet(rw,vItems[aItems[i]])) then begin
+      item = aItems[i];
+      res = true;
+    end;
+  end;
+
+  FindGroupSection = res;
+  return;
+end;
+
+function string 255 GetItemName(string tstr,array string aDesc)
+begin
+  Integer i;
+  string 255 res;
+
+  for (i=0;i<aDesc.length;i=i+1) begin
+    if (aDesc[i]==tstr) then begin
+      res = aDesc[i];
+      i = aDesc.length;
+    end;
+  end;
+
+  GetItemName = res;
+  return;
+end;
+
+global
+updating function Integer JPD_GroupInvoiceItems(var record IVVc IVr,record ORVc ORr)
+begin
+  record JPD_GroupIVRowsVc GIVr;
+  row JPD_GroupIVRowsVc GIVrw;
+  Integer i,rwcnt,rw;
+  row IVVc IVrw;
+  record IVVc oldIVr;
+  record JPD_GroupIVBlock GIVb;
+  vector string 255 vItems;
+  array string 255 aItems,aDesc;
+  vector val vSum;
+  array string 255 aSum;
+  string 255 warn1,warn2,id,item;
+  Integer sernrf;
+  record IVVc IV2r;
+  row ORVc ORrw;
+  Integer res;
+
+  RecordCopy(oldIVr,IVr);
+  res = 0;
+  RecordNew(GIVr);
+  GIVr.InvoiceNr = IVr.SerNr;
+  GIVr.OrderNr = ORr.SerNr;
+
+  rwcnt = MatRowCnt(ORr);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(ORr,i,ORrw);
+    if (ORrw.stp==kInvoiceRowTypeHeader) then begin
+      id = ORrw.Spec;
+      aDesc[aDesc.length] = ORrw.Spec;
+    end else begin
+      if (ORrw.stp==kInvoiceRowTypeNormal) then begin
+        vItems[id] = AddObjectToObjectList(vItems[id],i);
+      end;
+    end;
+  end;
+
+  GetVectorTags(vItems,aItems);
+
+  rwcnt = MatRowCnt(IVr);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(IVr,i,IVrw);
+    if (IVrw.stp==kInvoiceRowTypeNormal and nonblank(IVrw.ArtCode) and IVrw.OrdRow>-1) then begin
+      ClearRow(GIVr,GIVrw,1);
+      GIVrw.ArtCode = IVrw.ArtCode;
+      GIVrw.Qty = IVrw.Quant;
+      GIVrw.OrdRow = IVrw.OrdRow;
+      MatRowPut(GIVr,rw,GIVrw);
+      rw = rw + 1;      
+      if (FindGroupSection(vItems,aItems,IVrw.OrdRow,item)) then begin
+        vSum[item] = vSum[item] + IVrw.Sum;
+      end;
+
+      MatRowDelete(IVr,i);
+      i = i - 1;
+      rwcnt = rwcnt - 1;
+    end else begin
+      if (IVrw.stp==kInvoiceRowTypeHeader or IVrw.stp==kInvoiceRowTypeSubTotal) then begin
+        MatRowDelete(IVr,i);
+        i = i - 1;
+        rwcnt = rwcnt - 1;
+      end; 
+    end;
+  end;
+  RecordStore(GIVr,true);
+
+  rw = MatRowCnt(IVr);
+  BlockLoad(GIVb);
+  GetVectorTags(vSum,aSum);
+  for (i=0;i<aSum.length;i=i+1) begin
+    ClearRow(IVr,IVrw,1);
+    IVrw.ArtCode = GIVb.GroupItem;
+    MatRowPut(IVr,rw,IVrw);
+    //after item
+    IVVc_PasteArtCode(IVr,rw,warn1,warn2,false,sernrf)
+    
+    MatRowGet(IVr,rw,IVrw);
+    IVrw.Spec = GetItemName(aSum[i],aDesc);
+    IVrw.Price = vSum[aSum[i]];
+    IVrw.Quant = 1;
+    MatRowPut(IVr,rw,IVrw);
+    //after price change
+    IVVc_PastePrice(IVr,IV2r,rw,warn1);
+    rw = rw + 1;
+  end;
+  IVSumup(IVr,true);
+  if (RecordUpdate(oldIVr,IVr,true)==0) then begin
+    JPD_CheckAndUpdateOrderInvoiced(IVr,true);
+  end;
+
+  JPD_GroupInvoiceItems = res;
+  return;
+end;

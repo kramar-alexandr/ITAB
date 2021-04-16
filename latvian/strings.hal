@@ -82,6 +82,9 @@ begin
   SString(-100048,"Nepieciešams aizpildīt lauku 'Koordinators'");//VITO: EBST-11
   SString(-100049,"Rēķ. dat."); //EBS
 
+  SString(1000001,"Artikuli ieimportēti veiksmīgi"); //Item Import
+  SString(1000002,"Artikuls jau eksistē"); //Item Import
+
   SetBegin(900);
   SetText(0,"-");
   SetText(1,"C");
@@ -94,6 +97,14 @@ begin
   SetText(2,"Pārdevējs");//VITO: EBST-16
   EndSet;
   //:VITO
+
+  //CHN::Item import
+  SetBegin(10001);
+  SetText(0,"Vienkāršs");
+  SetText(1,"Noliktavas");
+  SetText(2,"Strukturēts");
+  EndSet;
+  //CHN::Item import
 
   return;
 end;

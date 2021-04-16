@@ -1,6 +1,31 @@
 remote inner function boolean RemoteModuleEnabled(string);
+external inner procedure FindOTforAcc(string,var string);
+external inner function string 40 ObjSClassPasteSpecialWindowClass(string);
+remote inner function Integer CountObjects(string);
+remote inner procedure ExtractElemFromSet(string,integer,var string);
+// external inner procedure ObjBTSClassArrayOnOpen2(integer,integer,var Array string,var Array string);
+remote inner procedure ObjBTSClassArrayOnOpenRemote2(string,var Array string,var Array string);
 // ui
 //fv-47; author: edz
+
+// KOS: FV-110
+global
+procedure RefreshWindow(record FidaVistaVc FVr)
+begin
+  integer nwn,wn;
+
+  wn = CurWindow;
+  nwn = FindWindow("FidaVistaDClass");
+  if (nwn!=0) then begin
+    CloseWindow(nwn);
+    nwn = OpenWindow("FidaVistaDClass",1,0,"","",FVr);
+    DeselectWindow(nwn,false);
+    SelectWindow(wn);
+  end;
+  
+  return;
+end;
+// :KOS
 
 global
 function boolean BPPayrollEClassOnOKWindow(Integer wn)
@@ -99,3 +124,189 @@ LFailEnabler:;
   return;
 end;
 //:edz
+
+// ARA: FV-247
+procedure FidaVistaAccTClassSpecPasteNameObjects(Integer wn,var string psname)
+BEGIN
+  record FidaVistaAccBlock FVAccr;
+  row FidaVistaAccBlock FVAccrw;
+  Integer rownr;
+  string 200 typ;
+  string 10 accnr;
+
+  GetWindowRecord(wn,FVAccr);
+  rownr = WindowActiveRow(wn);
+  typ="";
+  if (rownr>=0) then begin
+    MatRowGet(FVAccr,rownr,FVAccrw);
+    FindOTforAcc(FVAccrw.Acc,typ);
+  end;
+  if (nonblank(typ)) then begin
+    psname = "TRObjSClass";
+  end else begin    
+    psname = ObjSClassPasteSpecialWindowClass("ObjSClass");
+  end;
+  RETURN;
+END;
+
+global
+function string 40 FidaVistaAccTClassSpecPasteName(Integer wn,string defpsname)
+begin
+  string 255 psname;
+  
+  psname = defpsname;
+  switch (WindowActiveField(wn)) begin
+    case "Objects": FidaVistaAccTClassSpecPasteNameObjects(wn,psname);
+  end;
+  FidaVistaAccTClassSpecPasteName = psname;
+  return;
+end;
+
+global
+procedure FidaVistaAccBlock_TRObjSClass(record FidaVistaAccBlock FVAccr,integer currow,var record RcVc  RepSpec)
+begin
+  row FidaVistaAccBlock FVAccrw;
+  record ObjVc Objr;
+  integer typeam,i,objam,j;
+  string 5 otype,ctype;
+  boolean res,found;
+  string 100 object,typ,cobject,accnr;
+  
+  if (currow>=0) then begin
+    MatRowGet(FVAccr,currow,FVAccrw);
+    object = FVAccrw.Objects;
+    accnr = FVAccrw.Acc;
+  end;
+
+  if (nonblank(object)) then begin
+    FindOTforAcc(accnr,typ);
+    if (nonblank(typ)) then begin
+      typeam=CountObjects(typ); 
+      objam=CountObjects(object); 
+      for (i=1;i<=objam;i=i+1) begin
+
+        ExtractElemFromSet(object,i,cobject);
+        Objr.Code=cobject;
+        found = false;   
+        if (ReadFirstMain(Objr,1,true)) then begin
+          for (j=1;j<=typeam;j=j+1) begin
+            ExtractElemFromSet(typ,j,ctype);
+            if (Objr.OTCode==ctype) then begin
+              found=true;
+              switch (j) begin
+                case 1: RepSpec.f1=cobject;
+                case 2: RepSpec.f2=cobject;
+                case 3: RepSpec.f3=cobject;
+                case 4: RepSpec.f4=cobject;
+                case 5: RepSpec.f5=cobject;
+                case 6: RepSpec.AccStr=cobject;
+                case 7: RepSpec.FirstAcc=cobject;
+              end;
+            end;
+          end;
+        end;
+        if (found == false) then begin
+          if (nonblank(RepSpec.f6)) then begin
+            RepSpec.f6=RepSpec.f6 & "," & cobject;
+          end else begin
+            RepSpec.f6=cobject;
+          end;
+        end;
+      end;
+    end;
+  end;    
+  return;
+end;
+
+global
+function Boolean TRObjSClassOnOpenWindow(Integer wn)
+begin
+  Integer mwn,ar;
+  record RcVc RepSpec;
+  record FidaVistaAccBlock FVAccr;
+  boolean res;
+  
+  mwn = MotherWindow(wn);
+  ar = WindowActiveRow(mwn);
+  switch (GetWindowFileName(mwn)) begin
+    case "FidaVistaAccBlock":
+      GetWindowRecord(mwn,FVAccr);
+      FidaVistaAccBlock_TRObjSClass(FVAccr,ar,RepSpec);
+      RepSpec.TransStr = WindowActiveField(mwn);
+      RepSpec.long1 = WindowActiveRow(mwn);
+      PutWindowRecord(wn,RepSpec);
+      SelectWindow(wn);
+      WindowFieldGoto(wn,RepSpec,-1,"f1",true);
+    otherwise
+      res = inner.TRObjSClassOnOpenWindow(wn);
+  end;
+  TRObjSClassOnOpenWindow = false;
+  return;
+end;
+
+procedure ObjBTSClassArrayOnOpen2(Integer wn,integer fn,var Array string astr,var Array string astr2)
+BEGIN
+  record FidaVistaAccBlock FVAccr;
+  row FidaVistaAccBlock FVAccrw;
+  string 5 otype;
+  integer objam,currow,rwcnt;
+  string 200 typ,accnr;
+
+  currow = WindowActiveRow(wn);
+  GetWindowRecord(wn,FVAccr);
+  rwcnt = MatRowCnt(FVAccr);
+  if (currow<rwcnt) and (currow>=0) then begin
+    MatRowGet(FVAccr,currow,FVAccrw);
+    accnr = FVAccrw.Acc;
+  end;
+
+  otype = "";
+  if (nonblank(accnr) or nonblank(typ)) then begin
+    if (blank(typ)) then begin
+      FindOTforAcc(accnr,typ);
+    end;
+    objam = CountObjects(typ); 
+    if (objam>=fn) then begin
+      ExtractElemFromSet(typ,fn,otype);
+    end;
+  end;
+  ObjBTSClassArrayOnOpenRemote2(otype,astr,astr2);
+  return;
+end;
+
+global
+function Boolean ObjBTSClassOnOpenWindow(Integer wn)
+begin
+  Array string 255 astr;
+  Array string 255 astr2;
+  Integer i,acnt,mwn,fn,mmwn;
+  string 255 object,name;
+  boolean res;
+  
+  mwn = MotherWindow(wn);
+  mmwn = MotherWindow(mwn);
+  if (GetWindowFileName(mmwn) == "FidaVistaAccBlock") then begin
+    switch (WindowActiveField(mwn)) begin
+      case "f1": fn = 1;
+      case "f2": fn = 2;
+      case "f3": fn = 3;
+      case "f4": fn = 4;
+      case "f5": fn = 5;
+      case "AccStr": fn = 6;
+      case "FirstAcc": fn = 7;
+    end;
+    ObjBTSClassArrayOnOpen2(mmwn,fn,astr,astr2);
+    acnt = astr.length;
+    for (i=0;i<acnt;i=i+1) begin
+      AddListRow(wn,"ObjBT",1,astr[i],0);
+      AddListData(wn,"ObjBT","Object",astr[i]);
+      AddListData(wn,"ObjBT","Name",astr2[i]);
+  //    SetListString(wn,len(astr[i]),astr[i],false);    
+    end;
+  end else begin
+    res = inner.ObjBTSClassOnOpenWindow(wn);
+  end;
+  ObjBTSClassOnOpenWindow = false;
+  return;
+end;
+// :ARA

@@ -1,0 +1,12 @@
+// Version: 85331251
+// KOS: HAL-1965 - mainot versiju nepiecie?ams no?emt. Pievienots d?? haplatch/EPEmpSocInEn.hal 
+begin
+  
+  RecordAddBegin(EPStrTypeVc,"jpd85331251");
+  RecordField(TabNr,M4Set,8626,0);
+  RecordField(ContractType,M4Set,8625,0);
+  RecordField(ExpType,M4Int,0,0);
+  EndRecordAdd;
+
+  return;
+end;

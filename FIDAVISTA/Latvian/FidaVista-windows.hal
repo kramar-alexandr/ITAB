@@ -7,7 +7,7 @@ begin
   SetLangMode(LangLatvian,"LAT",0);
 
   BlockLoad(FidaVistaParamsb);//fv-31; edz
-  
+
   WindowBegin("Importïtie faili",FidaVistaLClass,CGmlist,-);
   UseView(FidaVistaVc);
   SpawnClass(FidaVistaDClass);
@@ -24,7 +24,7 @@ begin
   RlCol(-85,-85,"AccAmt",AccAmt,true);
   RlColKey(-25,-25,"",CorD,false,CorD);
   SpecialMenu("AtkÇrtot ierakstu piesaisti",'l',0,"FV_LinkDataLsm");//fv-25; edz
-  SearchField("Meklït");  
+  SearchField("Meklït");
   EndWindow;
 
   vs = 20;
@@ -159,7 +159,7 @@ begin
   ButtonFrame(h1,vs,340,7,"MaksÇjumu imports:");
   CheckBox(h1,vs,0,"GrÇmatot",OKIPFlag);
   CheckBox(h1,vs+=16,0,"Piesaist¥t, ja sakr¥t rï˙ina summa",SalesSum4Match);
-  CheckBox(h1+20,vs+=16,0,"Piesaist¥t, ja netiek atpaz¥ts klients",MatchSumNoAccNoRegNr);//FV-117; edz  
+  CheckBox(h1+20,vs+=16,0,"Piesaist¥t, ja netiek atpaz¥ts klients",MatchSumNoAccNoRegNr);//FV-117; edz
   CheckBox(h1,vs+=16,0,"Piesaist¥t, ja sakr¥t kopïjÇ parÇda summa",SalesDebtMatch);
   CheckBox(h1,vs+=16,0,"Piesaist¥t, ja nesakr¥t valta identificïtam rï˙inam",AllowCcyMismatch);
   CheckBox(h1,vs+=16,0,"Neat‰ifrïti maksÇjumi apmaksÇ vecÇkos rï˙inus",SalesPayOld);//FV-14; edz
@@ -170,13 +170,17 @@ begin
   ButtonFrame(h1,vs+=45,340,2,"Ja nekas nav uzminïts, veidot priek‰apmaksas:");
   CheckBox(h1,vs,0,"MaksÇjumus",SalesPrepay);
   CheckBox(h1+20,vs+=16,0,"Neievietot PVN kodu automÇtiski",SLIgnorePrepayVAT);//fv-155; edz
+  CheckBox(h1,vs+=32,0,"Iespïjot konsolidïto algu maksÇjumu",EnableBtchBookg); // ARA: HAL-1654
+  CheckBox(h1,vs+=16,0,"Iespïjot konsolidïto algu maksÇjumu ar paz¥mi (Tikai SEB)",EnableBtchBookgWithCode); // ARA: HAL-1654
   Tile(2,500,false,"2",ImpPurch);
-  ButtonFrame(h1,vs=20,340,5,"MaksÇjumu uzdevumu imports:");//FV-4; edz:
+  ButtonFrame(h1,vs=20,340,7,"MaksÇjumu uzdevumu imports:");//FV-4; edz:
   CheckBox(h1,vs,0,"GrÇmatot",OKOPFlag);
   CheckBox(h1,vs+=16,0,"Piesaist¥t, ja sakr¥t rï˙ina summa",PurchSum4Match);
   CheckBox(h1,vs+=16,0,"Piesaist¥t, ja sakr¥t kopïjÇ parÇda summa",PurchDebtMatch);
   CheckBox(h1,vs+=16,0,"Neat‰ifrïti maksÇjumu uzdevumi apmaksÇ vecÇkos rï˙inus",PurchPayOld);//:edz
   CheckBox(h1,vs+=16,0,"Atrast eksistïjo‰us MU",FindOP);//RGS: FV-207
+  CheckBox(h1,vs+=16,0,"MU KomentÇrÇ ievietot Kl./Pieg. nosaukumu",SupplierInComment);// ARA: HAL-1207
+  CheckBox(h1,vs+=16,0,"PÇrlikt MU samaksas datumu pïc bankas datiem",ChangeOPTransDate);// ARA: HAL-1397
   ButtonFrame(h1,vs+=45,340,3,"Importïjot veidot:");
   CheckBox(h1,vs,0,"MaksÇjumu uzdevumus",ImpPurch);
   CheckBox(h1,vs+=16,0,"IzmaksÇtos avansus",ImpPP);//fv-53; edz
@@ -185,12 +189,14 @@ begin
   CheckBox(h1,vs,0,"MaksÇjumu uzdevumus",PurchPrepay);
   CheckBox(h1+20,vs+=16,0,"Neveidot, ja atrasts apmaksÇts rï˙ins",NoPrepayIfFoundVIVc);//fv-122; edz
   CheckBox(h1+20,vs+=16,0,"Neievietot PVN kodu automÇtiski",PLIgnorePrepayVAT);//fv-155; edz
-  ButtonFrame(h1,vs+=45,340,5,"MaksÇjumu uzdevumÇ eksports");//fv-22; edz:
+  ButtonFrame(h1,vs+=45,340,6,"MaksÇjumu uzdevumÇ eksports");//fv-22; edz:
   CheckBox(h1,vs,0,"Iek∫aut MU komentÇru",ExpComment);
   CheckBox(h1,vs+=16,0,"Iek∫aut rï˙ina datumu",ExpDate);//:edz
   CheckBox(h1,vs+=16,0,"Iek∫aut valtas nodok∫a kodu kÇ valtu",UseTaxCodeAsCur);
   CheckBox(h1,vs+=16,0,"Neiek∫aut pïdi¿as",StripQuotes);
   CheckBox(h1,vs+=16,0,"ÅMK Kodu",ExportAMK);//latg-72; edz
+  CheckBox(h1,vs+=16,0,"Banka no IenÇko‰Ç rï˙ina",BankFlag);// KOS: FV-240
+  EditField(h1+120,vs+=28,100,"Årïjo maksÇjumu kods",Normal,ExternalPaymentCode,false,0); // ARA: FV-251
   //fv-114; edz:
   vs = 80;
   ButtonFrame(h2,vs-32,140,7,"Eksporta valsts");
@@ -207,17 +213,17 @@ begin
   RadioButton(h2,vs,0,0,"MaksÇjam mïs",BankFee);
   RadioButton(h2,vs+=18,1,0,"MaksÇ vi¿i",BankFee);
   RadioButton(h2,vs+=18,2,0,"Dal¥ts",BankFee);
-  
+
   RadioButton(h2,vs+=32,0,0,"Exportït CSV formÇtÇ(SEB Banka)",ExpType);
   RadioButton(h2,vs+=18,1,0,"Fidavista 1.01 formÇtÇ",ExpType);
   RadioButton(h2,vs+=18,2,0,"Fidavista 1.2 formÇtÇ (Citadele)",ExpType);
   RadioButton(h2,vs+=18,3,0,"SEPA",ExpType);
   //:FV-212 GLS
   Tile(3,500,true,"3",NoVATNr);
-  ButtonFrame(h1,vs=20,340,4,"Jauna kontakta veido‰ana:");//FV-4; edz:  
+  ButtonFrame(h1,vs=20,340,4,"Jauna kontakta veido‰ana:");//FV-4; edz:
   CheckBox(h1,vs,0,"Veidot kontaktu, ja Importïto failu ierakstÇ nav reÆ.nr.",NoVATNr);//fv-29; edz
-  CheckBox(h1,vs+=16,0,"Veidot kontaktu, ja Importïto failu ierakstÇ nav bankas konta",NoBankAcc);//fv-29; edz  
-  CheckBox(h1,vs+=16,0,"Pïc izveido‰anas atvïrt kontakta ierakstu",OpenCU);//fv-16; edz  
+  CheckBox(h1,vs+=16,0,"Veidot kontaktu, ja Importïto failu ierakstÇ nav bankas konta",NoBankAcc);//fv-29; edz
+  CheckBox(h1,vs+=16,0,"Pïc izveido‰anas atvïrt kontakta ierakstu",OpenCU);//fv-16; edz
   CheckBox(h1,vs+=16,0,"πaut piesaist¥t ierakstam eso‰u kontaktu",AttachExisting);//fv-31; edz
   Tile(4,500,true,"3",ImpTrans);
   ButtonFrame(h1,vs=20,340,1,"Importïjot veidot:");
@@ -240,7 +246,31 @@ begin
   CheckBox(h1,v+=16,0,"MaksÇjums nav izveidots",flags[1]);
   CheckBox(h1,v+=16,0,"Izveidots maksÇjums",flags[2]);
   EndWindow;
-  
+
+  // JTE: FV-233
+  WindowBegin("Bankas kontu piesaiste kontiem grupï‰ana",FidaVistaAccRClass,CGRcW,RcType);
+  SetWRect(20,80,400,400);
+  Sizeable(-1,-1,0,0);
+  h = 100; h1 = 180; v = 20; vs = 16;
+  EditField(h1,v,150,"Bankas konts",Normal,f1,false,0);
+  EditField(h1,v+=vs,150,"Raksts (pattern)",Normal,f2,false,0);
+  EditField(h1,v+=vs,150,"Op.nosauk. raksts (pattern)",Normal,f3,false,0);
+  EditField(h1,v+=vs,150,"Konts",Normal,f4,false,AccSClass);
+  EditField(h1,v+=vs,150,"Objekti",Normal,f5,false,ObjSClass);
+  EditFieldTL(h1,v+=vs,150,"Tips",M4StrSet,Normal,791,f6,false,SetSClass);
+  EditField(h1,v+=vs,150,"Persona",Normal,f7,false,UserSClass);
+
+  ButtonFrame(h,v+=40,150,7,"KÇrtot pïc:");
+  RadioButton(h,v,0,0,"Bankas konta",ArtMode);
+  RadioButton(h,v+=vs,1,0,"Raksta",ArtMode);
+  RadioButton(h,v+=vs,2,0,"Op.nosauk. raksta",ArtMode);
+  RadioButton(h,v+=vs,3,0,"Konta",ArtMode);
+  RadioButton(h,v+=vs,4,0,"Objekta",ArtMode);
+  RadioButton(h,v+=vs,5,0,"Tipa",ArtMode);
+  RadioButton(h,v+=vs,6,0,"Personas",ArtMode);
+  EndWindow;
+  // :JTE
+
   //fv-43; edz:
   WindowBegin("Ievietot importu",PasteFVImportSClass,CGother,HBlRecType);
   SetWRect(240,80,600,300);
@@ -249,7 +279,7 @@ begin
   SearchField("Search");
   EndWindow;
   //:edz
-  
+
   //fv-47; edz:
   WindowBegin("Veidot izmaksÇto avansu eksportu",FidaVista_PPEClass,CGECW,RcType);
   SetWRect(100,100,500,270);
@@ -276,7 +306,7 @@ begin
   //:edz
   EndWindow;
   //:edz
-  
+
   //herbe-244; edz:
 	WindowBegin("Algu maksÇjumi",BPPayrollEClass,CGEcW,RcType);
 	SetWRect(20,70,560,320);
@@ -310,14 +340,14 @@ begin
 	EditFieldTL(h,v+=20,100,"AOM(no:l¥dz)",M4UStr,Normal,21,f3,false,EPDepartmentSClass);
   EndWindow;
   //:edz
-  
+
   //fv-94; edz:
   WindowBegin("Pieg. neapmaksÇto rï˙inu ÏurnÇls",APListEClass,CGECW,RcType);
   SetWRect(100,100,400,220);
   StaticText(h,v,"Spiediet OK, lai sÇktu eksportu.",false);
   EndWindow;
   //:edz
-  
+
   //fv-103; edz:
   vs = 20;
   WindowBegin("Dzïst Importïto failu ierakstus",FidaVistaRemoveVClass,CGMnt,RcType);
@@ -334,7 +364,7 @@ begin
   CheckBox(h1,v+=vs,0,"Dzïst apstiprinÇtos",flags[3]);//kame-117; edz
   EndWindow;
   //:edz
-  
+
   //fv-157; edz:
   WindowBegin("Definït FiDAViSta POS komisiju uzstÇd¥jumus",FidaVistaCommTClass,CGHbl,HBlRecType);
   SetBlid(FidaVistaCommBlock);
@@ -349,7 +379,7 @@ begin
   EndMatrix;
   EndWindow;
   //:edz
-  
+
   //opt-93; edz:
   WindowBegin("IzmaksÇtie avansi",PP2SClass,CGslist,-);
   SetWRect(64,80,560,298);
@@ -369,7 +399,7 @@ begin
   SpecialMenu("GrÇmatot",'G',1,"OKPPLsm");
   EndWindow;
   //:edz
-  
+
   //fv-167; edz
   WindowBegin("Bankas pal¥gs - Banku klienti",FidaVistaTRTClass,CGHbl,HBlRecType);
   SetBlid(FidaVistaTRBlock);
@@ -382,7 +412,7 @@ begin
   EndMatrix;
   EndWindow;
   //:edz
-  
+
   //alk-290; edz:
   WindowBegin("First Data",FirstDataIClass,CGIcW,RcType);
   UseView(RcVc);

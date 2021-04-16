@@ -6,6 +6,7 @@ SourceFile("halcust/enab/Latvian",3);
 SourceFile("halcust/enab/English",3);
 SourceFile("halcust/enab/Estonian",3);
 SourceFile("halcust/enab/SAF",3);
+SourceFile("halcust/enab/HUN",3);
 SourceFile("halcust/enab/WActions",2);//HERBE-1591 GLS
 
 begin

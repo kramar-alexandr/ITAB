@@ -26,6 +26,7 @@ SourceFile("halcust/BurtiButtons/Startup",3);
 Exec_File("halcust/datadefBP.hal");//Bankas paligs
 Exec_File("halcust/datadefVAT.hal");//PVN
 Exec_File("halcust/datadefEN.hal");
+Exec_File("halcust/datadefHALPATCH.hal");// KOS: HAL-1965 -> remove if change version to newer
 
 SourceFile("halcust/LatPayRoll/latvian",0);//VITO: EBST-3
 SourceFile("halcust/LatPayRoll/hal/Reports",0);//VITO: EBST-3
@@ -134,6 +135,28 @@ begin
   EndArray;
   EndBlock;
   //:VITO
+
+  BlockBegin(JPD_GroupIVBlock,-,"");
+  RecordField(GroupItem,M4Code,20,INVc);
+  EndBlock;
+
+  RecordBegin(JPD_GroupIVRowsVc,-,"");
+  RecordField(InvoiceNr,M4Long,0,IVVc);
+  RecordField(OrderNr,M4Long,0,ORVc);
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(OrdRow,M4Long,0,0);
+  ArrayField(Qty,M4Qty,0,0);
+  ArrayField(ArtCode,M4Code,20,INVc);
+  EndArray;
+  MainKeyBegin(InvoiceNr,0);
+  KeySegment(InvoiceNr);
+  EndRecord;
+
+
+  RecordAddBegin(INVc,"INVc_ITAB");
+  RecordField(PurchaseCostAcc,M4Code,10,AccVc);
+  EndRecordAdd;
   
   return;
 end;

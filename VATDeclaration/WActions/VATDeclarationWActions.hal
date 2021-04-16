@@ -11,7 +11,7 @@ begin
   RepSpec.flags[1] = 1;
   RepSpec.flags[2] = 1;
   RepSpec.flags[3] = 1;
-  RepSpec.flags[5] = 3;
+  RepSpec.flags[5] = 4;
   RepSpec.flags[6] = 1;
   RepSpec.d1 = CurrentDate;
   PutWindowRecord(wn,RepSpec);
@@ -28,7 +28,7 @@ begin
   ReportDefaults(RepSpec,"VATDeclaration2010EClass");
   RepSpec.ArtMode = 1;  
   RepSpec.flags[4] = 0;
-  RepSpec.flags[5] = 3;
+  RepSpec.flags[5] = 4;
   RepSpec.flags[18] = 1;
   RepSpec.flags[19] = 1;
   RepSpec.flags[20] = 1;
@@ -92,7 +92,7 @@ begin
   RepSpec.Media = mtFile;
   RepSpec.ArtMode = 1;
   RepSpec.flags[4] = 0;
-  RepSpec.flags[5] = 3;
+  RepSpec.flags[5] = 4;
   RepSpec.flags[18] = 1;
   RepSpec.flags[19] = 1;
   RepSpec.flags[20] = 1;

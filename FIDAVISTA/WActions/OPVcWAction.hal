@@ -1,0 +1,73 @@
+// This is a prototype.
+// If needed, take the customized things from this and merge it with the clients customized or standard code
+// Tip: search for cust
+// Tasks included: HAL-1207
+
+// procedure UpdateSupplierName(integer wn, integer rownr) // ARA: HAL-1207 cust
+// begin
+//   record OPVc OPr;
+//   row OPVc OPrw;
+
+//   if (rownr == 0) then begin
+//     GetWindowRecord(wn,OPr);
+//     MatRowGet(OPr,rownr,OPrw);
+//     OPr.BankName = OPrw.Comment;
+//     OPr.PayNumber = OPrw.Comment;
+//     PutWindowRecord(wn,OPr);
+//   end;
+  
+//   return;
+// end;
+
+// function Boolean OPDClassVISerNrEFAfter(Integer wn,Integer rownr,Boolean changedf)
+// BEGIN
+//   Boolean res;
+
+//   res = true;
+//   if (changedf) then begin
+//     UpdateSupplierName(wn,rownr); // ARA: HAL-1207 cust
+//   end;
+//   OPDClassVISerNrEFAfter = res;
+//   RETURN;
+// END;
+
+// function Boolean OPDClassCommentEFAfter(Integer wn,Integer rownr,Boolean changedf)
+// BEGIN
+//   Boolean res;
+
+//   res = true;
+//   if (changedf) then begin
+//     UpdateSupplierName(wn,rownr); // ARA: HAL-1207 cust
+//   end;
+//   OPDClassCommentEFAfter = res;
+//   RETURN;
+// END;
+
+// function Boolean OPDClassVECodeEFAfter(Integer wn,Integer rownr,Boolean changedf)
+// BEGIN
+//   Boolean res;
+
+//   res = true;
+//   if (changedf) then begin
+//     UpdateSupplierName(wn,rownr); // ARA: HAL-1207 cust
+//   end;
+//   OPDClassVECodeEFAfter = res;
+//   RETURN;
+// END;
+
+// global
+// function Boolean OPDClassAfterEditField(Integer wn,string fieldname,Integer fn, Integer rownr,Integer changed)
+// BEGIN
+//   Boolean res;
+
+//   res = inner.OPDClassAfterEditField(wn,fieldname,fn,rownr,changed);
+
+//   switch (fieldname) begin
+//     case "VISerNr": res = OPDClassVISerNrEFAfter(wn,rownr,changed!=0); // ARA: HAL-1207 cust
+//     case "Comment": res = OPDClassCommentEFAfter(wn,rownr,changed!=0); // ARA: HAL-1207 cust
+//     case "VECode": res = OPDClassVECodeEFAfter(wn,rownr,changed!=0); // ARA: HAL-1207 cust
+//   end;
+
+//   OPDClassAfterEditField = res;
+//   RETURN;
+// END;

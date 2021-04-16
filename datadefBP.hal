@@ -56,22 +56,22 @@ begin
   RecordField(md5hash,M4Str,32,0);
   RecordField(OurAccNo,M4Str,60,0);
   RecordField(ImpFormat,M4Str,60,0); // RGS: FV-213
-  
+
   ArrayBegin(Math,-,1);
   ArrayField(LogDate,M4Date,0,0);
   ArrayField(LogTime,M4Time,0,0);
   ArrayField(LogMessage,M4Str,200,0);
   EndArray;
-  
+
   MainKeyBegin(md5hash,0);
   KeySegment(md5hash);
-  
+
   KeyBegin(BankRef);
   KeySegment(BankRef);
   KeySegment(TypeCode);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(CorD);
   KeySegment(CorD);
   KeySegment(RegDate);
@@ -79,21 +79,21 @@ begin
   KeySegment(TypeCode);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(RegDate);
   KeySegment(RegDate);
   KeySegment(BankRef);
   KeySegment(TypeCode);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(CPSAHLegalId);
   KeySegment(CPSAHLegalId);
   KeySegment(RegDate);
   KeySegment(BankRef);
   KeySegment(TypeCode);
   KeySegment(md5hash);
-  
+
   KeyBegin(CPSBankCode);
   KeySegment(CPSBankCode);
   KeySegment(RegDate);
@@ -101,21 +101,21 @@ begin
   KeySegment(TypeCode);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(TypeCodeLegalId);
   KeySegment(TypeCode);
   KeySegment(CPSAHLegalId);
   KeySegment(RegDate);
   KeySegment(BankRef);
   KeySegment(md5hash);
-  
+
   KeyBegin(TypeCodeDate);
   KeySegment(TypeCode);
   KeySegment(RegDate);
   KeySegment(BankRef);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(CPSCcy); // -- //
   KeySegment(CPSCcy);
   KeySegment(BankRef);
@@ -123,7 +123,7 @@ begin
   KeySegment(CorD);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(CUCode); // -- //
   KeySegment(CUCode);
   KeySegment(BankRef);
@@ -131,7 +131,7 @@ begin
   KeySegment(CorD);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(BookDate); // -- //
   KeySegment(BookDate);
   KeySegment(BankRef);
@@ -139,7 +139,7 @@ begin
   KeySegment(CorD);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(CPSAHName); // -- //
   KeySegment(CPSAHName);
   KeySegment(BankRef);
@@ -147,7 +147,7 @@ begin
   KeySegment(CorD);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(ImportDate); // -- //
   KeySegment(ImportDate);
   KeySegment(ImportTime);
@@ -155,7 +155,7 @@ begin
   KeySegment(TypeCode);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(FileName);
   KeySegment(FileName);
   KeySegment(TransNr);
@@ -163,7 +163,7 @@ begin
   KeySegment(TypeCode);
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
-  
+
   KeyBegin(DoneFlag);
   KeySegment(DoneFlag);
   KeySegment(BankRef);
@@ -171,7 +171,7 @@ begin
   KeySegment(CPSAHLegalId);
   KeySegment(md5hash);
   EndRecord;
-  
+
   BlockBegin(FidaVistaPatBlock,-,"");
   //BlockInServer;//edz@07.12.10; FV-17
   //BlockForAllCompanies;
@@ -182,7 +182,7 @@ begin
   ArrayField(Comment,M4Str,100,0);
   EndArray;
   EndBlock;
-  
+
   BlockBegin(FidaVistaParamsBlock,-,"");
   //BlockInServer;//edz@07.12.10; FV-17
   //BlockForAllCompanies;
@@ -231,6 +231,12 @@ begin
   RecordField(FindOP,M4Int,0,0);//RGS: FV-207
   RecordField(BankFee,M4Int,0,0);//FV-212 GLS
   RecordField(ExpType,M4Int,0,0);//FV-212 GLS
+  RecordField(SupplierInComment,M4Int,0,0);//ARA: HAL-1207
+  RecordField(BankFlag,M4Int,0,0);// KOS: FV-240
+  RecordField(ChangeOPTransDate,M4Int,0,0);//ARA: HAL-1397
+  RecordField(ExternalPaymentCode,M4Str,20,0); // ARA: FV-251
+  RecordField(EnableBtchBookg,M4Int,0,0);//ARA: HAL-1654
+  RecordField(EnableBtchBookgWithCode,M4Int,0,0);//ARA: HAL-1654
   EndBlock;
 
   BlockBegin(FidaVistaAccBlock,-,"");
@@ -246,7 +252,7 @@ begin
   ArrayField(TypeNamePattern,M4Str,100,0);//fv-148; edz
   EndArray;
   EndBlock;
-  
+
   //fv-157; edz:
   BlockBegin(FidaVistaCommBlock,-,"");
   RecordField(Math,M4Matrix,0,0);
@@ -257,7 +263,7 @@ begin
   EndArray;
   EndBlock;
   //:edz
-  
+
   //fv-167; edz:
   BlockBegin(FidaVistaTRBlock,-,"");
   RecordField(Math,M4Matrix,0,0);

@@ -1,6 +1,8 @@
 //VITO: JPD-51
 external function boolean MustCopyItemToPartnerCompany(string,var string);
 remote updating procedure CopyItemToPartnerCompany(record INVc,string,var string,var string);
+remote updating procedure ITAB_ImportItemsRemote(var record ORVc,var string,var Integer,var Longint);
+;
 
 global
 procedure GenerateMessage(string okcomp,string notokcomp)
@@ -51,3 +53,34 @@ begin
   return;
 end;
 //:VITO
+
+//CHN::Item import
+global updating
+procedure ITAB_ImportItems()
+begin
+  Integer wn,nwn;
+  record ORVc ORr;
+  Integer i,rwcnt,rownr;
+  Boolean testf;
+  Longint err;
+  record RcVc RepSpec;
+  string 255 fn;
+
+  wn = CurWindow;
+  DeselectWindow(wn,true);
+  GetWindowRecord(wn,ORr);
+  nwn = OpenWindow("WaitClass",0,0,"","",RepSpec);
+  if (MatRowCnt(ORr)>0) then begin
+    ITAB_ImportItemsRemote(ORr,fn,rownr,err);
+    if (rownr>-1) then begin
+      MessageBox(err,"");
+      WindowFieldGoto(wn,ORr,rownr,fn,true)
+    end else begin
+      MessageBox(1000001,"")
+    end;
+    PutWindowRecord(wn,ORr);
+  end;
+  CloseWindow(nwn);
+
+  return;
+end;

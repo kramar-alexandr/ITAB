@@ -20,3 +20,33 @@ begin
   return;
 end;
 // :EVS
+
+global
+procedure ArtRClassReportDefaults(Integer wn)
+BEGIN
+  record RcVc RepSpec;
+  
+  inner.ArtRClassReportDefaults(wn);
+
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  RepSpec.flags[15] = 1;
+  PutWindowRecord(wn,RepSpec);
+  SelectWindow(wn);
+  RETURN;
+END;
+
+global
+procedure PurOrdJRClassReportDefaults(Integer wn)
+BEGIN
+  record RcVc RepSpec;
+  
+  inner.PurOrdJRClassReportDefaults(wn);
+  
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  RepSpec.flags[10] = 1;
+  RepSpec.ArtMode = 3;
+  PutWindowRecord(wn,RepSpec);
+  SelectWindow(wn);
+END;

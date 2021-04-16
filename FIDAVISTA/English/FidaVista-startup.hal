@@ -39,6 +39,7 @@ begin
   Maintenance("Delete Imported files records",FidaVistaRemoveVClass,FidaVistaRemoveMn,modFV);//fv-103; edz
   
   Report("Imported file statistics",FidaVistaRClass,FidaVistaRn,0,modFV);
+  Report("Bank account link to accounts grouping",FidaVistaAccRClass,FidaVistaAccRn,0,modFV); // JTE: FV-233
 
   SetBegin(790);
   SetText(0,"-");
@@ -132,6 +133,24 @@ begin
   StrSetText(31014,"Only one person allowed in personnel payment!");//fv-169; edz
   StrSetText(31015,"Incorrect file format");//fv-174; edz
   StrSetText(31016,"Payment found and OKed");//RGS: FV-207
+  StrSetText(31017,"Converted amount using currency rate doesn't match defined amount. Bank reference/-es: ");//ARA: FV-236
+  // KOS: FV-240
+  StrSetText(31018,"Payment with number : ");
+  StrSetText(31019," wasn't exported.");
+  // :KOS
+  // JTE: FV-233
+  StrSetText(31020,"Bank account link to accounts grouping");
+  StrSetText(31021,"Bank account");
+  StrSetText(31022,"Pattern");
+  StrSetText(31023,"Type name pattern");
+  StrSetText(31024,"Account");
+  StrSetText(31025,"Object");
+  StrSetText(31026,"Type");
+  StrSetText(31027,"User");
+  StrSetText(31028,"Comment");
+  // :JTE
+  StrSetText(31029,"Payment found and OKed, transaction date has been changed to book date"); // ARA: HAL-1397
+  StrSetText(31030," account has no object with required type"); // JTE: FV-247
   EndStrSet;
 
   return;
