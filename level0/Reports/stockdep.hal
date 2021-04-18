@@ -17,7 +17,6 @@ begin
   
   pos = 0;
   ExtractObj(objstr,pos,tstr);
-  pos = 0;
   while(nonblank(tstr))begin
     if(nonblank(tstr))then begin
       Objr.Code = tstr;
